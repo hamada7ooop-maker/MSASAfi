@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- السماح بمرور حركة البيانات غير المشفرة فقط للنطاق المحلي أثناء التطوير والاختبار -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain> <!-- منفذ محاكي أندرويد الافتراضي لجهاز التطوير -->
+    </domain-config>
+
+    <!-- فرض تشفير البيانات والاتصال الآمن HTTPS لجميع النطاقات والاتصالات الأخرى -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

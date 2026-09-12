@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: gap:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://apis.google.com https://accounts.google.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https://*.googleusercontent.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://*.githubusercontent.com https://*.stlouisfed.org https://api.coingecko.com https://flagcdn.com; connect-src 'self' ws: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.googleapis.com https://generativelanguage.googleapis.com https://api.exchangerate-api.com https://v6.exchangerate-api.com https://open.er-api.com https://api.frankfurter.app https://*.google.com https://text.pollinations.ai https://gen.pollinations.ai https://*.supabase.co https://bdquhhaorjrbpqkzcolj.supabase.co wss://*.supabase.co https://api.groq.com https://*.puter.com wss://*.puter.com https://ipapi.co https://freeipapi.com http://ip-api.com https://api.stlouisfed.org https://api.coingecko.com https://api.currentsapi.services https://restcountries.com https://*.open-meteo.com; frame-src 'self' https://accounts.google.com;">
+<link rel="icon" type="image/png" href="/icon-192x192.png" />
+<script>
+  function safeShowError(title, msg, detail) {
+    if (!location.hostname.includes('localhost') && !location.hostname.includes('127.0.0.1')) return;
+    var d = document.createElement('div');
+    d.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#ef4444;color:white;z-index:999999;padding:12px 16px;border-radius:12px;max-width:90vw;font-size:12px;box-shadow:0 10px 25px rgba(0,0,0,0.3);';
+    d.innerHTML = '<strong>' + title + ':</strong> ' + msg + (detail ? '<pre style="margin-top:4px;font-size:10px;opacity:0.8;">' + detail + '</pre>' : '');
+    if (document.body) {
+      document.body.appendChild(d);
+    } else {
+      window.addEventListener('DOMContentLoaded', function() { document.body && document.body.appendChild(d); });
+    }
+  }
+  window.addEventListener('error', function(e) {
+    if (e.message && e.message.includes('ResizeObserver')) return;
+    safeShowError('Global Error', e.message, e.filename ? (e.filename + ':' + e.lineno) : '');
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    var reason = e.reason && e.reason.message ? e.reason.message : String(e.reason || '');
+    if (['Transition was skipped', 'aborted', 'The user aborted'].some(function(s) { return reason.includes(s); })) return;
+    safeShowError('Unhandled Rejection', reason);
+  });
+</script>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>مصاريفي - المدير المالي الشخصي الذكي</title>
+<meta name="description" content="تطبيق مصاريفي لإدارة المصاريف والدخل والميزانية بشكل ذكي واحترافي"/>
+<meta name="theme-color" content="#002b59"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="manifest" href="/manifest.json"/>
+
+<!-- Puter.js SDK removed: popups don't work in Capacitor WebView. Free AI now uses Pollinations REST API directly -->
+<style nonce="masarifi-inline">
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    body {
+        font-family: 'IBM Plex Sans Arabic', 'Manrope', 'Tajawal', 'Inter', sans-serif;
+        background-color: var(--color-background);
+        color: var(--color-on-background);
+        min-height: 100dvh;
+        -webkit-font-smoothing: antialiased;
+    }
+    #root {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+        min-height: 100dvh;
+    }
+    .dark body, html.dark body {
+        background-color: var(--color-background);
+        color: var(--color-text);
+    }
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined' !important;
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c3c6d1; border-radius: 9999px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.25s ease-out; }
+    /* Safe area for mobile */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0); }
+    /* ===== Phase 1: Professional UX Animations ===== */
+    @keyframes splashScale { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes splashGlow { 0%,100% { text-shadow: 0 0 30px rgba(169,199,255,0.2); } 50% { text-shadow: 0 0 60px rgba(169,199,255,0.5), 0 0 120px rgba(169,199,255,0.2); } }
+    @keyframes splashFade { to { opacity: 0; transform: scale(1.03); pointer-events: none; } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @keyframes onboardSlide { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes cardEnter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    @keyframes dotPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.5; } }
+    @keyframes pageSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .card-stagger > * { animation: cardEnter 0.35s ease-out both; }
+    .card-stagger > *:nth-child(1) { animation-delay: 0s; }
+    .card-stagger > *:nth-child(2) { animation-delay: 0.04s; }
+    .card-stagger > *:nth-child(3) { animation-delay: 0.08s; }
+    .card-stagger > *:nth-child(4) { animation-delay: 0.12s; }
+    .card-stagger > *:nth-child(5) { animation-delay: 0.16s; }
+    .card-stagger > *:nth-child(6) { animation-delay: 0.2s; }
+    .card-stagger > *:nth-child(7) { animation-delay: 0.24s; }
+    .card-stagger > *:nth-child(8) { animation-delay: 0.28s; }
+    .card-stagger > *:nth-child(9) { animation-delay: 0.32s; }
+    .card-stagger > *:nth-child(10) { animation-delay: 0.36s; }
+    .page-enter { animation: pageSlide 0.3s ease-out; }
+    .skeleton { background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 12px; }
+    .dark .skeleton { background: linear-gradient(90deg, #2a2d30 25%, #383b3e 50%, #2a2d30 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+
+    /* ===== Phase 9: Advanced UX/UI ===== */
+    /* Page transition directions */
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    .page-slide-right { animation: slideInRight 0.3s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .page-slide-left { animation: slideInLeft 0.3s cubic-bezier(0.25,0.46,0.45,0.94); }
+    .page-scale-in { animation: scaleIn 0.25s ease-out; }
+    .page-slide-up { animation: slideUp 0.35s cubic-bezier(0.25,0.46,0.45,0.94); }
+
+    /* Pull to refresh */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ptr-spinner { animation: spin 0.8s linear infinite; }
+    .ptr-indicator {
+      position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 9999;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: white; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s, transform 0.3s;
+    }
+    .ptr-indicator.active { opacity: 1; transform: translateX(-50%) scale(1); }
+    .dark .ptr-indicator { background: #1e2124; }
+
+    /* Swipe to delete */
+    .swipe-container { position: relative; overflow: hidden; }
+    .swipe-item { position: relative; transition: transform 0.3s ease-out; touch-action: pan-y; }
+    .swipe-bg { position: absolute; top: 0; bottom: 0; right: 0; width: 80px; background: #ef4444;
+      display: flex; align-items: center; justify-content: center; border-radius: 12px;
+      color: white; font-weight: 700; font-size: 12px; }
+    html[dir='ltr'] .swipe-bg { left: auto; right: 0; }
+
+    /* Counter animation */
+    @keyframes countUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .count-animate { animation: countUp 0.4s ease-out; }
+
+    /* Progress bar animation */
+    @keyframes progressFill { from { width: 0; } }
+    .progress-animate { animation: progressFill 0.8s ease-out; }
+
+    /* Bottom sheet */
+    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes sheetOverlay { from { opacity: 0; } to { opacity: 1; } }
+    .bottom-sheet-overlay { animation: sheetOverlay 0.2s ease-out; }
+    .bottom-sheet-content { animation: sheetUp 0.35s cubic-bezier(0.25,0.46,0.45,0.94); }
+
+    /* Haptic press feedback */
+    .haptic-btn { transition: transform 0.1s, box-shadow 0.15s; }
+    .haptic-btn:active { transform: scale(0.96); }
+
+    /* Gradient text */
+    .gradient-text { background: linear-gradient(135deg, #002b59, #1a4175); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .dark .gradient-text { background: linear-gradient(135deg, #93c5fd, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    /* Smooth number transitions */
+    .num-transition { transition: all 0.3s ease-out; }
+
+    /* Glassmorphism cards */
+    .glass-card { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.3); }
+    .dark .glass-card { background: rgba(30,33,36,0.7); border: 1px solid rgba(255,255,255,0.05); }
+
+    /* Improved scrollbar for notification panel */
+    .notif-scroll::-webkit-scrollbar { width: 3px; }
+    .notif-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9px; }
+
+    /* FAB pulse */
+    @keyframes fabPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,43,89,0.3); } 50% { box-shadow: 0 0 0 10px rgba(0,43,89,0); } }
+    .fab-pulse { animation: fabPulse 2s ease-in-out infinite; }
+
+    /* Ripple effect */
+    .ripple { position: relative; overflow: hidden; }
+    .ripple::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at var(--x,50%) var(--y,50%), rgba(0,0,0,0.08) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; }
+    .ripple:active::after { opacity: 1; }
+</style>
+</head>
+<body class="bg-[#f0f1f3] dark:bg-[#121214] text-[#191c1d] dark:text-[#e0e0e0] min-h-screen">
+<div id="app" class="min-h-screen"></div>
+<div id="react-root"></div>
+<!-- Offline indicator -->
+<div id="offline-toast" style="display:none;position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#ef4444;color:#fff;padding:8px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);gap:6px;align-items:center;" role="alert" aria-live="polite">
+  📡 <span id="offline-banner-text">أنت غير متصل بالإنترنت · You’re offline</span>
+</div>
+<!-- <script type="module" src="/src/main.js"></script> -->
+<script type="module" src="/src/main.tsx"></script>
+<script>
+  // Service Worker for PWA offline support (Production only, skip on localhost & native app)
+  if ('serviceWorker' in navigator) {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        for (const reg of regs) reg.unregister();
+      });
+    } else if (!window.Capacitor) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(reg => console.log('[SW] Registered:', reg.scope))
+          .catch(err => console.warn('[SW] Registration failed:', err));
+      });
+    }
+  }
+  // Offline/online indicator
+  const offlineToast = document.getElementById('offline-toast');
+  function syncOfflineState() {
+    if (offlineToast) {
+      offlineToast.style.display = navigator.onLine ? 'none' : 'flex';
+    }
+  }
+  window.addEventListener('online',  syncOfflineState);
+  window.addEventListener('offline', syncOfflineState);
+  syncOfflineState();
+</script>
+</body>
+</html>

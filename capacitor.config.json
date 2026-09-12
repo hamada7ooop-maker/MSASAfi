@@ -1,0 +1,40 @@
+{
+  "appId": "com.masarifi.app",
+  "appName": "Masarifi",
+  "webDir": "dist",
+  "server": {
+    "allowNavigation": [
+      "accounts.google.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#002b59",
+      "sound": "beep.wav"
+    },
+    "Camera": {
+      "presentationStyle": "fullscreen"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#002b59",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "Keyboard": {
+      "resize": "body",
+      "resizeOnFullScreen": true
+    }
+  }
+}

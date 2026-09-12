@@ -1,0 +1,9 @@
+export const APP_VERSION = '23.0.6';
+export const MAX_TRANSACTIONS = 10000;
+export const MAX_IMAGE_SIZE_KB = 500;
+export const PIN_LENGTH = 4;
+export const MAX_ATTEMPTS = 5;
+export const LOCKOUT_SECONDS = 30;
+export const AUTO_LOCK_MINUTES = 5;
+export const CACHE_TTL_MS = 5000;
+export const DEBOUNCE_MS = 500;
