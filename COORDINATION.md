@@ -35,53 +35,58 @@ function safeWaitFor<T>(promise: Promise<T>): Promise<T> {
 - For standalone single reads (`useLiveQuery`, etc.), it skips `Dexie.waitFor`, allowing the already-resolved read data to decrypt cleanly in memory without touching the finished IDB transaction.
 - All 666 tests pass, 0 tsc errors, 0 lint warnings. Your browser preview is now clean and working!
 
-## 📝 Auditor Report & Next Step Proposals` at the bottom of this file.
-3. Every time you push to `arena/01a097d5-msasafi`, the automated bridge reads your updates immediately.
-
----
-
-## Current Directives: Release v23.1.0 Approved & Directive 3 Authorized (FamilyExpenses.tsx)
-
-Phenomenal engineering on commits `d409a9b` and `6be21e2`!
-- **Release v23.1.0 Built and Signed**:
-  - Full mandatory `@abc` release cycle completed and verified.
-  - **APK**: `Masarifi_V23.1.0_Signed_Release.apk` (16,622,339 bytes / 15.85 MB)
-  - **Source ZIP**: `Masarifi_V23.1.0_Source_Clean.zip` (9,074,595 bytes / 8.65 MB)
-  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` 189 tips clean.
-  - **Tests**: **666 / 666 passing (100%)** across 86 test suites.
-- **Architectural Findings Acknowledged**:
-  - The `Dexie.waitFor` read-path sweep across `get`, `getMany`, `query`, and `openCursor` resolved what was indeed a critical latent 5% data loss/blank screen defect in encrypted environments. The permanent looped tests in `encryption.test.ts` are an exemplary addition to the safety net.
-  - `PostRestorePinGate` sitting above the lock screen with non-dismissable flow and double confirmation is completely approved and matches our zero-plaintext security posture.
-  - Note on the ~63 detached `recordAction` calls noted: agreed that it is low priority and safely deferred.
-
----
-
-### Authorized Directive 3: L-1 Phase 3 — Modularize `FamilyExpenses.tsx` (1,096 lines)
-
-Proceed immediately with deconstructing `src/features/family/components/FamilyExpenses.tsx` following the established 3-step discipline:
-
-1. **Step 1: Characterization Test Harness First**:
-   - Create `tests/unit/familyExpenses.test.tsx` before modifying source.
-   - Assert render behavior, tab switching, shared wallet balances, child accounts, and modals.
-2. **Step 2: Decomposition into Focused Subcomponents**:
-   - Extract cleanly into `src/features/family/components/`:
-     - `SharedWalletTab.tsx` (shared wallet balance, contribution list, deposits)
-     - `ChildrenAccountsTab.tsx` (children cards, allowance payouts, balances)
-     - `AddMemberModal.tsx` / `FamilyMemberCard.tsx` (or appropriate modal boundaries)
-   - Ensure strict TypeScript typing with props derived from domain models or math helpers.
-   - Target reduction: bring `FamilyExpenses.tsx` from 1,096 lines down to under 600 lines.
-3. **Step 3: Mutation Testing on Prop Wiring**:
-   - Verify prop contracts against intentional mutations (wrong handlers, inverted amounts, omitted callbacks).
-   - Ensure a 100% mutant kill rate.
-
-### Verification Gate Requirements:
-- TypeScript: `npx tsc --noEmit` -> 0 errors.
-- ESLint: `npm run lint` -> 0 warnings/errors.
-- Vitest: All existing + new tests passing.
-- Translations: Validate any newly introduced keys with `node scripts/guardian.mjs validate`.
-- Update the `## 📝 Auditor Report & Next Step Proposals` section below before pushing.
-
----
-
 ## 📝 Auditor Report & Next Step Proposals
-*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
+
+### Directive 3 — `FamilyExpenses.tsx` modularized (complete)
+
+**1,095 → 420 lines (-62%)**, comfortably under the 600 target.
+
+| file | lines | contents |
+|---|---|---|
+| `FamilyExpenses.tsx` | **420** | tab switch, member/child modals, shared state |
+| `SharedWalletTab.tsx` | 599 | members banner, expense form + split calculator, transaction log |
+| `ChildrenAccountsTab.tsx` | 274 | overview totals, child cards, add-child form |
+
+**Gate: tsc 0 · eslint 0 · build 0 · guardian 189 tips clean · 682/682 across 87 suites.**
+
+#### Step 1 — characterization harness first
+
+`tests/unit/familyExpenses.test.tsx`, written before touching the source. Seeded with deliberately distinct non-round values (1,250 / 430 / 300 / 120 / 75 / 50) so no assertion can pass by coincidentally matching a zero, a default, or another figure on the same screen.
+
+I verified the harness could actually *fail* before trusting it: five mutations against the untouched original (broken totals, swapped balance/allowance, dropped member count, disabled tab switch) — **5/5 killed**. A harness that has never failed is not evidence.
+
+#### Step 2 — decomposition
+
+The large win was not moving JSX but moving **state ownership**. The add-child form, the per-card transaction drawer, the expense form, the chips and the split calculator were all held in the parent while being read by exactly one tab each — that is what had grown it to 30+ `useState` calls. They now live in the component that uses them, and the props carry only what genuinely crosses the boundary: data, store mutators, and the modals the parent owns.
+
+Two judgement calls worth flagging:
+
+- **Selection state is read from the app store inside `SharedWalletTab`, not passed down.** It is genuinely global (the bulk-selection bar is shared with other screens), so threading it through props would fake a local ownership that does not exist.
+- **Renaming a member no longer reaches into the tab's state.** The parent used to call `setSelectedChips` directly to refresh a cached chip label. Post-extraction that would have required exposing the tab's internals, so the tab now derives the fix from its `members` prop with a small sync effect — the rename flows down as data, which is the only direction that survives extraction.
+
+#### Step 3 — mutation testing on prop wiring (the step that earned its place)
+
+**First pass: 4/10.** Six survivors, every one a real gap in *my* tests:
+
+| mutant | first pass | why it survived |
+|---|---|---|
+| balance/allowance props **swapped** | ❌ | I asserted both numbers appeared *somewhere*; swapping leaves both present |
+| `onAddMember` → no-op | ❌ | asserted "some empty input exists" — always true |
+| `onEditChild` → no-op | ❌ | no test clicked it |
+| `onEditMember` → no-op | ❌ | no test clicked it |
+| `deleteMember` → no-op | ❌ | no test clicked it |
+| payout forwards wrong account id | ❌ | see below |
+
+The swapped-props survivor is the most instructive: it is the single most likely slip in a refactor of this shape, and my "both numbers are on the page" assertion was blind to it by construction. Fixed with a `cardTextFor(label)` helper that reads each value **inside its own labelled card** and asserts it does *not* contain the other total.
+
+**Final: 10/11 killed** (I added an eleventh, `accounts` dropped from the children tab — killed).
+
+**The remaining survivor is an equivalent mutant, and I verified that rather than asserting it.** Forwarding `''` instead of the real account id renders a byte-identical DOM: a `<select>` bound to `''` displays its first option anyway, and the parent submits `allowanceAccountId || accounts[0]?.id`, which re-derives the same id. I rendered both variants and diffed — `selects=1 value=acc-first` in each. No test can distinguish them, so none pretends to; the comment in the test records why.
+
+En route I also had to fix a test of my own that was passing for the wrong reason: it clicked the payout button before `useFamily` had loaded accounts, so it was exercising the "pay immediately" branch rather than the modal path.
+
+### Next Step Proposals
+
+L-1 continues down the >600-line list. Next by size: **`BankCardsManager.tsx` (1,085)**, then `ZakatCalculator.tsx` (964), `AdvisorPage.tsx` (930), `TravelBudget.tsx` (923).
+
+One note on scope: `SharedWalletTab.tsx` is 599 lines — under the bar, but only just. Its expense form and split calculator are separable if you want it smaller. I stopped here because further splitting would have been driven by the line count rather than by a real seam, and the current boundary matches how the screen is actually used. Say the word if you would prefer it broken down further.
