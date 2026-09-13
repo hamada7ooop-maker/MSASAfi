@@ -8,6 +8,7 @@ import { toast } from '../../../../toast';
 import { bridge } from '../../../../core/AppBridge';
 import { useAppStore } from '../../../../store/appStore';
 import { useSettingsStore } from '../../../../store/settingsStore';
+import { logger } from '../../../../core/logger';
 
 interface SecurityCardProps {
   settings: Record<string, unknown>;
@@ -90,8 +91,43 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
 
   const handleSavePin = async () => {
     if (newPin && newPin.length === 4) {
+      // ── DATA-LOSS FIX ─────────────────────────────────────────────────────
+      // This function used to mint a fresh salt, store the new hash, and stop.
+      // Because the data key was PBKDF2(pin, pinSalt), a new salt produced a
+      // different key and nothing re-encrypted the existing rows: every
+      // encrypted record across twelve tables became permanently unreadable
+      // the moment the user changed their PIN.
+      //
+      // With envelope encryption the records are encrypted under a persistent
+      // Master Data Key that the PIN only wraps. A PIN change re-wraps that
+      // key and touches no records at all. The re-wrap is attempted BEFORE the
+      // new hash is written, so a failure leaves the old PIN — and therefore
+      // access to the data — fully intact.
+      // ──────────────────────────────────────────────────────────────────────
       const salt = generateSalt();
       const hashed = await hashPin(newPin, salt);
+
+      const oldSalt = (await DB.getSetting<string>('pinSalt')) ?? null;
+      const hadPin = Boolean((await DB.getSetting<string>('pinHash')) || (await DB.getSetting<string>('pin')));
+
+      try {
+        const { initializeVaultKey, rewrapVaultKey } = await import('@core/security/vaultKey');
+        if (hadPin && oldSalt) {
+          // Changing an existing PIN. The session is already unlocked, so the
+          // master data key is in memory: re-wrap that exact key under the new
+          // PIN. Nothing is re-encrypted and the old PIN is never needed.
+          await rewrapVaultKey(newPin, salt);
+        } else {
+          // First time a PIN is set. There is no prior ciphertext, so a fresh
+          // random master data key is correct.
+          await initializeVaultKey(newPin, salt, /* adoptExistingKey */ false);
+        }
+      } catch (e) {
+        logger.error('SecurityCard', 'Failed to re-wrap the vault key; PIN change aborted', e);
+        toast(t('settings.pinChangeFailed') || 'تعذّر تغيير الرمز. لم يتم تغيير أي شيء وبياناتك سليمة.', 'error');
+        return;
+      }
+
       await DB.setSetting('pinHash', hashed);
       await DB.setSetting('pinSalt', salt);
       await DB.setSetting('pin', null);
@@ -120,8 +156,13 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
     // Removing the PIN turns off encryption: clear the "vault is encrypted"
     // flag so subsequent plaintext writes are allowed again.
     const { setEncryptionRequired, clearEncryptionKey } = await import('@core/security/crypto');
+    const { clearVaultKey } = await import('@core/security/vaultKey');
     setEncryptionRequired(false);
     clearEncryptionKey();
+    // Drop the wrapped master data key too. Leaving it behind would strand a
+    // wrapper keyed to a PIN that no longer exists, and a later PIN would
+    // create a second, conflicting envelope.
+    await clearVaultKey();
     await DB.setSetting('pinHash', null);
     await DB.setSetting('pinSalt', null);
     await DB.setSetting('pin', null);

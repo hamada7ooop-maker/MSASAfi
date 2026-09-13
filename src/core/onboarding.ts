@@ -102,8 +102,13 @@ export function initBiometricAuth(renderApp: () => void, resetAutoLock: () => vo
         if (pin) {
           const { db: DB_CORE } = await import('./db/core');
           const salt = (await DB_CORE.getSetting('pinSalt')) as string;
-          const { deriveMasterKey, setEncryptionKey } = await import('./security/crypto');
-          setEncryptionKey(await deriveMasterKey(pin, salt));
+          // Unwrap the master data key — never re-derive it from the PIN.
+          // Records are encrypted under a persistent key that the PIN merely
+          // wraps; deriving here would install a key that does not match the
+          // stored ciphertext. See core/security/vaultKey.ts.
+          const { unlockVault } = await import('./security/vaultKey');
+          const key = await unlockVault(pin, salt);
+          if (!key) throw new Error('Failed to unwrap vault key after biometric auth.');
         } else {
           throw new Error('No PIN securely stored, fallback to manual entry.');
         }

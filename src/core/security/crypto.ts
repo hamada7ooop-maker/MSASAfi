@@ -20,8 +20,13 @@ let _encryptionRequired = false;
 /**
  * Derive a CryptoKey from PIN + salt using PBKDF2 → AES-GCM.
  * Iterations: 600,000 (SHA-256)
+ *
+ * `extractable` must stay `false` for keys that are only ever used to
+ * encrypt/decrypt in place. Pass `true` only when the resulting key has to be
+ * exported — i.e. when it is about to be wrapped by the envelope layer
+ * (see vaultKey.ts, legacy migration).
  */
-export async function deriveMasterKey(pin: string, salt: string): Promise<CryptoKey> {
+export async function deriveMasterKey(pin: string, salt: string, extractable = false): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     'raw', 
@@ -40,7 +45,7 @@ export async function deriveMasterKey(pin: string, salt: string): Promise<Crypto
     },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
-    false,
+    extractable,
     ['encrypt', 'decrypt']
   );
 }
@@ -90,10 +95,13 @@ export async function decryptKey(encryptedKeyBase64: string, kek: CryptoKey): Pr
   );
   
   return crypto.subtle.importKey(
-    'raw', 
-    rawKey, 
-    { name: 'AES-GCM' }, 
-    false, 
+    'raw',
+    rawKey,
+    { name: 'AES-GCM' },
+    // Extractable: on a PIN change the MDK must be exported again so it can be
+    // re-wrapped under the new KEK. Without this, changing the PIN would fail
+    // and the vault would be stranded. The raw bytes never leave memory.
+    true,
     ['encrypt', 'decrypt']
   );
 }

@@ -11,17 +11,30 @@ import { logger } from '../../../core/logger';
 import { silentFail } from '../../../core/utils';
 
 /**
- * Re-derives the AES-GCM master key after a successful unlock.
+ * Restores the AES-GCM data key after a successful unlock.
  *
  * Auto-lock and app-backgrounding wipe the key from memory via
  * clearEncryptionKey(). Without this step the DB middleware cannot decrypt
  * existing records, and — worse — _encryptRecord would write new records in
  * plaintext because it bails out when no key is loaded.
+ *
+ * The key is *unwrapped*, never re-derived from the PIN. Records are encrypted
+ * under a persistent random Master Data Key that the PIN merely wraps, so the
+ * PIN (and its salt) can change without stranding the ciphertext. Deriving the
+ * data key from the PIN here would reintroduce the data-loss bug that envelope
+ * encryption exists to fix — see core/security/vaultKey.ts.
+ *
+ * Legacy installations, which predate the envelope, are migrated transparently
+ * by unlockVault on their first unlock.
+ *
+ * Throws when the key cannot be unwrapped, so the caller refuses the unlock
+ * rather than proceeding with no key (which would persist plaintext).
  */
 async function restoreEncryptionKey(pin: string, salt: string): Promise<void> {
   try {
-    const { deriveMasterKey, setEncryptionKey } = await import('@core/security/crypto');
-    setEncryptionKey(await deriveMasterKey(pin, salt));
+    const { unlockVault } = await import('@core/security/vaultKey');
+    const key = await unlockVault(pin, salt);
+    if (!key) throw new Error('Vault key unwrap failed');
   } catch (e) {
     logger.error('PinScreen', 'Failed to restore encryption key after unlock', e);
     throw e;
@@ -192,11 +205,23 @@ export function PinScreen() {
       if (timingSafeEqual(hashed, pinHash)) {
         // ── CRITICAL ──────────────────────────────────────────────────────
         // Auto-lock / backgrounding calls clearEncryptionKey(), wiping the
-        // AES-GCM key from memory. Unlocking MUST re-derive it, otherwise
-        // every encrypted record silently fails to decrypt and any
-        // subsequent write is persisted in PLAINTEXT.
+        // AES-GCM key from memory. Unlocking MUST restore it, otherwise every
+        // encrypted record silently fails to decrypt and any subsequent write
+        // is persisted in PLAINTEXT.
+        //
+        // Fail closed: if the key cannot be unwrapped the PIN hash matched but
+        // the vault is unusable (corrupt or tampered wrapper). Staying locked
+        // is the only safe outcome — unlocking with no key loaded would let
+        // the app write plaintext over encrypted data.
         // ──────────────────────────────────────────────────────────────────
-        await restoreEncryptionKey(newPin, pinSalt);
+        try {
+          await restoreEncryptionKey(newPin, pinSalt);
+        } catch {
+          setError(true);
+          setPin('');
+          toast(t('settings.pinError') || 'Wrong PIN', 'error');
+          return;
+        }
         setAttempts(0);
         setLockedUntil(0);
         await persistLockout(0, 0);
