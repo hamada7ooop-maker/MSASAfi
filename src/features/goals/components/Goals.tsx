@@ -12,6 +12,7 @@ import type { Goal } from '../../../types';
 import confetti from 'canvas-confetti';
 import { checkMilestone } from '../../../core/loyalty';
 import { InflationCalculator } from './InflationCalculator';
+import { isAtLeastMoney } from '../../../core/money';
 
 export function Goals() {
   const { t } = useI18n();
@@ -120,7 +121,12 @@ export function Goals() {
 
       const updatedGoal = await addToGoal(pendingDeposit.goalId, pendingDeposit.amount, accountId);
       
-      if (updatedGoal && updatedGoal.saved >= updatedGoal.target && (g_orig.saved || 0) < g_orig.target) {
+      // Drift-tolerant comparison — see core/money.ts.
+      if (
+        updatedGoal &&
+        isAtLeastMoney(updatedGoal.saved, updatedGoal.target) &&
+        !isAtLeastMoney(g_orig.saved || 0, g_orig.target)
+      ) {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         toast('🎉 ' + t('goal.completed'), 'success');
       } else {

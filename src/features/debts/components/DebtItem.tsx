@@ -6,6 +6,7 @@ import type { Debt, Account } from '../../../types';
 import { toast } from '../../../toast';
 import { awardPoints } from '../../../core/loyalty';
 import confetti from 'canvas-confetti';
+import { isSettled } from '../../../core/money';
 
 interface DebtItemProps {
   debt: Debt;
@@ -58,8 +59,11 @@ export function DebtItem({
     try {
       await onPayDebt(debt.id, numAmount, debt.accountId);
       
-      // Check if settled
-      if (remaining - numAmount <= 0) {
+      // Check if settled. Drift-tolerant: `paid` accumulates float error over
+      // many payments, so clearing the final instalment can leave a remaining
+      // balance of ~1e-11 and a strict `<= 0` would never mark the debt
+      // settled. See core/money.ts.
+      if (isSettled(remaining - numAmount)) {
         await awardPoints('DEBT_SETTLED');
         try {
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
@@ -189,7 +193,7 @@ export function DebtItem({
         )}
 
         {/* Payment Action */}
-        {remaining <= 0 ? (
+        {isSettled(remaining) ? (
           <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-wider p-3 sm:p-4 rounded-2xl flex items-center justify-center gap-2 border border-emerald-500/20">
             <span className="material-symbols-outlined text-base shrink-0">verified</span> 
             <span className="truncate">{t('debt.fullyPaid')}</span>

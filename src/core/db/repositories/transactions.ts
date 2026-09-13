@@ -4,6 +4,7 @@ import { updateHomeWidget } from '../../../widgets/homeWidget';
 import { triggerNotificationRefresh } from '@/core/events';
 import { silentFail, ignore } from '@/core/utils';
 import { logger } from '../../logger';
+import { addMoney } from '@/core/money';
 
 /**
  * Applies a signed delta to an account balance.
@@ -13,7 +14,10 @@ import { logger } from '../../logger';
 async function applyBalanceDelta(accountId: string, delta: number): Promise<boolean> {
   const acc = await db.accounts.get(accountId);
   if (!acc) return false;
-  acc.balance += delta;
+  // Round at each accumulation. `balance += delta` on raw doubles compounds
+  // representation error with every transaction, which eventually breaks
+  // threshold checks elsewhere (goal completion, debt payoff). See core/money.ts.
+  acc.balance = addMoney(acc.balance || 0, delta);
   await db.accounts.put(acc);
   return true;
 }

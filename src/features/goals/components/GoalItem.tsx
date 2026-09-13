@@ -5,6 +5,7 @@ import type { Goal, Account } from '../../../types';
 import confetti from 'canvas-confetti';
 import { toast } from '../../../toast';
 import { awardPoints } from '../../../core/loyalty';
+import { isAtLeastMoney } from '../../../core/money';
 
 interface GoalItemProps {
   goal: Goal;
@@ -72,7 +73,10 @@ export function GoalItem({
     try {
       const updatedGoal = await onAddDeposit(goal.id, numAmount, goal.accountId);
       
-      if (updatedGoal && updatedGoal.saved >= updatedGoal.target && saved < target) {
+      // Drift-tolerant: `saved` accumulates float error across deposits, so a
+      // goal funded to exactly its target can land on 4999.999999999999 and a
+      // strict `>=` would silently refuse to complete it. See core/money.ts.
+      if (updatedGoal && isAtLeastMoney(updatedGoal.saved, updatedGoal.target) && !isAtLeastMoney(saved, target)) {
         await awardPoints('GOAL_COMPLETED');
         try {
           confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });

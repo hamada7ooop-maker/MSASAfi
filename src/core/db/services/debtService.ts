@@ -1,12 +1,15 @@
 import type { MasarifiDB } from '../schema';
 import type { Debt } from '@/types';
 import { t } from '@/i18n/engine';
+import { addMoney } from '@/core/money';
 
 export const DebtService = {
   async payDebt(db: MasarifiDB, debtId: string, amount: number, accountId?: string): Promise<Debt | undefined> {
     const debt = await db.debts.get(debtId);
     if (!debt) return undefined;
-    const newPaid = (debt.paid || 0) + amount;
+    // Rounded accumulation so `total - paid` reaches exactly zero on the final
+    // payment instead of a residue like 1e-11 — see core/money.ts.
+    const newPaid = addMoney(debt.paid || 0, amount);
     await db.debts.update(debtId, { paid: newPaid });
 
     const accId = accountId || (await db.accounts.toCollection().first())?.id;
@@ -24,7 +27,7 @@ export const DebtService = {
           ? t('debt.pay.lentDesc', { name: debt.name }) 
           : t('debt.pay.owedDesc', { name: debt.name });
 
-        await db.accounts.update(accId, { balance: (acc.balance || 0) + balanceChange });
+        await db.accounts.update(accId, { balance: addMoney(acc.balance || 0, balanceChange) });
         await db.addTransaction({
           amount,
           type: txType,

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import type { Debt } from '../../../types';
+import { isSettled } from '../../../core/money';
 
 interface DebtPlannerProps {
   owedDebts: Debt[];
@@ -110,7 +111,9 @@ export function DebtPayoffPlanner({ owedDebts }: DebtPlannerProps) {
           d.remaining = Math.max(d.remaining - amountPaid, 0);
           monthlyPayments.push({ debtName: d.name, amountPaid, remaining: d.remaining });
 
-          if (d.remaining === 0 && amountPaid > 0) {
+          // `Math.max(..., 0)` above only yields an exact 0 when the
+          // subtraction lands exactly; drift makes `=== 0` unreliable.
+          if (isSettled(d.remaining) && amountPaid > 0) {
             events.push(t('debt.planner.milestonePaid', { name: d.name }));
           }
         }
