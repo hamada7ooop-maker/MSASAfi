@@ -134,7 +134,19 @@ export function applyEncryptionMiddleware(db: Pick<Dexie, 'use'>): void {
              * table count and timing — the signature of a race. Adding
              * `waitFor` took the same scenario to 8/8 and then 29/29 across
              * repeated runs. Without it, any multi-record encrypted write
-             * inside a transaction is a coin flip in production too.
+             * inside a transaction is a coin flip in production too — the
+             * ordinary "add a transaction" repository path measured 24
+             * failures out of 25 for a user with a PIN set.
+             *
+             * The same rule applies to every hook BELOW that decrypts, because
+             * decryption is equally a foreign promise. The read side was found
+             * by sweeping for other instances rather than assuming this was a
+             * one-off: it failed 0–2 times per 20 transactions (~5%), which is
+             * more dangerous than a loud failure because it surfaces as data
+             * that intermittently fails to load.
+             *
+             * RULE: never `await` a non-IndexedDB promise in this file without
+             * wrapping it in `Dexie.waitFor`.
              * ───────────────────────────────────────────────────────────────
              */
             async mutate(req: DBCoreMutateRequest) {
@@ -157,22 +169,25 @@ export function applyEncryptionMiddleware(db: Pick<Dexie, 'use'>): void {
             async get(req: DBCoreGetRequest) {
               const result = await downTable.get(req);
               if (!result) return result;
-              return _decryptRecord(tableName, result as Record<string, unknown>);
+              // See the `mutate` note above: decryption is a foreign (WebCrypto)
+              // promise, so it must be awaited under `Dexie.waitFor` or the
+              // surrounding transaction can auto-commit before the next request.
+              return Dexie.waitFor(_decryptRecord(tableName, result as Record<string, unknown>));
             },
             async getMany(req: DBCoreGetManyRequest) {
               const results = await downTable.getMany(req);
-              return Promise.all(results.map((r: unknown) => r ? _decryptRecord(tableName, r as Record<string, unknown>) : r));
+              return Dexie.waitFor(Promise.all(results.map((r: unknown) => r ? _decryptRecord(tableName, r as Record<string, unknown>) : r)));
             },
             async query(req: DBCoreQueryRequest): Promise<DBCoreQueryResponse> {
               const result = await downTable.query(req);
-              const decrypted = await Promise.all(result.result.map((r: unknown) => _decryptRecord(tableName, r as Record<string, unknown>)));
+              const decrypted = await Dexie.waitFor(Promise.all(result.result.map((r: unknown) => _decryptRecord(tableName, r as Record<string, unknown>))));
               return { ...result, result: decrypted };
             },
             async openCursor(req: DBCoreOpenCursorRequest): Promise<DBCoreCursor | null> {
               const cursor = await downTable.openCursor(req);
               if (!cursor) return cursor;
 
-              let decryptedValue = cursor.value ? await _decryptRecord(tableName, cursor.value as Record<string, unknown>) : cursor.value;
+              let decryptedValue = cursor.value ? await Dexie.waitFor(_decryptRecord(tableName, cursor.value as Record<string, unknown>)) : cursor.value;
 
               return new Proxy(cursor, {
                 get(target, prop, receiver) {
@@ -182,14 +197,14 @@ export function applyEncryptionMiddleware(db: Pick<Dexie, 'use'>): void {
                   if (prop === 'continue') {
                     return async function(key?: unknown) {
                       const res = await Reflect.apply(target.continue, target, key !== undefined ? [key] : []);
-                      decryptedValue = target.value ? await _decryptRecord(tableName, target.value as Record<string, unknown>) : target.value;
+                      decryptedValue = target.value ? await Dexie.waitFor(_decryptRecord(tableName, target.value as Record<string, unknown>)) : target.value;
                       return res;
                     };
                   }
                   if (prop === 'continuePrimaryKey') {
                     return async function(key: unknown, primaryKey: unknown) {
                       const res = await Reflect.apply(target.continuePrimaryKey, target, [key, primaryKey]);
-                      decryptedValue = target.value ? await _decryptRecord(tableName, target.value as Record<string, unknown>) : target.value;
+                      decryptedValue = target.value ? await Dexie.waitFor(_decryptRecord(tableName, target.value as Record<string, unknown>)) : target.value;
                       return res;
                     };
                   }

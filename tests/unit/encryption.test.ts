@@ -11,6 +11,10 @@ import {
   isEncryptionKeyReady,
   setEncryptionRequired
 } from '@/core/security/crypto';
+import { db as DB } from '@/core/db/core';
+import { generateSalt } from '@/core/security';
+import { initializeVaultKey } from '@/core/security/vaultKey';
+import { TransactionRepository } from '@/core/db/repositories/transactions';
 
 describe('Encryption Layer Unit Tests (encryption.ts)', () => {
   beforeEach(async () => {
@@ -230,5 +234,85 @@ describe('Encrypting many records inside one transaction (Dexie.waitFor)', () =>
 
     clearEncryptionKey();
     setEncryptionRequired(false);
+  });
+
+  /**
+   * Guards the everyday path, not a synthetic one.
+   *
+   * The `Dexie.waitFor` regression test above covers a bulk write. This covers
+   * what users actually do: add a transaction through the repository, with a
+   * PIN set. `TransactionRepository.add` opens a transaction spanning
+   * `transactions` + `accounts` and writes through the encryption middleware.
+   *
+   * Measured with the fix removed, this fails 24 times out of 25 -- i.e. a
+   * user with a PIN could barely record a single expense. The defect was
+   * invisible because no test had ever written to an encrypted table through
+   * a repository while a key was loaded.
+   */
+  it('records transactions through the repository with a vault key loaded', async () => {
+    await initializeVaultKey('1234', generateSalt(), /* adoptExistingKey */ false);
+
+    // Counted as a delta: earlier tests in this file share the database, so an
+    // absolute count would assert on their leftovers rather than on this path.
+    const before = await DB.transactions.count();
+
+    // Looped: a single write can pass by luck, which is how this survived.
+    for (let i = 0; i < 12; i++) {
+      await TransactionRepository.add({
+        type: 'expense',
+        amount: 10 + i,
+        description: `coffee ${i}`,
+      } as never);
+    }
+
+    expect((await DB.transactions.count()) - before).toBe(12);
+
+    // ...and every row is genuinely enveloped, not merely written.
+    const mine = (await DB.transactions.toArray()).filter((r) =>
+      String((r as { description?: string }).description || '').startsWith('coffee ')
+    );
+    expect(mine).toHaveLength(12);
+    expect(mine.every((r) => '_encrypted' in (r as Record<string, unknown>))).toBe(true);
+    // The caller's view still decrypts correctly.
+    expect(mine.some((r) => (r as { description?: string }).description === 'coffee 7')).toBe(true);
+  });
+
+  /**
+   * The read side needs `Dexie.waitFor` too.
+   *
+   * Found by sweeping for other instances of the write-path defect rather than
+   * assuming it was a one-off. `get`/`getMany`/`query`/`openCursor` all DECRYPT
+   * after reading, which is equally a foreign WebCrypto promise awaited inside
+   * the transaction -- so a read followed by any further request could see the
+   * transaction auto-commit underneath it.
+   *
+   * It hid better than the write bug because it is load-dependent: measured at
+   * 0-2 failures per 20 transactions across repeated runs (~5%), where the
+   * write path failed 24/25. A rare failure on a READ is worse than a loud one,
+   * because it surfaces as data that intermittently fails to load rather than
+   * as an obvious error.
+   *
+   * This test therefore loops: a single pass proves nothing at a 5% rate.
+   */
+  it('survives repeated read-then-read cycles inside one transaction', async () => {
+    await initializeVaultKey('1234', generateSalt(), /* adoptExistingKey */ false);
+    for (let i = 0; i < 5; i++) {
+      await DB.transactions.put({
+        id: `rr${i}`, type: 'expense', amount: i, description: `d${i}`,
+      } as never);
+    }
+
+    for (let round = 0; round < 20; round++) {
+      await DB.transaction('rw', DB.transactions, DB.accounts, async () => {
+        await DB.transactions.toArray();   // query -> decrypt (foreign await)
+        await DB.accounts.toArray();       // the request that used to fail
+        await DB.transactions.get('rr1');  // get -> decrypt
+        await DB.accounts.toArray();
+      });
+    }
+
+    // Values still round-trip: waitFor must not have changed what is returned.
+    const row = (await DB.transactions.get('rr1')) as { description?: string } | undefined;
+    expect(row?.description).toBe('d1');
   });
 });
