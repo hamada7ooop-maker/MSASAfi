@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -54,17 +54,14 @@ export function QuickAddModal() {
   
   const amountInputRef = useRef<HTMLInputElement>(null);
 
+  // Mirrors `type` so loadData can read the latest value without taking it as
+  // a dependency (see the note in loadData).
+  const typeRef = useRef(type);
   useEffect(() => {
-    if (isQuickAddOpen) {
-      loadData();
-      // Auto-focus amount input
-      const timer = setTimeout(() => amountInputRef.current?.focus(), 400);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isQuickAddOpen]);
+    typeRef.current = type;
+  }, [type]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [cats, accs] = await Promise.all([
         DB.getCategories(),
@@ -88,14 +85,33 @@ export function QuickAddModal() {
           }
         }
       } else {
-        // Set default category for the current type
-        const defaultCat = cats.find((c: Category) => c.type === type || c.type === 'both');
+        // Set default category for the current type.
+        // `type` is read through a ref rather than listed as a dependency on
+        // purpose: this picks a sensible DEFAULT when the sheet opens. Making
+        // loadData depend on `type` would re-run the whole load — and reset
+        // the category the user just chose — every time they toggle
+        // income/expense mid-entry.
+        const defaultCat = cats.find(
+          (c: Category) => c.type === typeRef.current || c.type === 'both'
+        );
         if (defaultCat && isMounted.current) setSelectedCategory(defaultCat.name);
       }
     } catch (err) {
       silentFail('[QuickAdd] Load data error')(err);
     }
-  };
+    // `editingTransactionId` IS a real dependency: without it, opening the
+    // sheet for a second transaction could populate it from the first.
+  }, [editingTransactionId, isMounted]);
+
+  useEffect(() => {
+    if (isQuickAddOpen) {
+      loadData();
+      // Auto-focus amount input
+      const timer = setTimeout(() => amountInputRef.current?.focus(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isQuickAddOpen, loadData]);
+
 
   useEffect(() => {
     // Update default category when type changes, but ONLY if not editing

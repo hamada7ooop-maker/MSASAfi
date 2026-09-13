@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useI18n } from '../../../i18n';
 import { useFormat } from '../../../core/hooks/useFormat';
@@ -25,6 +25,13 @@ export function useAddTransactionForm() {
   const editId = searchParams.get('edit');
 
   const [type, setType] = useState<'income' | 'expense'>('expense');
+
+  // Mirrors `type` so loadData can read the latest value without taking it as
+  // a dependency (see the note inside loadData).
+  const typeRef = useRef(type);
+  useEffect(() => {
+    typeRef.current = type;
+  }, [type]);
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedAccountId, setSelectedAccountId] = useState<string>('');
@@ -116,7 +123,7 @@ export function useAddTransactionForm() {
     return t('cooling.remainingTime', { hours: String(hours), mins: String(mins) });
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       await DB.appendMissingDefaultCategories();
 
@@ -167,20 +174,26 @@ export function useAddTransactionForm() {
         }
       } else {
         if (accs.length > 0 && isMounted.current) setSelectedAccountId(accs[0].id);
-        const defaultCat = cats.find((c: Category) => c.type === type || c.type === 'both');
+        // Read through a ref: this only picks an initial default. Depending
+        // on `type` would re-run the whole load and wipe the category the
+        // user just chose whenever they toggle income/expense.
+        const defaultCat = cats.find(
+          (c: Category) => c.type === typeRef.current || c.type === 'both'
+        );
         if (defaultCat && isMounted.current) setSelectedCategory(defaultCat.name);
       }
     } catch (err) {
       silentFail('[AddTransaction] Error loading data')(err);
     }
-  };
+    // `editId` IS a real dependency: it comes from the URL, so navigating
+    // from one transaction's edit screen to another must reload the form.
+  }, [editId, isMounted]);
 
   useEffect(() => {
     loadData();
     const timer = setTimeout(() => amountRef.current?.focus(), 300);
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadData]);
 
   const handleVoiceStart = () => {
     if (!voiceAssistant.isSupported()) {

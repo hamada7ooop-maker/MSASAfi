@@ -50,7 +50,13 @@ export default tseslint.config(
       "no-useless-escape": "off",
       "prefer-const": "warn",
       "no-case-declarations": "off",
-      "react-hooks/exhaustive-deps": "warn",
+      // Promoted from "warn" to "error" once the 12 outstanding suppressions
+      // in application code were resolved (L-7). As a warning it could not
+      // fail a build, so stale dependency arrays accumulated silently — and
+      // three of them turned out to be real staleness bugs. The arcade games
+      // keep their suppressions (see the override below); they are
+      // self-contained game loops, not financial screens.
+      "react-hooks/exhaustive-deps": "error",
       "no-restricted-imports": ["error", {
         "paths": [
           { "name": "@/db", "message": "استورد مباشرة من @/core/db/core أو @/core/db/repositories/*" },

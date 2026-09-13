@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../i18n/index';
 import { CardRepository } from '../../../core/db/repositories/cards';
@@ -166,7 +166,7 @@ export function BankCardsManager() {
   const activeStyle = CARD_STYLES.find(s => s.id === styleName) || CARD_STYLES[0];
 
   // ── Data loading ─────────────────────────────────────────────────────────
-  const loadCards = async () => {
+  const loadCards = useCallback(async () => {
     try {
       setLoading(true);
       const data = await CardRepository.getAll();
@@ -178,10 +178,9 @@ export function BankCardsManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeCardId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadCards(); }, []);
+  useEffect(() => { loadCards(); }, [loadCards]);
 
   useEffect(() => {
     const providers = obService.current.getProvidersByCountry(countryId);

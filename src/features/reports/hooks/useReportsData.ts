@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TransactionRepository } from '../../../core/db/repositories/transactions';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -44,7 +44,7 @@ export function useReportsData() {
     isLoading: true,
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       if (isMounted.current) {
         setData(prev => ({ ...prev, isLoading: true }));
@@ -109,12 +109,13 @@ export function useReportsData() {
         setData(prev => ({ ...prev, isLoading: false }));
       }
     }
-  };
+  }, [reportPeriod, customRange, isMounted]);
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportPeriod, customRange]);
+  }, [fetchData]);
 
+  // `refresh` is now a stable reference, so consumers can safely place it in
+  // their own dependency arrays.
   return { ...data, refresh: fetchData };
 }

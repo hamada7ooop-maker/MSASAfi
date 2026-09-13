@@ -21,6 +21,16 @@ interface SearchResult {
 export function SearchOverlay() {
   const { t, isLTR } = useI18n();
   const { fmt, getCurrencySymbol } = useFormat();
+
+  // The search effect below is debounced on `query` alone. `fmt`, `t` and
+  // `getCurrencySymbol` are only used to LABEL the results, and their
+  // identities change on every render — depending on them would restart the
+  // 300 ms debounce continuously and re-query the database for no reason.
+  // A ref gives the effect the current formatters without making it re-run.
+  const formattersRef = useRef({ fmt, getCurrencySymbol, t });
+  useEffect(() => {
+    formattersRef.current = { fmt, getCurrencySymbol, t };
+  }, [fmt, getCurrencySymbol, t]);
   const isMounted = useIsMounted();
   const { isSearchOpen, setSearchOpen } = useAppStore(
     useShallow((s) => ({ isSearchOpen: s.isSearchOpen, setSearchOpen: s.setSearchOpen }))
@@ -79,8 +89,8 @@ export function SearchOverlay() {
             id: `tx_${tx.id}`,
             icon: 'receipt',
             color: '#002b59',
-            title: tx.description || t(tx.category) || tx.category,
-            sub: `${tx.type === 'income' ? '+' : '-'}${fmt(tx.amount)} ${getCurrencySymbol()} • ${new Date(tx.date || tx.createdAt || Date.now()).toLocaleDateString()}`,
+            title: tx.description || formattersRef.current.t(tx.category) || tx.category,
+            sub: `${tx.type === 'income' ? '+' : '-'}${formattersRef.current.fmt(tx.amount)} ${formattersRef.current.getCurrencySymbol()} • ${new Date(tx.date || tx.createdAt || Date.now()).toLocaleDateString()}`,
             page: '/transactions',
             type: 'txn'
           }));
@@ -89,28 +99,28 @@ export function SearchOverlay() {
         goals
           .filter(g => g.name.toLowerCase().includes(q))
           .forEach(g => res.push({ 
-            id: `goal_${g.id}`, icon: 'flag', color: '#1b6d24', title: g.name, sub: `${fmt(g.target)}`, page: '/goals', type: 'goal' 
+            id: `goal_${g.id}`, icon: 'flag', color: '#1b6d24', title: g.name, sub: `${formattersRef.current.fmt(g.target)}`, page: '/goals', type: 'goal' 
           }));
 
         // Debts
         debts
           .filter(d => d.name.toLowerCase().includes(q))
           .forEach(d => res.push({ 
-            id: `debt_${d.id}`, icon: 'balance', color: '#5e0006', title: d.name, sub: `${fmt(d.total - (d.paid || 0))}`, page: '/debts', type: 'debt' 
+            id: `debt_${d.id}`, icon: 'balance', color: '#5e0006', title: d.name, sub: `${formattersRef.current.fmt(d.total - (d.paid || 0))}`, page: '/debts', type: 'debt' 
           }));
 
         // Bills
         bills
           .filter(b => b.name.toLowerCase().includes(q))
           .forEach(b => res.push({ 
-            id: `bill_${b.id}`, icon: 'receipt_long', color: '#930010', title: b.name, sub: `${fmt(b.amount)}`, page: '/bills', type: 'bill' 
+            id: `bill_${b.id}`, icon: 'receipt_long', color: '#930010', title: b.name, sub: `${formattersRef.current.fmt(b.amount)}`, page: '/bills', type: 'bill' 
           }));
 
         // Subs
         subs
           .filter(s => s.name.toLowerCase().includes(q))
           .forEach(s => res.push({ 
-            id: `sub_${s.id}`, icon: 'subscriptions', color: '#002b59', title: s.name, sub: `${fmt(s.amount)}`, page: '/bills', type: 'sub' 
+            id: `sub_${s.id}`, icon: 'subscriptions', color: '#002b59', title: s.name, sub: `${formattersRef.current.fmt(s.amount)}`, page: '/bills', type: 'sub' 
           }));
 
         if (isMounted.current) {
@@ -127,8 +137,7 @@ export function SearchOverlay() {
 
     const timer = setTimeout(runSearch, 300); // debounce
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, isMounted]);
 
   if (!isSearchOpen) return null;
 

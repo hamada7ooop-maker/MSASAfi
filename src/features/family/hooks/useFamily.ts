@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, db as DB } from '@/core/db/core';
 import { FAMILY_SHARED_CATEGORY_KEY } from '../../../core/categoryConstants';
@@ -30,19 +30,18 @@ export function useFamily() {
     [] as Transaction[]
   );
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const m = (await DB.getSetting('familyMembers')) as FamilyMember[] | undefined;
     const accs = await DB.getAccounts();
     if (isMounted.current) {
       setMembers(Array.isArray(m) ? m : []);
       setAccounts(accs);
     }
-  };
+  }, [isMounted]);
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
+  }, [loadData]);
 
   const isLoading = sharedTransactions === undefined;
 

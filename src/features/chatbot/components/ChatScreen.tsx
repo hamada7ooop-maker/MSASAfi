@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useAIAdvisor } from '../hooks/useAIAdvisor';
 import { useI18n } from '../../../i18n/index';
 import { ChatBubble } from './ChatBubble';
@@ -28,16 +28,22 @@ export function ChatScreen() {
   const allDynamic = useMemo(() => CHAT_DYNAMIC_KEYS.map((k) => t(k)), [t, CHAT_DYNAMIC_KEYS]);
   const [randomQs, setRandomQs] = useState<string[]>([]);
 
+  const refreshRandomQs = useCallback(() => {
+    setRandomQs([...allDynamic].sort(() => 0.5 - Math.random()).slice(0, 5));
+  }, [allDynamic]);
+
+  // Runs once on mount. refreshRandomQs is deliberately NOT a dependency:
+  // it changes identity whenever the language changes (via `allDynamic`), and
+  // depending on it would reshuffle the suggested questions under the user
+  // mid-conversation. The initial shuffle is all this effect is for.
+  const didInit = useRef(false);
   useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
     checkKeys();
     loadPinnedQs();
     refreshRandomQs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const refreshRandomQs = () => {
-    setRandomQs([...allDynamic].sort(() => 0.5 - Math.random()).slice(0, 5));
-  };
+  }, [refreshRandomQs]);
 
   const loadPinnedQs = async () => {
     const pinned = await DB.getSetting('pinnedChatQs');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -130,7 +130,7 @@ export function ZakatCalculator() {
     realestate: ''
   });
 
-  const syncPrices = async () => {
+  const syncPrices = useCallback(async () => {
     setIsSyncing(true);
     let success = false;
 
@@ -226,9 +226,12 @@ export function ZakatCalculator() {
     }
 
     setIsSyncing(false);
-  };
+    // `baseCurrency` is read when fetching the gold/silver rates: without it
+    // here, changing the currency left the calculator quoting prices in the
+    // previous one. `t` is read for the toast copy.
+  }, [baseCurrency, t]);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     const saved = (await DB.getSetting('zakatHistory')) as string | undefined;
     if (saved) setHistory(JSON.parse(saved));
 
@@ -254,12 +257,11 @@ export function ZakatCalculator() {
         syncPrices();
       }, 600); // تأخير بسيط لضمان سلاسة الواجهة وتحميل المكون بالكامل
     }
-  };
+  }, [syncPrices]);
 
   useEffect(() => {
     loadHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadHistory]);
 
   const handleAssetChange = (key: keyof typeof assets, value: string) => {
     const sanitized = sanitizeNumericInput(value);

@@ -55,8 +55,7 @@ export function ImageCropper({ image, onCrop, onCancel }: ImageCropperProps) {
       draw();
     };
     img.src = image;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [image]);
+  }, [image, draw]);
 
   useEffect(() => {
     draw();

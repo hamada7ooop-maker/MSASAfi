@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useIsMounted } from '../../../hooks/useIsMounted';
 import { TransactionRepository } from '../../../core/db/repositories/transactions';
@@ -343,16 +343,38 @@ export function useHomeData(
     setExtras(prev => ({ ...prev, nwPeriod: period }));
   };
 
-  const safeMonthlyStats = monthlyStats || { income: 0, expense: 0, count: 0, breakdown: {}, net: 0, weekly: { income: 0, expense: 0, net: 0 } };
+  // ── Reference stability ────────────────────────────────────────────────
+  // `x || []` allocates a NEW array on every render while `x` is still
+  // undefined (useLiveQuery returns undefined until its first result lands).
+  // Consumers that put these values in a dependency array would therefore
+  // re-run their effects on every render during loading — which is why
+  // several of them carried an eslint-disable instead of honest deps.
+  // Memoising the empty fallbacks makes the identities stable, so those
+  // dependency arrays can now be correct and complete.
+  // ───────────────────────────────────────────────────────────────────────
+  const EMPTY = useMemo(() => [] as never[], []);
+
+  const safeMonthlyStats = useMemo(
+    () =>
+      monthlyStats || {
+        income: 0,
+        expense: 0,
+        count: 0,
+        breakdown: {},
+        net: 0,
+        weekly: { income: 0, expense: 0, net: 0 },
+      },
+    [monthlyStats]
+  );
 
   return {
-    recentTransactions: recentTransactions || [],
-    allBudgets: allBudgets || [],
-    budgets: allBudgets || [], // Alias for Dashboard compatibility
-    upcomingBills: upcomingBills || [],
-    allGoals: allGoals || [],
-    goals: allGoals || [], // Alias for Advisor compatibility
-    owedDebts: owedDebts || [],
+    recentTransactions: recentTransactions || EMPTY,
+    allBudgets: allBudgets || EMPTY,
+    budgets: allBudgets || EMPTY, // Alias for Dashboard compatibility
+    upcomingBills: upcomingBills || EMPTY,
+    allGoals: allGoals || EMPTY,
+    goals: allGoals || EMPTY, // Alias for Advisor compatibility
+    owedDebts: owedDebts || EMPTY,
     monthlyStats: safeMonthlyStats,
     categoryBreakdown: safeMonthlyStats.breakdown || {},
     totalBalance: totalBalance || 0,

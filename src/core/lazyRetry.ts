@@ -4,6 +4,11 @@ import { ComponentType, lazy, LazyExoticComponent } from 'react';
  * Robust lazy component loader with automatic retry on dynamic import failure.
  * Fixes stale chunk / Vite HMR dynamic import caching issues.
  */
+// `ComponentType<any>` is deliberate and matches React's own typings for
+// lazy(). `unknown` does not work here: component props are contravariant, so
+// `ComponentType<unknown>` rejects every component that declares props. This
+// is the one place the escape hatch is the correct answer rather than a
+// shortcut.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyWithRetry<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T } | Record<string, T>>,

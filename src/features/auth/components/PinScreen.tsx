@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -121,6 +121,25 @@ export function PinScreen() {
     return () => clearInterval(timer);
   }, [lockedUntil]);
 
+  const handleBiometric = useCallback(async () => {
+    try {
+      const available = await BiometricService.isAvailable();
+      if (available) {
+        const success = await BiometricService.authenticate();
+        if (success) {
+          setAttempts(0);
+          setLocked(false);
+        }
+      }
+    } catch {
+      // Biometric cancelled or failed
+    }
+    // Only stable references are used (a React setter, a Zustand action and a
+    // module-level service), so this identity does not churn — which is what
+    // lets the effect below depend on it honestly rather than suppress the
+    // warning.
+  }, [setLocked]);
+
   useEffect(() => {
     let isMounted = true;
     async function checkAndTriggerBio() {
@@ -138,23 +157,8 @@ export function PinScreen() {
     }
     checkAndTriggerBio();
     return () => { isMounted = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useBiometric]);
+  }, [useBiometric, handleBiometric]);
 
-  const handleBiometric = async () => {
-    try {
-      const available = await BiometricService.isAvailable();
-      if (available) {
-        const success = await BiometricService.authenticate();
-        if (success) {
-          setAttempts(0);
-          setLocked(false);
-        }
-      }
-    } catch {
-      // Biometric cancelled or failed
-    }
-  };
 
   const handleNumber = async (num: string) => {
     // Wait for the persisted cooldown before honouring any key press, so a

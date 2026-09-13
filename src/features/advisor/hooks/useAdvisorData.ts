@@ -90,8 +90,17 @@ export function useAdvisorData() {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [homeData.isLoading, homeData.monthlyStats, homeData.balance]);
+    // `budgets` and `goals` ARE read above (generateDeepInsights), so they
+    // belong here: without them the advisor kept serving insights computed
+    // from a stale budget or goal list. Their identities are stable thanks to
+    // the memoised fallbacks in useHomeData.
+  }, [
+    homeData.isLoading,
+    homeData.monthlyStats,
+    homeData.balance,
+    homeData.budgets,
+    homeData.goals,
+  ]);
 
   return {
     ...homeData,

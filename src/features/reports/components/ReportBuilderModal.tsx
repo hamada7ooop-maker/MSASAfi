@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useIsMounted } from '../../../hooks/useIsMounted';
@@ -41,14 +41,7 @@ export function ReportBuilderModal() {
   const [datePreset, setDatePreset] = useState<DatePreset>('thisMonth');
   const [customRange, setCustomRange] = useState({ from: '', to: '' });
 
-  useEffect(() => {
-    if (isReportBuilderOpen) {
-      loadCategories();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReportBuilderOpen]);
-
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const cats = await DB.categories.toArray();
       if (isMounted.current) {
@@ -57,7 +50,14 @@ export function ReportBuilderModal() {
     } catch (err) {
       silentFail('[ReportBuilder] Failed to load categories')(err);
     }
-  };
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (isReportBuilderOpen) {
+      loadCategories();
+    }
+  }, [isReportBuilderOpen, loadCategories]);
+
 
   if (!isReportBuilderOpen) return null;
 
