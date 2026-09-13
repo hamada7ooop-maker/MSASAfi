@@ -3105,6 +3105,10 @@ export const locale_fa = {
   "security.resetVaultDone": "Reset complete. You can start fresh and set a new PIN.",
   "security.resetVaultFailed": "Reset failed. Please try again.",
   "security.postRestorePinTitle": "Set a new PIN for this device",
-  "security.postRestorePinBody": "Your data was restored but is not yet encrypted on this device. Set a PIN now to encrypt it with a key that belongs to this device."
+  "security.postRestorePinBody": "Your data was restored but is not yet encrypted on this device. Set a PIN now to encrypt it with a key that belongs to this device.",
+  "security.pinMismatch": "The two PINs do not match",
+  "security.confirmPin": "Re-enter your PIN to confirm",
+  "security.enterNewPin": "Enter a new PIN",
+  "security.encryptNow": "Encrypt my data"
 };
 export default locale_fa;

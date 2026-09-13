@@ -32,12 +32,29 @@ Both findings are now permanent tests in `encryption.test.ts` (8 tests), each lo
 
 **Gate: tsc 0 · eslint 0 · build 0 · 660/660 (run twice).**
 
+### Directive 1 — post-restore prompt at launch (complete)
+
+`PostRestorePinGate` (`src/features/auth/components/PostRestorePinGate.tsx`), mounted in `AppShell` above `PinScreen`. Checks `isPinSetupPending()` at mount and blocks until answered.
+
+Three decisions worth recording:
+
+1. **It sits above the lock screen, not behind it.** A restored vault has no PIN, so `PinScreen` has nothing to unlock — but the restored data is plaintext until this is answered. Ordering them the other way would show a lock over data that is not locked.
+2. **It is not dismissable, and `resetVault` is deliberately NOT offered here.** "Remind me later" would mean "leave my financial history readable", so there is no honest deferral. Equally there is nothing to escape from: the data is readable, the user is not locked out, so the only sensible action is to protect it. The destructive path belongs on the lockout screen, where it is the only way out — not here.
+3. **The PIN is confirmed twice, and encryption runs before the PIN is persisted.** A typo is unrecoverable, since the PIN is the sole key material. And if encryption fails the user keeps no PIN and is re-prompted next launch, rather than ending up with a lock over data that was never encrypted.
+
+**Tests:** `tests/unit/postRestorePinGate.test.tsx`, 6 tests, asserting the **database** for the `_encrypted` envelope rather than the component's own success message — the bug class here is precisely data that looks protected and is not.
+
+**Mutation tested (5 mutants): 4/5 killed first pass.** The survivor mattered: leaving the gate open after a successful setup passed everything, because I had asserted the flag was cleared but never that the modal actually closed — the user would have been stuck behind a blocking dialog whose work was already done. Added that assertion; **5/5 killed** on recheck.
+
+4 new locale keys (`security.pinMismatch`, `security.confirmPin`, `security.enterNewPin`, `security.encryptNow`) across all 11 files; ar + en translated, the other 9 seeded from English. `i18n-sync` 100%.
+
+**Gate: tsc 0 · eslint 0 · build 0 · 666/666 across 86 files · i18n 100%.**
+
 ### Next Step Proposals
 
-Your directives in `ceeb76f` arrived while this sweep was running, so the ordering already matches:
+Directives 1 and 2 are both complete. **Next up is directive 3, L-1 on `FamilyExpenses.tsx`**, following the 3-step discipline (characterization tests in `tests/unit/familyExpenses.test.tsx` → extract `SharedWalletTab.tsx` / `ChildrenAccountsTab.tsx` etc. into `src/features/family/components/` → mutation-test the new prop wiring).
 
-- **Directive 2 (harden async-in-transaction sites) — complete, above.** Note it found more than expected: the read path was a second live instance, and the original write defect measured 24/25 failures on the commonest user action.
-- **Directive 1 (post-restore prompt at launch) — next.** I will gate it in `AppRoot` on `isPinSetupPending()`. Note that `ac97159` already shipped the `SecurityCard` warning banner, so this is the launch-time enforcement layer on top of it, not a duplicate.
-- **Directive 3 (L-1 `FamilyExpenses.tsx`) — after that**, using the 3-step discipline: characterization tests → extraction → mutation testing on the new prop wiring.
+Two notes before that starts:
 
-One correction for the record: the release note in `ceeb76f` cites **653/653**, which was the count at `ac97159`. The suite is now **660/660** — `55f98c1` added 5 mutation-gap tests and this commit adds 2 regression tests.
+- **Release counts.** `ceeb76f` cites 653/653, which was correct at `ac97159`. The suite is now **666/666** across 86 files: +5 mutation-gap tests (`55f98c1`), +2 encryption regressions (`d409a9b`), +6 gate tests (this commit). Worth rebuilding v23.0.18 from the current head, since it also carries the read-path fix described above — that one affects every encrypted read in the app, so the signed APK you have is missing it.
+- **Residual, low priority:** the ~63 detached `recordAction(...).catch(silentFail)` calls are safe today only because they fire after their transaction closes. Awaiting them, or routing them through one helper, would remove a footgun — but nothing is currently broken and I would not spend the next slot on it.

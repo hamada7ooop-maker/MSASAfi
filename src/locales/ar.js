@@ -3111,7 +3111,11 @@ export const locale_ar = {
   "security.resetVaultDone": "تمت إعادة التعيين. يمكنك البدء من جديد وتعيين رمز جديد.",
   "security.resetVaultFailed": "تعذّرت إعادة التعيين. حاول مرة أخرى.",
   "security.postRestorePinTitle": "عيّن رمزاً سرياً جديداً لهذا الجهاز",
-  "security.postRestorePinBody": "تمت استعادة بياناتك، لكنها غير مشفّرة على هذا الجهاز بعد. عيّن رمزاً سرياً الآن لتشفيرها بمفتاح خاص بهذا الجهاز."
+  "security.postRestorePinBody": "تمت استعادة بياناتك، لكنها غير مشفّرة على هذا الجهاز بعد. عيّن رمزاً سرياً الآن لتشفيرها بمفتاح خاص بهذا الجهاز.",
+  "security.pinMismatch": "الرمزان غير متطابقين",
+  "security.confirmPin": "أعد إدخال الرمز للتأكيد",
+  "security.enterNewPin": "أدخل رمزاً سرياً جديداً",
+  "security.encryptNow": "شفّر بياناتي"
 };
 
 export default locale_ar;

@@ -6,6 +6,7 @@ import { RewardModal } from '../modals/RewardModal';
 import { GlobalActionModal } from '../modals/GlobalActionModal';
 import { FloatingActionButton } from '../common/FloatingActionButton';
 import { PinScreen } from '../../features/auth/components/PinScreen';
+import { PostRestorePinGate } from '../../features/auth/components/PostRestorePinGate';
 import { ReportBuilderModal } from '../../features/reports/components/ReportBuilderModal';
 import { SearchOverlay } from '../modals/SearchOverlay';
 import { NotifPanel } from '../../features/notifications/components/NotifPanel';
@@ -89,6 +90,10 @@ export function AppShell({ children }: AppShellProps) {
       <SearchOverlay />
       <NotifPanel />
       {isLocked && <PinScreen />}
+      {/* Sits above everything, including the lock screen: a restored vault has
+          no PIN yet, so there is nothing for PinScreen to unlock -- but the
+          restored data is lying in plaintext until this is answered. */}
+      <PostRestorePinGate />
     </div>
   );
 }
