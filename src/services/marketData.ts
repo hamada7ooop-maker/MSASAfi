@@ -3,7 +3,7 @@
  * Handles fetching live prices for Gold, Silver, and Exchange Rates.
  */
 
-import { db as DB } from '@/core/db/core';
+import { getApiKey } from '@/core/apiKeys';
 import { useSettingsStore } from '../store/settingsStore';
 import { CURRENCY_RATES } from '../core/currency';
 import { silentFail, withTimeoutSignal } from '../core/utils';
@@ -46,7 +46,7 @@ export async function fetchLiveGoldPrice(
   currency: string = useSettingsStore.getState().baseCurrency,
   signal?: AbortSignal
 ): Promise<number | null> {
-  const apiKeySetting = (await DB.getSetting('goldApiKey')) as string | undefined;
+  const apiKeySetting = await getApiKey('goldApiKey');
   const apiKey = apiKeySetting?.trim();
   if (!apiKey) return null;
 
@@ -102,7 +102,7 @@ export async function fetchExchangeRates(
   base: string = useSettingsStore.getState().baseCurrency,
   signal?: AbortSignal
 ): Promise<Record<string, number> | null> {
-  const apiKey = (await DB.getSetting('exchangeRateApiKey')) as string | undefined;
+  const apiKey = await getApiKey('exchangeRateApiKey');
   if (!apiKey) {
     return null;
   }
@@ -128,7 +128,7 @@ export async function fetchExchangeRates(
  * Fetches latest financial news using Currents API.
  */
 export async function fetchFinancialNews(signal?: AbortSignal): Promise<NewsArticle[] | null> {
-  const apiKey = (await DB.getSetting('currentsApiKey')) as string | undefined;
+  const apiKey = await getApiKey('currentsApiKey');
   if (!apiKey) return null;
 
   try {
@@ -153,7 +153,7 @@ export async function fetchFinancialNews(signal?: AbortSignal): Promise<NewsArti
 }
 
 export async function fetchEconomicIndicators(signal?: AbortSignal): Promise<EconomicIndicator[] | null> {
-  const apiKey = (await DB.getSetting('fredApiKey')) as string | undefined;
+  const apiKey = await getApiKey('fredApiKey');
   if (!apiKey) return null;
 
   const FRED_BASE = import.meta.env.DEV ? '/api/fred' : 'https://api.stlouisfed.org';

@@ -3,6 +3,7 @@ import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { db as DB } from '@/core/db/core';
+import { getApiKey } from '@/core/apiKeys';
 import { toast } from '../../../toast';
 import { checkMilestone } from '../../../core/loyalty';
 import { silentFail, parseNum, sanitizeNumericInput } from '../../../core/utils';
@@ -177,7 +178,7 @@ export function ZakatCalculator() {
     // 2. الاسترجاع البديل (Fallback) باستخدام GoldAPI.io إذا تم تكوين مفتاح للعميل وفشل الطلب الموحد
     if (!success) {
       try {
-        const apiKey = (await DB.getSetting('goldApiKey')) as string | undefined;
+        const apiKey = await getApiKey('goldApiKey');
         if (!apiKey) {
           toast(t('market.error.fetch') || 'Failed to fetch live prices', 'error');
           setIsSyncing(false);

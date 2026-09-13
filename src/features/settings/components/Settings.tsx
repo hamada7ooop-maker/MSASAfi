@@ -394,7 +394,7 @@ export function Settings() {
       tab: 'advanced',
       keys: ['settings.advancedAPI', 'settings.keyActive', 'settings.keyNotSet'],
       keywords: ['gemini', 'key', 'api', 'ai pro', 'مفتاح', 'ذكاء اصطناعي'],
-      render: () => <AdvancedAPICard key="advancedAPI" settings={settings} updateSetting={updateSetting} />
+      render: () => <AdvancedAPICard key="advancedAPI" settings={settings} />
     },
     {
       id: 'backupSync',

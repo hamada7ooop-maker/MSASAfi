@@ -4,6 +4,7 @@
 
 import { silentFail } from './errors';
 import { db as DB } from './db/core';
+import { getApiKey } from './apiKeys';
 
 export interface CurrencyMeta {
   flag: string;
@@ -157,7 +158,7 @@ export async function updateExchangeRates() {
   await updateCryptoRates();
 
   try {
-    const apiKey = await DB.getSetting('exchangeRateApiKey');
+    const apiKey = await getApiKey('exchangeRateApiKey');
     
     let url = 'https://open.er-api.com/v6/latest/USD'; // Default free one
     if (apiKey) {

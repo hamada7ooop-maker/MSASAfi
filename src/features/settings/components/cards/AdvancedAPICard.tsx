@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '../../../../i18n/index';
 import { toast } from '../../../../toast';
+import { getApiKey, setApiKey, MARKET_API_KEYS, type MarketApiKeyName } from '../../../../core/apiKeys';
 
 interface AdvancedAPICardProps {
+  /** Only used as a change signal to re-read the keys from secure storage. */
   settings: Record<string, unknown>;
-  updateSetting: (key: string, value: unknown) => void;
 }
 
 const COLOR_MAP: Record<string, { track: string; ring: string; badge: string }> = {
@@ -14,7 +15,7 @@ const COLOR_MAP: Record<string, { track: string; ring: string; badge: string }> 
   indigo: { track: 'bg-gradient-to-br from-indigo-500/10 to-violet-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm', ring: 'focus:ring-indigo-500/20', badge: 'bg-gradient-to-r from-indigo-600 to-violet-600 shadow-indigo-600/20' },
 };
 
-export function AdvancedAPICard({ settings, updateSetting }: AdvancedAPICardProps) {
+export function AdvancedAPICard({ settings }: AdvancedAPICardProps) {
   const { t } = useI18n();
 
   const [goldKey,     setGoldKey]     = useState('');
@@ -22,26 +23,51 @@ export function AdvancedAPICard({ settings, updateSetting }: AdvancedAPICardProp
   const [newsKey,     setNewsKey]     = useState('');
   const [fredKey,     setFredKey]     = useState('');
   const [expanded,    setExpanded]    = useState<string | null>(null);
+  // Mirrors which keys are set, since the values no longer live in `settings`.
+  const [present, setPresent] = useState<Record<string, boolean>>({});
 
+  // API keys now live in secure storage (keystore / encrypted preferences),
+  // not in the plaintext `settings` table — see core/apiKeys.ts.
   useEffect(() => {
-    setGoldKey    (String(settings.goldApiKey          || ''));
-    setExchangeKey(String(settings.exchangeRateApiKey  || ''));
-    setNewsKey    (String(settings.currentsApiKey      || ''));
-    setFredKey    (String(settings.fredApiKey          || ''));
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        MARKET_API_KEYS.map(async (k) => [k, (await getApiKey(k)) || ''] as const)
+      );
+      if (cancelled) return;
+      const map = Object.fromEntries(entries) as Record<MarketApiKeyName, string>;
+      setGoldKey(map.goldApiKey);
+      setExchangeKey(map.exchangeRateApiKey);
+      setNewsKey(map.currentsApiKey);
+      setFredKey(map.fredApiKey);
+      setPresent(Object.fromEntries(entries.map(([k, v]) => [k, Boolean(v)])));
+    })();
+    return () => { cancelled = true; };
   }, [settings]);
 
-  const handleSave = (key: string, stateValue: string) => {
-    if (!stateValue.trim()) {
-      if (!settings[key]) {
+  const handleSave = async (key: string, stateValue: string) => {
+    const name = key as MarketApiKeyName;
+    const trimmed = stateValue.trim();
+
+    if (!trimmed) {
+      if (!present[name]) {
         toast(t('settings.msg.enterKey') || 'أدخل المفتاح أولاً', 'error');
         return;
       }
-      updateSetting(key, '');
+      await setApiKey(name, '');
+      setPresent((p) => ({ ...p, [name]: false }));
       toast(t('settings.msg.cleared') || 'تم المسح', 'info');
-    } else {
-      updateSetting(key, stateValue.trim());
-      toast(t('settings.msg.saved') || 'تم الحفظ ✓', 'success');
+      return;
     }
+
+    const ok = await setApiKey(name, trimmed);
+    if (!ok) {
+      // Report the failure instead of implying the key was stored.
+      toast(t('common.error') || 'تعذّر الحفظ الآمن', 'error');
+      return;
+    }
+    setPresent((p) => ({ ...p, [name]: true }));
+    toast(t('settings.msg.saved') || 'تم الحفظ ✓', 'success');
   };
 
   const apis = [
@@ -74,7 +100,7 @@ export function AdvancedAPICard({ settings, updateSetting }: AdvancedAPICardProp
           {apis.map((api) => {
             const colors = COLOR_MAP[api.color];
             const isExpanded = expanded === api.id;
-            const hasKey = !!settings[api.key];
+            const hasKey = !!present[api.key];
 
             return (
               <div key={api.id}>
