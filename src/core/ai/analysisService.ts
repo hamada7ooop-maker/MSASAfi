@@ -18,7 +18,13 @@ export function detectAnomalies(
   const amounts = categoryTxs.map(t => Number(t.amount) || 0);
   const mean = amounts.reduce((a, b) => a + b, 0) / amounts.length;
   
-  const variance = amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / amounts.length;
+  // Sample standard deviation (Bessel's correction, n-1). These amounts are a
+  // sample of the user's spending, not the whole population, and dividing by n
+  // understates the spread — at the n=3 minimum that made the detector fire on
+  // ordinary transactions.
+  const variance =
+    amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+    Math.max(1, amounts.length - 1);
   const stdDev = Math.sqrt(variance);
 
   // If standard deviation is too small, fallback to multiplier check

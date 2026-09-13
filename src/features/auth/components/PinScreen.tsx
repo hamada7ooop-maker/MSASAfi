@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -7,6 +7,7 @@ import { db as DB } from '@/core/db/core';
 import { BiometricService } from '../../../core/services/BiometricService';
 import { toast } from '../../../toast';
 import { logger } from '../../../core/logger';
+import { silentFail } from '../../../core/utils';
 
 /**
  * Constant-time string comparison to avoid leaking match length/position
@@ -48,8 +49,61 @@ export function PinScreen() {
   const [attempts, setAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState(0);
   const [cooldownText, setCooldownText] = useState('');
+  // Holds the in-flight read of the persisted lockout. Key presses await it
+  // rather than being dropped, so a tap made during startup still counts but
+  // can never slip in ahead of a cooldown that is still being loaded.
+  const lockoutReadyRef = useRef<Promise<{ attempts: number; lockedUntil: number }> | null>(null);
 
   const MAX_ATTEMPTS = 5;
+
+  // ── Persisted brute-force cooldown ──────────────────────────────────────
+  // These used to live in useState alone, so force-quitting the app reset the
+  // counter and the cooldown — an attacker could retry 5 guesses indefinitely
+  // just by relaunching. Persisting them makes the lockout survive restarts.
+  // ────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    let alive = true;
+
+    const read = (async () => {
+      try {
+        const [savedAttempts, savedUntil] = await Promise.all([
+          DB.getSetting('pinAttempts'),
+          DB.getSetting('pinLockedUntil'),
+        ]);
+        const restored = {
+          attempts: Number(savedAttempts) || 0,
+          lockedUntil: Number(savedUntil) || 0,
+        };
+        if (alive) {
+          setAttempts(restored.attempts);
+          setLockedUntil(restored.lockedUntil);
+        }
+        return restored;
+      } catch (e) {
+        // A read failure must not hand out a free unlock, but it also must not
+        // brick the keypad. Fall back to "no recorded lockout".
+        silentFail('[PinScreen] Failed to read lockout state')(e);
+        return { attempts: 0, lockedUntil: 0 };
+      }
+    })();
+
+    lockoutReadyRef.current = read;
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const persistLockout = async (nextAttempts: number, nextLockedUntil: number) => {
+    try {
+      await Promise.all([
+        DB.setSetting('pinAttempts', nextAttempts),
+        DB.setSetting('pinLockedUntil', nextLockedUntil),
+      ]);
+    } catch (e) {
+      silentFail('[PinScreen] Failed to persist lockout state')(e);
+    }
+  };
 
   // Countdown timer for lockout
   useEffect(() => {
@@ -102,8 +156,11 @@ export function PinScreen() {
   };
 
   const handleNumber = async (num: string) => {
-    // Check lockout
-    if (lockedUntil > Date.now()) {
+    // Wait for the persisted cooldown before honouring any key press, so a
+    // restart cannot buy a guess in the gap before the read resolves.
+    const persisted = await (lockoutReadyRef.current ?? Promise.resolve(null));
+    const effectiveLockedUntil = Math.max(lockedUntil, persisted?.lockedUntil ?? 0);
+    if (effectiveLockedUntil > Date.now()) {
       return;
     }
     if (pin.length >= 4) return;
@@ -127,6 +184,8 @@ export function PinScreen() {
           await DB.setSetting('pin', null);
           await restoreEncryptionKey(newPin, salt);
           setAttempts(0);
+          setLockedUntil(0);
+          await persistLockout(0, 0);
           setLocked(false);
           return;
         }
@@ -151,6 +210,8 @@ export function PinScreen() {
         // ──────────────────────────────────────────────────────────────────
         await restoreEncryptionKey(newPin, pinSalt);
         setAttempts(0);
+        setLockedUntil(0);
+        await persistLockout(0, 0);
         setLocked(false);
       } else {
         const newAttempts = attempts + 1;
@@ -163,8 +224,10 @@ export function PinScreen() {
           const cooldownMs = 30000 * Math.pow(2, Math.floor((newAttempts - MAX_ATTEMPTS) / MAX_ATTEMPTS));
           const lockTime = Date.now() + cooldownMs;
           setLockedUntil(lockTime);
+          await persistLockout(newAttempts, lockTime);
           toast(t('settings.pinLocked') || `Too many attempts. Wait ${cooldownMs / 1000}s`, 'error');
         } else {
+          await persistLockout(newAttempts, lockedUntil);
           toast(t('settings.pinError') || 'Wrong PIN', 'error');
         }
       }
