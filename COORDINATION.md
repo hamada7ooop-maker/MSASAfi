@@ -8,135 +8,37 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ---
 
-## Current Directives: Priority Shift to Security Decisions (Vault PIN & Reset Lockout)
+## Current Directives: Release v23.0.18 Approved & Next Steps
 
-We completely agree with your proposal: **Security-first takes precedence over internal refactoring (L-1)**.
-Implementing the two security decisions now will safeguard user vaults before continuing with `FamilyExpenses.tsx`.
+Outstanding work on commit `ac97159`!
+- Release **v23.0.18** has been successfully built and signed:
+  - APK: `Masarifi_V23.0.18_Signed_Release.apk` (15.85 MB)
+  - Source ZIP: `Masarifi_V23.0.18_Source_Clean.zip` (8.64 MB)
+  - Tests: **653 / 653 passing (100%)** across 85 test suites.
+- Both security directives (post-restore PIN setup & capped lockout / reset) are verified and documented in permanent memory.
 
-### Scope of Work:
-1. **Force New PIN Setup After Vault Restore**:
-   - When a user restores data onto a new device, the local vault must require setting a fresh PIN secured with the current device's hardware-backed key.
-   - Add unit/integration tests confirming that a restored vault triggers the PIN setup flow and properly re-encrypts local keys.
-2. **Clean Reset Lockout Flow**:
-   - Provide a clean, robust lockout reset path for locked-out vaults without redundant legacy backward-compatibility shims.
-   - Preserve brute-force throttling while preventing permanent lockouts.
-   - Comprehensive test suite for lockout trigger, timer persistence, and reset flow.
+### Decision on Auditor Proposals:
+We approve combining **Proposal 2 & 3** into a quick security hardening commit, followed by **Proposal 1**:
+
+1. **Post-Restore Prompt at Launch (Proposal 3)**:
+   - Wire a prompt/modal in `AppRoot.tsx` (or equivalent root routing) that checks `isPinSetupPending()`.
+   - If pending, immediately prompt the user to set a PIN for this device, ensuring restored data is encrypted without relying on the user voluntarily visiting Settings.
+2. **Harden Async-in-Transaction Sites (Proposal 2)**:
+   - Audit `recordAction` in `schema.ts` and similar fire-and-forget writes inside transactions. Ensure no untracked microtask races can trigger `TransactionInactiveError` or silent data drops.
+3. **Resume L-1: Deconstruct `FamilyExpenses.tsx` (Proposal 1)**:
+   - Target file: `src/features/family/components/FamilyExpenses.tsx` (1,096 lines).
+   - Follow the 3-step discipline:
+     1. Characterization tests first in `tests/unit/familyExpenses.test.tsx`.
+     2. Extract subcomponents into `src/features/family/components/` (`SharedWalletTab.tsx`, `ChildrenAccountsTab.tsx`, etc.).
+     3. Mutation testing on newly wired props.
 
 ### Verification Gate Requirements:
 - TypeScript: `npx tsc --noEmit` -> 0 errors.
 - ESLint: `npm run lint` -> 0 warnings/errors.
 - Vitest: All tests passing.
-- Update the `## 📝 Auditor Report & Next Step Proposals` section below with your summary and thoughts before pushing.
+- Update the `## 📝 Auditor Report & Next Step Proposals` section below before pushing.
 
 ---
 
 ## 📝 Auditor Report & Next Step Proposals
-
-### Report — Vault PIN & Reset Lockout (this commit)
-
-Both directives are implemented, tested and wired into the live flows. Gate: **tsc 0 · eslint 0 · build 0 · 653/653**.
-
-New module: `src/core/security/vaultRecovery.ts`. New tests: `tests/unit/vaultRecovery.test.ts` (29) + 1 regression test added to `tests/unit/encryption.test.ts`.
-
----
-
-#### 🔴 Finding 1 — a restore onto a new device left all financial data in PLAINTEXT
-
-This was not in the directive; it was found while implementing it, and it is more serious than the item I was asked to build.
-
-`performRestore` correctly refuses to import the backup's vault secrets (`wrappedMDK`, `pinHash`, `pinSalt`) — importing them would hand the target device an envelope its own PIN cannot open. But on a *new* device there are no local vault secrets either, so after a restore there is **no key at all**. The Dexie middleware encrypts only when a key is loaded:
-
-```
-if (!isEncryptionKeyReady()) return obj;   // core/db/encryption.ts
-```
-
-Verified against the real database, not reasoned about — a restored transaction lands on disk as:
-
-```json
-{"id":"r1","type":"expense","amount":1234,"description":"salary details"}
-```
-
-No `_encrypted` envelope. The source device had a PIN; the user believes their data is protected; on the new device it is readable by anything that can open IndexedDB. This is exactly what the approved "force a new PIN after restore" directive prevents — the directive was right, and the reason is stronger than stated.
-
-**Implemented:** `evaluateRestoreProtection()` runs at the end of `performRestore` and sets a *persisted* flag (persisted deliberately: the restore path reloads the page, so an in-memory flag would be wiped precisely when needed). `SecurityCard.handleSavePin` checks it and calls `completePostRestorePinSetup(pin, salt)`, which creates a device-local envelope and then encrypts every restored record under it. The flag clears only after **both** steps succeed, so an interrupted attempt retries on next launch rather than silently leaving data exposed.
-
-#### 🔴 Finding 2 — the brute-force cooldown could brick a device permanently
-
-The old formula `30s * 2^floor((attempts-5)/5)` was uncapped:
-
-| wrong attempts | cooldown |
-|---|---|
-| 50 | 4.3 hours |
-| 80 | 11.4 days |
-| 100 | **182 days** |
-| 150 | **186,413 days** |
-
-It is persisted in IndexedDB and survives reinstalling the app. A child tapping the keypad can lock a real user out beyond any usable horizon — a permanent lockout produced by the defence, not by an attacker.
-
-**Implemented:** `cooldownForAttempts()` keeps the doubling but caps at **15 minutes**, and guards the exponent (`2 ** 1024` is `Infinity`, which poisons every later sum as `NaN`). Throttling stays meaningful: at the cap an attacker gets 480 guesses/day, so exhausting 10,000 four-digit PINs still takes ~21 days on a device they physically hold. A test asserts the cap is **≥ 5 minutes**, so nobody can "fix" a flaky test by lowering it until brute force becomes cheap.
-
-#### Reset Lockout
-
-`resetVault()` clears the encrypted tables **before** the key material — the reverse order could leave unreadable ciphertext with no key to open it. Exposed as a "Forgot your PIN?" affordance that appears **only while a cooldown is in force**, behind a confirmation that states plainly that the data will be destroyed.
-
-**On honesty:** the PIN *is* the key material. No reset can preserve the records — any flow claiming otherwise would either be lying or would mean the encryption never protected anything. The confirmation text says so.
-
-Per your directive, **no legacy backward-compatibility shims** were added for users locked out before this change; the reset path serves them.
-
----
-
-#### ⚠️ Latent production bug found en route (most important item here)
-
-My first test run failed with `InvalidStateError`. I treated it as a test artifact and was wrong twice before measuring properly. Isolated experimentally:
-
-- A **single** encrypted write after a database wipe failed **20/20**.
-- A multi-table encrypted transaction with no code of mine involved failed **10/15**.
-- Failure rate varied non-monotonically with table count (1–3 tables failed, 5+ passed) — the signature of a race, not a logic error.
-
-**Root cause:** `encryption.ts` awaits WebCrypto inside Dexie's `mutate` hook. An IndexedDB transaction auto-commits once its queue drains with no pending requests, so awaiting a **non-IndexedDB** promise inside a transaction lets it close underneath the next write. The fix is Dexie's documented remedy, `Dexie.waitFor()`, which keeps the transaction alive while the foreign promise settles.
-
-This is **not** test-only. Any multi-record encrypted write inside a transaction was a coin flip in production — it simply had no test exercising that path before now. Result after the fix: 8/8, then **29/29 across repeated runs**.
-
-I verified the guard is real by removing `Dexie.waitFor` and confirming the new regression test fails, then restoring it.
-
-I also **removed my own retry workaround** once the root cause was fixed (5 consecutive clean runs without it). Fixing the cause beat papering over the symptom, and leaving both would have left dead complexity implying a fragility that no longer exists.
-
----
-
-### Mutation testing — `vaultRecovery.ts`
-
-Step 3 of the agreed method, run against the 29 tests as they stood at `ac97159`. Twelve mutants, chosen to attack security invariants rather than syntax.
-
-**First pass: 7/12 killed.** The five survivors were each investigated rather than assumed to be gaps:
-
-| # | Mutation | First pass | Verdict |
-|---|---|---|---|
-| M2 | cap removed (`Math.min` → `Math.max`) | ✅ killed (5) | the fix itself is well covered |
-| M5 | fail-open: encrypt with no key loaded | ✅ killed | |
-| M4 | restore detection inverted | ✅ killed (3) | |
-| M1, M8, M11, M12 | threshold, counter, envelope, lockout clearing | ✅ killed | |
-| **M9** | **flag cleared BEFORE encryption** | ❌ survived | **real gap — the interruption-safety property was asserted nowhere** |
-| **M7** | **a failed attempt zeroes an active lockout** | ❌ survived | **real gap — an attacker could clear a running cooldown by guessing again** |
-| **M6** | `isLockedOut` boundary `>` → `>=` | ❌ survived | real gap (off-by-one at the expiry instant) |
-| **M10** | `auditLog` exclusion removed | ❌ survived | real gap — a deliberate decision nothing pinned |
-| M3 | Infinity guard disabled | ❌ survived | **equivalent mutant — proven, see below** |
-
-**Five tests added; second pass 11/12 killed.** The one survivor is M3, and I did not write a test for it because none can fail: I checked every input 0–20000 plus `NaN`/`Infinity`/`MAX_SAFE_INTEGER` and the guarded and unguarded functions agree everywhere, since `Math.min` clamps long before `2 ** steps` could overflow. It is unreachable defensive code. Rather than fake coverage with a tautological test, I documented it as knowingly-untestable in the source. A bonus mutant (cooldown not restarting the clock) is also killed by the new tests.
-
-**Two of my new tests failed on first run against unmutated source — both were my errors, and one taught me something about the code.** I had assumed `registerFailedAttempt` only issues a cooldown every 5th failure; in fact `steps` is 0 across the whole first block, so attempts 5, 6, 7… each re-arm it. That is the better behaviour (a wrong guess always restarts the clock), and it is now asserted explicitly instead of being an accident nobody had read.
-
-**A third issue surfaced only under repetition.** My interruption test passed, then failed 3 runs in 6. Cause: it aborts right after `initializeVaultKey`, whose `setSetting` fires the un-awaited audit write documented above; with nothing left to await, that write lands during the *next* test's wipe and kills an unrelated transaction (`TransactionInactiveError`). Every other test masks this by awaiting a real transaction afterwards. Fixed by draining, then confirmed **8/8 consecutive clean runs**. Worth noting as further evidence for proposal (2) below — this is the same un-awaited-write hazard, showing up a second time.
-
-### Post-restore banner
-
-The two `security.postRestorePin*` keys were unused; the flag was honoured but never explained. `SecurityCard` now shows an amber warning above the PIN row, only while `isPinSetupPending()` and no PIN is set, stating that the restored data is not yet encrypted. Without it the user sees an ordinary "set a PIN" row and reasonably assumes the lock carried over from their old device.
-
-**Gate after this work: tsc 0 · eslint 0 · build 0 · 658/658 · i18n 100%.**
-
-### Next Step Proposals
-
-1. **Resume L-1 with `FamilyExpenses.tsx` (1095 lines)** — the agreed next file, same order: characterization tests → extraction → mutation testing.
-2. **Audit other async-in-transaction sites (recommended first).** The `Dexie.waitFor` defect suggests a class of bug, not an instance. `recordAction` in `schema.ts` fires audit writes **without awaiting** (`.catch(silentFail)` and returns), so audit entries can race any transaction. Worth a focused sweep — it is cheap to check and the failure mode is silent data loss.
-3. **Post-restore prompt at launch.** The flag is set and honoured when the user opens Settings → PIN, but nothing yet *forces* the prompt on next launch. A gate in `AppRoot` reading `isPinSetupPending()` would close the window where a user simply never visits Settings. I did not add it unasked because it touches app-wide routing; say the word and it is a small change.
-
-*Auditor: security items complete, mutation-tested at 11/12 with the survivor proven equivalent. Awaiting your call on ordering (2) vs (1) — my recommendation is (2) first, now reinforced by the audit-write hazard resurfacing during this round.*
+*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
