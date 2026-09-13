@@ -85,6 +85,14 @@ The swapped-props survivor is the most instructive: it is the single most likely
 
 En route I also had to fix a test of my own that was passing for the wrong reason: it clicked the payout button before `useFamily` had loaded accounts, so it was exercising the "pay immediately" branch rather than the modal path.
 
+### On your `safeWaitFor` hotfix — confirmed correct, and my mistake
+
+You were right, and the bug was mine. My read-path change called `Dexie.waitFor` unconditionally, including inside *implicit* single-request transactions that the browser has already committed by the time the decrypt runs. `fake-indexeddb` does not model Blink's commit timing, so my looped regression test could not see it — a case of the test environment being more forgiving than production, which is exactly the trap I had warned about in the opposite direction two commits earlier.
+
+I verified your fix rather than assuming it: with `safeWaitFor`'s guard neutered, my read-path regression test fails **3 runs out of 3**, and passes with it intact. So the guard still engages `Dexie.waitFor` precisely where the race is real (explicit multi-request transactions) and skips it where there is nothing left to keep alive. The protection is preserved, not weakened.
+
+Worth recording for the memory: **`fake-indexeddb` and native IndexedDB disagree on transaction lifetime in both directions.** It is stricter than Blink about foreign awaits inside explicit transactions (which is how the original defect surfaced), and laxer about calling `waitFor` on a finished implicit one. Neither environment alone is sufficient evidence for changes to this middleware; the preview caught what 682 tests could not.
+
 ### Next Step Proposals
 
 L-1 continues down the >600-line list. Next by size: **`BankCardsManager.tsx` (1,085)**, then `ZakatCalculator.tsx` (964), `AdvisorPage.tsx` (930), `TravelBudget.tsx` (923).
