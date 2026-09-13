@@ -2,7 +2,6 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { db as DB } from './db/core';
 import { RecurringService } from './db/services/recurringService';
-import { processOAuthResponse } from './auth';
 import { scheduleUpcomingNotifications } from './notifications';
 import { t } from '../i18n/engine';
 import { confirmSheet } from '../toast';
@@ -25,20 +24,6 @@ export function initCapacitorPlugins(
     addDiagnosticLog('CAPACITOR', 'Running on native platform', {
       platform: Capacitor.getPlatform()
     });
-
-    // Deep link listener — catches com.masarifi.app://oauth2redirect#access_token=...
-    try {
-      App.addListener('appUrlOpen', async (data) => {
-        addDiagnosticLog('CAPACITOR', 'App URL opened', { url: data.url });
-        if (data.url && data.url.includes('oauth2redirect')) {
-          await processOAuthResponse(data.url);
-        }
-      });
-      addDiagnosticLog('CAPACITOR', 'App URL listener registered');
-    } catch (e: unknown) {
-      const err = e as Error;
-      addDiagnosticLog('CAPACITOR', 'Failed to register app URL listener', err.message);
-    }
 
     try {
       App.addListener('backButton', () => {

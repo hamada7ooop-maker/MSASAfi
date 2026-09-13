@@ -1,6 +1,5 @@
 export const translations = {
   "ar": {
-  "_masarifi_drive_token": "رمز جوجل درايف",
   "a11y.back": "رجوع",
   "a11y.backHome": "العودة للرئيسية",
   "a11y.chatAssistant": "المساعد المالي الذكي",
@@ -2417,13 +2416,6 @@ export const translations = {
   "settings.manageRules": "إدارة القواعد",
   "settings.marketApiDesc": "أدخل مفاتيح API الخاصة بك لتفعيل ميزات البيانات اللحظية والذكاء المالي.",
   "settings.marketApiKeys": "مفاتيح الربط البرمجي (APIs)",
-  "settings.master.activated": "تم تفعيل وضع السيادة! 🕯️",
-  "settings.master.enter": "أدخل الرمز السيادي",
-  "settings.master.invalid": "رمز غير صحيح",
-  "settings.masterDesc": "أدخل كلمة المرور الرئيسية لتفعيل ميزات التجربة الكاملة.",
-  "settings.masterPh": "رمز السيادة...",
-  "settings.masterSuccess": "تم تفعيل وضع السيادة! كافة ميزات التطوير نشطة الآن 🚀",
-  "settings.masterTitle": "الوضع المطور",
   "settings.matchTypeInfo": "المطابقة التامة تبحث عن النص كما هو، بينما الـ Regex يمنحك مرونة برمجية.",
   "settings.monthlySalary": "الراتب الشهري",
   "settings.msg.authGoogle": "جاري المصادقة مع جوجل...",

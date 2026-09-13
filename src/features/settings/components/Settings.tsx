@@ -182,7 +182,7 @@ export function Settings() {
         await unlockEverything();
         setShowMasterModal(false);
         setMasterPass('');
-        toast(t('settings.masterSuccess'), 'success');
+        toast('Master mode activated — all development features are now active', 'success');
       } else {
         await DB.recordAction('DEV_UNLOCK_FAILED', 'Developer master unlock attempt failed');
         toast(t('common.error'), 'error');
@@ -599,10 +599,10 @@ export function Settings() {
               <span className="material-symbols-outlined text-3xl">terminal</span>
             </div>
             <h3 className="text-xl font-black text-center text-on-surface dark:text-white mb-1.5">
-              {t('settings.masterTitle')}
+              Developer Mode
             </h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-bold mb-5 leading-relaxed">
-              {t('settings.masterDesc')}
+              Dev builds only. Enter the master passcode to unlock developer and test tools.
             </p>
             <input
               autoFocus
@@ -610,7 +610,7 @@ export function Settings() {
               value={masterPass}
               onChange={(e) => setMasterPass(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleMasterPass()}
-              placeholder={t('settings.masterPh')}
+              placeholder="Master passcode..."
               className="w-full bg-slate-50 dark:bg-slate-800/50 rounded-2xl px-5 py-4 text-center text-sm font-bold border-none outline-none focus:ring-2 ring-blue-500/30 mb-5 dark:text-white"
             />
             <div className="flex gap-3">
