@@ -1,0 +1,56 @@
+# ── Dependencies ──────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────
+dist/
+dist-ssr/
+build/
+coverage/
+*.local
+
+# ── Environment & secrets ─────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Signing keys (NEVER commit) ───────────────
+*.keystore
+*.jks
+*.p12
+*.pem
+key.properties
+android/key.properties
+
+# ── Native build artifacts ────────────────────
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/res/xml/config.xml
+android/capacitor-cordova-android-plugins/
+ios/App/Pods/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+
+# ── Logs ──────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Editors & OS ──────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+vite.preview.config.local.ts
