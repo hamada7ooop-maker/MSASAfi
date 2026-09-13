@@ -10,6 +10,7 @@ import { DepositAccountModal } from './DepositAccountModal';
 import { confirmSheet, toast } from '../../../toast';
 import type { Goal } from '../../../types';
 import confetti from 'canvas-confetti';
+import { celebrate } from '../../../core/a11y';
 import { checkMilestone } from '../../../core/loyalty';
 import { InflationCalculator } from './InflationCalculator';
 import { isAtLeastMoney } from '../../../core/money';
@@ -127,7 +128,7 @@ export function Goals() {
         isAtLeastMoney(updatedGoal.saved, updatedGoal.target) &&
         !isAtLeastMoney(g_orig.saved || 0, g_orig.target)
       ) {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        celebrate(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }));
         toast('🎉 ' + t('goal.completed'), 'success');
       } else {
         toast(t('goal.amountAdded'), 'success');

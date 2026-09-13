@@ -6,6 +6,7 @@ import type { Debt, Account } from '../../../types';
 import { toast } from '../../../toast';
 import { awardPoints } from '../../../core/loyalty';
 import confetti from 'canvas-confetti';
+import { celebrate } from '../../../core/a11y';
 import { isSettled } from '../../../core/money';
 
 interface DebtItemProps {
@@ -66,7 +67,7 @@ export function DebtItem({
       if (isSettled(remaining - numAmount)) {
         await awardPoints('DEBT_SETTLED');
         try {
-          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+          celebrate(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }));
         } catch {
           /* Confetti effect is non-critical UI decoration — silently fallback */
         }

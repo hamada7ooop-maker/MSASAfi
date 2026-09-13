@@ -5,6 +5,7 @@ import { useSettingsStore } from '../../../store/settingsStore';
 import { checkMilestone } from '../../../core/loyalty';
 import { toast } from '../../../toast';
 import confetti from 'canvas-confetti';
+import { celebrate } from '../../../core/a11y';
 import { silentFail } from '../../../core/utils';
 
 interface GlossaryTerm {
@@ -137,15 +138,15 @@ export function Glossary() {
       if (success) {
         setIsRewardClaimed(true);
         toast(t('glossary.rewardClaimed') || 'تم استلام مكافأة القاموس! 🎉', 'success');
-        try {
+        // celebrate() skips the burst when the user prefers reduced motion,
+        // and swallows any failure — the reward itself already landed.
+        celebrate(() =>
           confetti({
             particleCount: 150,
             spread: 70,
             origin: { y: 0.6 }
-          });
-        } catch {
-          /* Confetti effect is non-critical UI decoration — silently fallback */
-        }
+          })
+        );
       }
     } else {
       toast(t('glossary.markedReadSuccess') || 'Term marked as read! 📚', 'success');

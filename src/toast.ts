@@ -3,6 +3,7 @@
 // ============================================
 import { t } from './i18n/engine';
 import { registerToBridge } from './core/AppBridge';
+import { announce } from './core/a11y';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -34,14 +35,28 @@ export function toast(msg: unknown, type: ToastType = 'success'): void {
 
   el.className = 'masarifi-toast';
   el.style.background = bg;
+
+  // Toasts are how the app confirms that money moved — saved, deleted,
+  // transferred, failed. Rendered as a bare div, none of that reached a
+  // screen-reader user. `role=status` exposes it; the separate announce()
+  // call carries the text to the shared live region, which also handles the
+  // case of the same message firing twice in a row.
+  el.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  el.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+  el.setAttribute('aria-atomic', 'true');
+  // The icon is decorative; its name ("error", "check_circle") would
+  // otherwise be read out as part of the message.
+  
   const iconEl = document.createElement('span');
   iconEl.className = 'material-symbols-outlined';
   iconEl.style.fontSize = '18px';
   iconEl.textContent = icon;
+  iconEl.setAttribute('aria-hidden', 'true');
   const msgEl = document.createElement('span');
   msgEl.textContent = String(msg ?? '');
   el.append(iconEl, msgEl);
   document.body.appendChild(el);
+  announce(String(msg ?? ''), type === 'error');
   requestAnimationFrame(() => {
     el.classList.add('masarifi-toast--visible');
   });

@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { db as DB } from '@/core/db/core';
 import { toast } from '../../../toast';
 import confetti from 'canvas-confetti';
+import { celebrate } from '../../../core/a11y';
 
 const DARK_IDS = ['black', 'oled', 'midnight', 'dim', 'royal-gold', 'aurora', 'crimson', 'forest', 'vantablack'];
 
@@ -130,7 +131,7 @@ export function Shop() {
 
     const success = await spendPoints(item.cost, item.id);
     if (success) {
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      celebrate(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }));
       if (item.id.startsWith('palette:')) {
         await applyTheme(item as ThemeItem);
       }

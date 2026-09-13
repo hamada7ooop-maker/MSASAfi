@@ -88,7 +88,10 @@ export const BalanceCard = React.memo(function BalanceCard({ balance, financialS
           {/* Top Row: Info */}
           <div className="flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/55 block">
+              {/* Was text-white/55: measured 4.17-4.42:1 over the card
+                  gradients, under the 4.5:1 AA floor for text this small.
+                  /75 measures ~6.9:1 and costs nothing visually. */}
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-white/75 block">
                 {t('home.balance')}
               </span>
               <div className="flex items-center gap-2">
@@ -103,14 +106,32 @@ export const BalanceCard = React.memo(function BalanceCard({ balance, financialS
           {/* Middle Row: Massive Balance + Incognito Toggle */}
           <div className="my-6">
             <div className="flex items-center gap-3 group/balance relative max-w-full">
+              {/*
+                The balance changes as the user records transactions. Without a
+                live region a screen-reader user has no way to know the figure
+                moved — they would have to hunt for it again after every entry.
+                `polite` waits for a pause rather than interrupting.
+
+                When hidden for privacy the digits are only blurred visually,
+                so they would still be read aloud in full. aria-hidden removes
+                them from the accessibility tree and a text alternative
+                announces that the balance is concealed instead.
+              */}
               <h1 
                 className={`text-premium-header tracking-tighter flex items-baseline gap-2 whitespace-nowrap leading-none transition-all duration-700 ${
                   isSecret ? 'filter blur-[12px] opacity-15 select-none pointer-events-none' : 'hover:scale-[1.01]'
                 }`}
                 style={{ fontSize: baseSize }}
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label={
+                  isSecret
+                    ? t('home.balanceHidden') || 'الرصيد مخفي'
+                    : `${t('home.balance')}: ${formattedBalance} ${currency}`
+                }
               >
-                <span className="tabular-nums drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]">{formattedBalance}</span> 
-                <span className="text-[0.4em] font-black opacity-45 shrink-0 tracking-normal leading-none">{currency}</span>
+                <span aria-hidden="true" className="tabular-nums drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]">{formattedBalance}</span> 
+                <span aria-hidden="true" className="text-[0.4em] font-black opacity-45 shrink-0 tracking-normal leading-none">{currency}</span>
               </h1>
 
               {/* Incognito Frosted Button */}
@@ -120,9 +141,13 @@ export const BalanceCard = React.memo(function BalanceCard({ balance, financialS
                   setIsSecret(!isSecret);
                 }}
                 className="w-9 h-9 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] text-white/60 hover:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-inner shrink-0"
-                title={isSecret ? 'إظهار الرصيد' : 'إخفاء الرصيد (حماية الخصوصية)'}
+                title={isSecret ? t('home.showBalance') : t('home.hideBalance')}
+                aria-label={isSecret ? t('home.showBalance') : t('home.hideBalance')}
+                aria-pressed={isSecret}
               >
-                <span className="material-symbols-outlined text-[18px]">
+                {/* Icon font ligature: without aria-hidden the literal word
+                    "visibility" is announced as the button's content. */}
+                <span aria-hidden="true" className="material-symbols-outlined text-[18px]">
                   {isSecret ? 'visibility_off' : 'visibility'}
                 </span>
               </button>

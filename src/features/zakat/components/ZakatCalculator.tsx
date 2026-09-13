@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { prefersReducedMotion } from '@/core/a11y';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -31,6 +32,16 @@ function AnimatedNumber({ value, formatter, baseCurrency }: AnimatedNumberProps)
     const end = value;
     prevValueRef.current = value;
     if (start === end) return;
+
+    // The stylesheet's prefers-reduced-motion rule collapses CSS animation,
+    // but it cannot touch a requestAnimationFrame loop. Snap straight to the
+    // final figure instead of counting up to it — the number is the
+    // information; the count-up is decoration.
+    if (prefersReducedMotion()) {
+      setDisplayValue(end);
+      setIsAnimating(false);
+      return;
+    }
 
     setIsAnimating(true);
     const duration = 1000; // ms

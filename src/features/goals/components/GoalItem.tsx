@@ -3,6 +3,7 @@ import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import type { Goal, Account } from '../../../types';
 import confetti from 'canvas-confetti';
+import { celebrate } from '../../../core/a11y';
 import { toast } from '../../../toast';
 import { awardPoints } from '../../../core/loyalty';
 import { isAtLeastMoney } from '../../../core/money';
@@ -79,7 +80,7 @@ export function GoalItem({
       if (updatedGoal && isAtLeastMoney(updatedGoal.saved, updatedGoal.target) && !isAtLeastMoney(saved, target)) {
         await awardPoints('GOAL_COMPLETED');
         try {
-          confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+          celebrate(() => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }));
         } catch {
           /* Confetti effect is non-critical UI decoration — silently fallback */
         }
