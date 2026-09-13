@@ -213,7 +213,9 @@ describe('call sites actually use the guards', () => {
   });
 
   it('the Zakat count-up snaps instead of animating under reduced motion', () => {
-    const src = read('src/features/zakat/components/ZakatCalculator.tsx');
+    // The count-up moved to its own component when ZakatCalculator was split
+    // (L-1). The guard itself is unchanged -- only its address is.
+    const src = read('src/features/zakat/components/AnimatedNumber.tsx');
     expect(src).toContain('prefersReducedMotion()');
     // The guard must come before the rAF loop starts.
     expect(src.indexOf('prefersReducedMotion()')).toBeLessThan(
