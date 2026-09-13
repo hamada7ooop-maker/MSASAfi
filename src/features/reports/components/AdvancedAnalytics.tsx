@@ -2,12 +2,15 @@ import React, { useState, useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/core/db/core';
 import { useI18n } from '../../../i18n/index';
-import { useFormat } from '../../../core/hooks/useFormat';
 import { toast } from '../../../toast';
 import { ExportService } from '../services/exportService';
 import { silentFail } from '../../../core/utils';
 
 import { oklchToRgb, oklabToRgb } from '../utils/colorUtils';
+import { AnalysisTab } from './analytics/AnalysisTab';
+import { HeatmapTab } from './analytics/HeatmapTab';
+import { FreedomTab } from './analytics/FreedomTab';
+import { ComparisonTab } from './analytics/ComparisonTab';
 import {
   getPrevMonthDates,
   calculateTotalWealth,
@@ -25,7 +28,6 @@ import {
 
 export function AdvancedAnalytics() {
   const { t } = useI18n();
-  const { fmt, getCurrencySymbol } = useFormat();
   const [activeTab, setActiveTab] = useState<'analysis' | 'heatmap' | 'freedom' | 'comparison'>('analysis');
   const [heatmapMonth, setHeatmapMonth] = useState<number>(new Date().getMonth());
   const [heatmapYear, setHeatmapYear] = useState<number>(new Date().getFullYear());
@@ -569,653 +571,50 @@ export function AdvancedAnalytics() {
       {/* Tabs Content */}
       <div className="space-y-6">
         {activeTab === 'analysis' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Needs vs Wants & Wasted Rate */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Needs vs Wants */}
-              <div className="fin-card p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 space-y-4">
-                <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-emerald-500 text-sm">balance</span>
-                  {t('analytics.needsWants') || 'الضروريات مقابل الكماليات'}
-                </h4>
-                <div className="space-y-2">
-                  <div className="h-6 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex">
-                    <div
-                      style={{ width: `${needsVsWants.needsPct}%` }}
-                      className="bg-emerald-500 h-full flex items-center justify-center text-[9px] font-black text-white"
-                      title={t('analytics.needsLabel', { amt: fmt(needsVsWants.needs) })}
-                    >
-                      {needsVsWants.needsPct > 15 ? `${needsVsWants.needsPct.toFixed(0)}%` : ''}
-                    </div>
-                    <div
-                      style={{ width: `${needsVsWants.wantsPct}%` }}
-                      className="bg-amber-500 h-full flex items-center justify-center text-[9px] font-black text-white"
-                      title={t('analytics.wantsLabel', { amt: fmt(needsVsWants.wants) })}
-                    >
-                      {needsVsWants.wantsPct > 15 ? `${needsVsWants.wantsPct.toFixed(0)}%` : ''}
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-[10px] text-slate-400 font-bold">
-                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>{t('analytics.needsLabel', { amt: `${fmt(needsVsWants.needs)} ${getCurrencySymbol()}` })}</span>
-                    <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>{t('analytics.wantsLabel', { amt: `${fmt(needsVsWants.wants)} ${getCurrencySymbol()}` })}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Wasted Spending */}
-              <div className="fin-card p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-3xl">heart_broken</span>
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100">
-                    {t('analytics.wasted') || 'معدل الهدر المالي'}
-                  </h4>
-                  <p className="text-lg font-black text-red-500">
-                    {wastedSpending.rate.toFixed(1)}% <span className="text-xs text-slate-400">({fmt(wastedSpending.amount)} {getCurrencySymbol()})</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
-                    {wastedSpending.rate > 20 
-                      ? t('analytics.wasted.warning')
-                      : t('analytics.wasted.good')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Emotional & Mood Spending Analytics */}
-            <div className="fin-card p-6 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 space-y-6">
-              <div>
-                <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-purple-500 text-sm">psychology</span>
-                  {t('analytics.mood.title')}
-                </h4>
-                <p className="text-[10px] text-slate-400 font-bold mt-1">
-                  {t('analytics.mood.desc')}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                {[
-                  { key: 'happy', label: t('analytics.mood.happy'), data: moodSpending.moods.happy, color: 'bg-emerald-500' },
-                  { key: 'sad', label: t('analytics.mood.sad'), data: moodSpending.moods.sad, color: 'bg-blue-500' },
-                  { key: 'stressed', label: t('analytics.mood.stressed'), data: moodSpending.moods.stressed, color: 'bg-red-500' },
-                  { key: 'tired', label: t('analytics.mood.tired'), data: moodSpending.moods.tired, color: 'bg-amber-500' },
-                  { key: 'neutral', label: t('analytics.mood.neutral'), data: moodSpending.moods.neutral, color: 'bg-slate-500' }
-                ].map((mObj) => {
-                  const pct = moodSpending.total > 0 ? (mObj.data.amount / moodSpending.total) * 100 : 0;
-                  return (
-                    <div key={mObj.key} className="p-3 bg-white dark:bg-slate-800/50 rounded-2xl border border-black/5 dark:border-white/5 space-y-2 flex flex-col justify-between">
-                      <div>
-                        <span className="text-[10px] text-slate-500 font-black block">{mObj.label}</span>
-                        <span className="text-xs font-black text-[#002b59] dark:text-blue-100 mt-1 block">
-                          {fmt(mObj.data.amount)} {getCurrencySymbol()}
-                        </span>
-                        <span className="text-[9px] text-slate-400 font-bold block mt-0.5">
-                          {t('analytics.mood.txCount', { count: mObj.data.count })}
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                        <div style={{ width: `${pct}%` }} className={`h-full ${mObj.color} rounded-full`}></div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {moodSpending.hasEmotionalSpending && (
-                <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-xs font-black text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-lg">lightbulb</span>
-                  <span>
-                    {t('analytics.mood.insight', {
-                      mood: moodSpending.highestMood === 'happy'
-                        ? t('analytics.mood.happyWord')
-                        : moodSpending.highestMood === 'sad'
-                        ? t('analytics.mood.sadWord')
-                        : moodSpending.highestMood === 'stressed'
-                        ? t('analytics.mood.stressedWord')
-                        : t('analytics.mood.tiredWord')
-                    })}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Days of Week & Times of Day */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Days of Week */}
-              <div className="fin-card p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 space-y-4">
-                <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-blue-500 text-sm">calendar_view_week</span>
-                  {t('analytics.days') || 'الإنفاق حسب أيام الأسبوع'}
-                </h4>
-                <div className="space-y-2">
-                  {daysOfWeekLabels.map((day, idx) => {
-                    const amt = dayOfWeekSpending[idx];
-                    const pct = (amt / maxDaySpending) * 100;
-                    return (
-                      <div key={day} className="space-y-1">
-                        <div className="flex justify-between text-[10px] font-bold">
-                          <span className="text-slate-500">{day}</span>
-                          <span className="text-[#002b59] dark:text-blue-200">{fmt(amt)} {getCurrencySymbol()}</span>
-                        </div>
-                        <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                          <div
-                            style={{ width: `${pct}%` }}
-                            className="bg-blue-500 h-full rounded-full transition-all duration-500"
-                          ></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Times of Day & Seasons */}
-              <div className="space-y-6">
-                {/* Times of Day */}
-                <div className="fin-card p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 space-y-4">
-                  <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-amber-500 text-sm">schedule</span>
-                    {t('analytics.times') || 'الإنفاق حسب أوقات اليوم'}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { key: 'morning', label: t('analytics.time.morning'), val: timeOfDaySpending.morning, amt: timeOfDaySpending.amounts.morning },
-                      { key: 'afternoon', label: t('analytics.time.afternoon'), val: timeOfDaySpending.afternoon, amt: timeOfDaySpending.amounts.afternoon },
-                      { key: 'evening', label: t('analytics.time.evening'), val: timeOfDaySpending.evening, amt: timeOfDaySpending.amounts.evening },
-                      { key: 'night', label: t('analytics.time.night'), val: timeOfDaySpending.night, amt: timeOfDaySpending.amounts.night }
-                    ].map(tObj => (
-                      <div key={tObj.key} className="p-3 bg-white dark:bg-slate-800/50 rounded-2xl border border-black/5 dark:border-white/5 space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold block">{tObj.label}</span>
-                        <span className="text-sm font-black text-[#002b59] dark:text-blue-100 block">
-                          {tObj.val.toFixed(0)}%
-                        </span>
-                        <span className="text-[9px] text-slate-400/80 font-bold block">
-                          {fmt(tObj.amt)} {getCurrencySymbol()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Seasonal Spending */}
-                <div className="fin-card p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 space-y-4">
-                  <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-purple-500 text-sm">ac_unit</span>
-                    {t('analytics.seasons') || 'الإنفاق حسب مواسم السنة'}
-                  </h4>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[
-                      { key: 'winter', val: seasonalSpending.winter },
-                      { key: 'spring', val: seasonalSpending.spring },
-                      { key: 'summer', val: seasonalSpending.summer },
-                      { key: 'autumn', val: seasonalSpending.autumn }
-                    ].map(sObj => (
-                      <div key={sObj.key} className="text-center space-y-1 p-2 bg-white dark:bg-slate-800/50 rounded-xl">
-                        <span className="text-[9px] text-slate-400 font-black block">{t(`analytics.season.${sObj.key}`)}</span>
-                        <span className="text-xs font-black text-[#002b59] dark:text-blue-100 block">{sObj.val.toFixed(0)}%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AnalysisTab
+            needsVsWants={needsVsWants}
+            wastedSpending={wastedSpending}
+            moodSpending={moodSpending}
+            dayOfWeekSpending={dayOfWeekSpending}
+            daysOfWeekLabels={daysOfWeekLabels}
+            maxDaySpending={maxDaySpending}
+            timeOfDaySpending={timeOfDaySpending}
+            seasonalSpending={seasonalSpending}
+          />
         )}
 
         {/* Heatmap Calendar */}
         {activeTab === 'heatmap' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-rose-500 text-sm">calendar_month</span>
-                  {t('analytics.heatmap.title') || 'خريطة الإنفاق الحرارية'}
-                </h4>
-                <p className="text-[10px] text-slate-400 font-bold mt-1">
-                  {t('analytics.heatmap.desc') || 'توضيح بصري لكثافة إنفاقك اليومي على مدار الشهر.'}
-                </p>
-              </div>
-
-              {/* Month Selector */}
-              <div className="flex gap-2">
-                <select
-                  value={heatmapMonth}
-                  onChange={(e) => {
-                    setHeatmapMonth(Number(e.target.value));
-                    setSelectedHeatmapDay(null);
-                  }}
-                  className="bg-slate-100 dark:bg-slate-800 text-xs font-black p-3.5 rounded-2xl border-none text-[#002b59] dark:text-white"
-                >
-                  {monthsLabels.map((lbl, idx) => (
-                    <option key={idx} value={idx}>{lbl}</option>
-                  ))}
-                </select>
-                <select
-                  value={heatmapYear}
-                  onChange={(e) => {
-                    setHeatmapYear(Number(e.target.value));
-                    setSelectedHeatmapDay(null);
-                  }}
-                  className="bg-slate-100 dark:bg-slate-800 text-xs font-black p-3.5 rounded-2xl border-none text-[#002b59] dark:text-white"
-                >
-                  {[2025, 2026, 2027].map(yr => (
-                    <option key={yr} value={yr}>{yr}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Calendar Grid */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-7 gap-2 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {daysOfWeekLabels.map(d => <div key={d}>{d}</div>)}
-              </div>
-
-              <div className="grid grid-cols-7 gap-2">
-                {/* Empty cells before the first day of the month */}
-                {Array.from({ length: heatmapData.firstDayIndex }).map((_, i) => (
-                  <div key={`empty-${i}`} className="aspect-square bg-slate-50/20 dark:bg-slate-800/10 rounded-2xl border border-dashed border-slate-100 dark:border-white/5 opacity-30"></div>
-                ))}
-
-                {/* Days of the month */}
-                {Array.from({ length: heatmapData.totalDays }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const dayStats = heatmapData.dailySpending[dayNum] || { amount: 0, count: 0 };
-                  const intensity = heatmapData.maxDailySpend > 0 ? (dayStats.amount / heatmapData.maxDailySpend) : 0;
-
-                  // Determine color class based on intensity
-                  let bgStyle: React.CSSProperties = {};
-                  let borderClass = 'border-slate-100 dark:border-white/5';
-                  let textClass = 'text-[#002b59] dark:text-blue-100';
-
-                  if (dayStats.amount === 0) {
-                    bgStyle = { backgroundColor: 'transparent' };
-                  } else if (intensity < 0.25) {
-                    bgStyle = { backgroundColor: 'rgba(59, 130, 246, 0.15)' }; // Light blue
-                  } else if (intensity < 0.6) {
-                    bgStyle = { backgroundColor: 'rgba(99, 102, 241, 0.35)' }; // Indigo
-                  } else if (intensity < 0.9) {
-                    bgStyle = { backgroundColor: 'rgba(124, 58, 237, 0.6)' }; // Purple
-                  } else {
-                    bgStyle = { backgroundColor: 'rgba(244, 63, 94, 0.85)' }; // Rose
-                    borderClass = 'border-red-500/50 dark:border-red-400/50 animate-pulse';
-                    textClass = 'text-white font-black';
-                  }
-
-                  return (
-                    <button
-                      key={`day-${dayNum}`}
-                      onClick={() => setSelectedHeatmapDay({ day: dayNum, amount: dayStats.amount, count: dayStats.count })}
-                      style={bgStyle}
-                      className={`aspect-square rounded-2xl border ${borderClass} flex flex-col items-center justify-center gap-0.5 hover:scale-105 active:scale-95 transition-all relative group`}
-                    >
-                      <span className={`text-[10px] font-black ${textClass}`}>{dayNum}</span>
-                      {dayStats.amount > 0 && (
-                        <span className={`text-[8px] opacity-80 ${dayStats.amount > heatmapData.maxDailySpend * 0.9 ? 'text-white' : 'text-slate-500 dark:text-slate-400'} font-bold`}>
-                          {dayStats.amount.toFixed(0)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Day stats card */}
-              {selectedHeatmapDay && (
-                <div className="fin-card p-5 bg-blue-500/10 border border-blue-500/20 rounded-3xl flex items-center justify-between gap-4 animate-in slide-in-from-bottom-2 duration-300">
-                  <div className="space-y-1">
-                    <span className="text-[10px] text-blue-500 font-black uppercase tracking-widest block">
-                      {t('analytics.heatmap.dayDetails', { day: selectedHeatmapDay.day, month: monthsLabels[heatmapMonth], year: heatmapYear })}
-                    </span>
-                    <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                      {t('analytics.heatmap.totalSpend')} <span className="text-sm font-black text-[#002b59] dark:text-blue-100">{fmt(selectedHeatmapDay.amount)} {getCurrencySymbol()}</span>
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-bold">
-                      {t('analytics.heatmap.txCount', { count: selectedHeatmapDay.count })}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedHeatmapDay(null)}
-                    className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
+          <HeatmapTab
+            heatmapData={heatmapData}
+            heatmapMonth={heatmapMonth}
+            setHeatmapMonth={setHeatmapMonth}
+            heatmapYear={heatmapYear}
+            setHeatmapYear={setHeatmapYear}
+            selectedHeatmapDay={selectedHeatmapDay}
+            setSelectedHeatmapDay={setSelectedHeatmapDay}
+            monthsLabels={monthsLabels}
+            daysOfWeekLabels={daysOfWeekLabels}
+          />
         )}
 
         {/* Financial Freedom Score */}
         {activeTab === 'freedom' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-              {/* Score Gauge */}
-              <div className="flex flex-col items-center justify-center p-6 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 rounded-[2rem] space-y-4">
-                <h4 className="text-xs font-black text-[#002b59] dark:text-blue-100 flex items-center gap-1.5 self-start">
-                  <span className="material-symbols-outlined text-emerald-500 text-sm">account_balance</span>
-                  {t('analytics.freedom.score') || 'درجة الحرية المالية'}
-                </h4>
-
-                <div className="relative w-36 h-36 flex items-center justify-center">
-                  {/* Progress Ring */}
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="72"
-                      cy="72"
-                      r="64"
-                      className="stroke-slate-200 dark:stroke-slate-800 fill-none"
-                      strokeWidth="12"
-                    />
-                    <circle
-                      cx="72"
-                      cy="72"
-                      r="64"
-                      className="stroke-emerald-500 fill-none transition-all duration-1000 ease-out"
-                      strokeWidth="12"
-                      strokeDasharray={402}
-                      strokeDashoffset={402 - (402 * freedomData.score) / 100}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center">
-                    <span className="text-2xl font-black text-[#002b59] dark:text-blue-100">
-                      {freedomData.score.toFixed(1)}%
-                    </span>
-                    <span className="text-[9px] text-slate-400 font-bold uppercase">{t('analytics.freedom.independenceScore')}</span>
-                  </div>
-                </div>
-
-                <p className="text-[10px] text-slate-400 font-bold text-center leading-relaxed max-w-xs">
-                  {t('analytics.freedom.desc') || 'مبني على قاعدة الـ 4% (العيش من عوائد 25 ضعف مصاريفك السنوية).'}
-                </p>
-              </div>
-
-              {/* Security Months Indicator */}
-              <div className="space-y-4">
-                <div className="p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
-                    <span className="material-symbols-outlined text-2xl">shield</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest block">
-                      {t('analytics.freedom.months') || 'أشهر الأمان المالي'}
-                    </span>
-                    <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                      {freedomData.monthsOfSecurity.toFixed(1)} <span className="text-xs font-bold text-slate-400">{t('analytics.freedom.monthsSuffix')}</span>
-                    </p>
-                    <p className="text-[9px] text-slate-400 font-bold mt-0.5">
-                      {t('analytics.freedom.monthsDesc') || 'الفترة التي يمكنك العيش فيها دون دخل بناءً على ثروتك الحالية.'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Wealth Summary Cards */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 rounded-2xl space-y-1">
-                    <span className="text-[9px] text-slate-400 font-bold block">{t('analytics.freedom.totalWealth')}</span>
-                    <span className="text-sm font-black text-[#002b59] dark:text-blue-100 block">
-                      {fmt(totalWealth)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                  <div className="p-4 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 rounded-2xl space-y-1">
-                    <span className="text-[9px] text-slate-400 font-bold block">{t('analytics.freedom.targetCapital')}</span>
-                    <span className="text-sm font-black text-[#002b59] dark:text-blue-100 block">
-                      {fmt(freedomData.requiredCapital)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <FreedomTab freedomData={freedomData} totalWealth={totalWealth} />
         )}
 
         {activeTab === 'comparison' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Custom Range Picker Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-slate-50/50 dark:bg-slate-800/20 border border-slate-100 dark:border-white/5 rounded-3xl">
-              {/* Period A Selectors */}
-              <div className="space-y-3 p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-black/5 dark:border-white/5">
-                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-white/5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0"></span>
-                  <h4 className="text-xs font-black text-slate-700 dark:text-slate-200">{t('analytics.compare.periodA')}</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.fromDate')}</label>
-                    <input
-                      type="date"
-                      value={compareStartA}
-                      onChange={e => setCompareStartA(e.target.value)}
-                      className="w-full text-[10px] font-bold p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl text-slate-700 dark:text-slate-200"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.toDate')}</label>
-                    <input
-                      type="date"
-                      value={compareEndA}
-                      onChange={e => setCompareEndA(e.target.value)}
-                      className="w-full text-[10px] font-bold p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl text-slate-700 dark:text-slate-200"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Period B Selectors */}
-              <div className="space-y-3 p-4 bg-white dark:bg-slate-800/50 rounded-2xl border border-black/5 dark:border-white/5">
-                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-white/5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0"></span>
-                  <h4 className="text-xs font-black text-slate-700 dark:text-slate-200">{t('analytics.compare.periodB')}</h4>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.fromDate')}</label>
-                    <input
-                      type="date"
-                      value={compareStartB}
-                      onChange={e => setCompareStartB(e.target.value)}
-                      className="w-full text-[10px] font-bold p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl text-slate-700 dark:text-slate-200"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.toDate')}</label>
-                    <input
-                      type="date"
-                      value={compareEndB}
-                      onChange={e => setCompareEndB(e.target.value)}
-                      className="w-full text-[10px] font-bold p-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-white/5 rounded-xl text-slate-700 dark:text-slate-200"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Overall Comparative Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Total Income Compare */}
-              <div className="p-5 bg-white dark:bg-slate-800/40 rounded-[2rem] border border-black/5 dark:border-white/5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-emerald-500 font-black flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">trending_up</span>
-                    {t('analytics.compare.totalIncome')}
-                  </span>
-                  {(() => {
-                    const diff = comparisonData.periodA.income - comparisonData.periodB.income;
-                    const isUp = diff >= 0;
-                    return (
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                        isUp ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
-                      }`}>
-                        <span className="material-symbols-outlined text-[10px]">
-                          {isUp ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                        {isUp ? t('analytics.compare.increase') : t('analytics.compare.decrease')} ({fmt(Math.abs(diff))})
-                      </span>
-                    );
-                  })()}
-                </div>
-                <div className="grid grid-cols-2 gap-2 border-t border-slate-50 dark:border-white/5 pt-3">
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodA')}</span>
-                    <span className="text-sm font-black text-[#002b59] dark:text-blue-100">
-                      {fmt(comparisonData.periodA.income)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodB')}</span>
-                    <span className="text-sm font-bold text-slate-400">
-                      {fmt(comparisonData.periodB.income)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Expense Compare */}
-              <div className="p-5 bg-white dark:bg-slate-800/40 rounded-[2rem] border border-black/5 dark:border-white/5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-rose-500 font-black flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">trending_down</span>
-                    {t('analytics.compare.totalExpense')}
-                  </span>
-                  {(() => {
-                    const diff = comparisonData.periodA.expense - comparisonData.periodB.expense;
-                    const isUp = diff >= 0;
-                    return (
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                        isUp ? 'bg-rose-500/10 text-rose-600' : 'bg-emerald-500/10 text-emerald-600'
-                      }`}>
-                        <span className="material-symbols-outlined text-[10px]">
-                          {isUp ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                        {isUp ? t('analytics.compare.increase') : t('analytics.compare.decrease')} ({fmt(Math.abs(diff))})
-                      </span>
-                    );
-                  })()}
-                </div>
-                <div className="grid grid-cols-2 gap-2 border-t border-slate-50 dark:border-white/5 pt-3">
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodA')}</span>
-                    <span className="text-sm font-black text-[#002b59] dark:text-blue-100">
-                      {fmt(comparisonData.periodA.expense)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodB')}</span>
-                    <span className="text-sm font-bold text-slate-400">
-                      {fmt(comparisonData.periodB.expense)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Net Cash Flow Compare */}
-              <div className="p-5 bg-white dark:bg-slate-800/40 rounded-[2rem] border border-black/5 dark:border-white/5 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-blue-500 font-black flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">monetization_on</span>
-                    {t('analytics.compare.netSavings')}
-                  </span>
-                  {(() => {
-                    const diff = comparisonData.periodA.net - comparisonData.periodB.net;
-                    const isUp = diff >= 0;
-                    return (
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
-                        isUp ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
-                      }`}>
-                        <span className="material-symbols-outlined text-[10px]">
-                          {isUp ? 'arrow_upward' : 'arrow_downward'}
-                        </span>
-                        {isUp ? t('analytics.compare.improvement') : t('analytics.compare.decline')} ({fmt(Math.abs(diff))})
-                      </span>
-                    );
-                  })()}
-                </div>
-                <div className="grid grid-cols-2 gap-2 border-t border-slate-50 dark:border-white/5 pt-3">
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodA')}</span>
-                    <span className={`text-sm font-black ${
-                      comparisonData.periodA.net >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600'
-                    }`}>
-                      {fmt(comparisonData.periodA.net)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[8px] text-slate-400 font-bold block">{t('analytics.compare.lblPeriodB')}</span>
-                    <span className="text-sm font-bold text-slate-400">
-                      {fmt(comparisonData.periodB.net)} {getCurrencySymbol()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Side-by-Side Category Spending breakdown */}
-            <div className="p-6 bg-white dark:bg-slate-800/40 border border-slate-100 dark:border-white/5 rounded-[2rem] space-y-4">
-              <div>
-                <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-amber-500 text-sm">difference</span>
-                  {t('analytics.compare.categoriesAnalysis')}
-                </h4>
-                <p className="text-[9px] text-slate-400 font-bold">
-                  {t('analytics.compare.categoriesAnalysisDesc')}
-                </p>
-              </div>
-
-              {comparisonData.categoryComparison.length === 0 ? (
-                <div className="text-center py-8 text-xs font-bold text-slate-400">
-                  {t('analytics.compare.noData')}
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-right border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-100 dark:border-white/5 text-[9px] text-slate-400 font-bold">
-                        <th className="pb-3 text-right">{t('analytics.compare.category')}</th>
-                        <th className="pb-3 text-center">{t('analytics.compare.periodANew')}</th>
-                        <th className="pb-3 text-center">{t('analytics.compare.periodBRef')}</th>
-                        <th className="pb-3 text-center">{t('analytics.compare.difference')}</th>
-                        <th className="pb-3 text-center">{t('analytics.compare.changePct')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50 dark:divide-white/5">
-                      {comparisonData.categoryComparison.map((item, index) => {
-                        const isIncrease = item.diff > 0;
-                        return (
-                          <tr key={index} className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
-                            <td className="py-3 flex items-center gap-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[7px]">📁</span>
-                              {t(`category.${item.category}`) || item.category}
-                            </td>
-                            <td className="py-3 text-center font-black text-[#002b59] dark:text-blue-100">
-                              {fmt(item.amtA)} {getCurrencySymbol()}
-                              <span className="text-[8px] text-slate-400 font-bold block">({t('analytics.compare.txSuffix', { count: item.countA })})</span>
-                            </td>
-                            <td className="py-3 text-center text-slate-400">
-                              {fmt(item.amtB)} {getCurrencySymbol()}
-                              <span className="text-[8px] text-slate-400 font-bold block">({t('analytics.compare.txSuffix', { count: item.countB })})</span>
-                            </td>
-                            <td className={`py-3 text-center ${isIncrease ? 'text-rose-600' : 'text-emerald-600'}`}>
-                              {isIncrease ? '+' : ''}{fmt(item.diff)} {getCurrencySymbol()}
-                            </td>
-                            <td className="py-3 text-center">
-                              <span className={`px-2 py-0.5 rounded-full text-[8px] font-black ${
-                                isIncrease ? 'bg-rose-500/10 text-rose-600' : 'bg-emerald-500/10 text-emerald-600'
-                              }`}>
-                                {isIncrease ? '📈' : '📉'} {item.pctChange.toFixed(0)}%
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
+          <ComparisonTab
+            comparisonData={comparisonData}
+            compareStartA={compareStartA}
+            setCompareStartA={setCompareStartA}
+            compareEndA={compareEndA}
+            setCompareEndA={setCompareEndA}
+            compareStartB={compareStartB}
+            setCompareStartB={setCompareStartB}
+            compareEndB={compareEndB}
+            setCompareEndB={setCompareEndB}
+          />
         )}
       </div>
     </div>
