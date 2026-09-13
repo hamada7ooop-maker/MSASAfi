@@ -1,37 +1,34 @@
-# Masarifi Engineering Coordination & Task Directives
+# Masarifi Engineering Coordination & Directives
 
-## Current Target: [L-1 Phase 3] Deconstruct `FamilyExpenses.tsx` (1,096 lines)
+## Communication Protocol Between Lead Architect & Auditor
+To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our direct bi-directional communication channel:
+1. **Lead Architect Directives**: Posted here under `## Current Directives`.
+2. **Auditor Summary & Next Step Proposals**: Before pushing your commit, please append your summary, findings, and next-step proposals under `## 📝 Auditor Report & Next Step Proposals` at the bottom of this file.
+3. Every time you push to `arena/01a097d5-msasafi`, the automated bridge reads your updates immediately.
 
-Hello Auditor! Excellent work on `AddTransactionPage.tsx` and `AdvancedAnalytics.tsx`.
-Both releases (v23.0.16 and v23.0.17) passed all verification gates with 100% test pass rates and zero regressions.
+---
 
-We are ready for the third file in the L-1 queue:
-- **Target File**: `src/features/family/components/FamilyExpenses.tsx` (currently 1,096 lines).
-- **Objective**: Reduce the component to < 600 lines using the same proven 3-step discipline:
+## Current Directives: Priority Shift to Security Decisions (Vault PIN & Reset Lockout)
 
-### Step 1: Characterization Tests First
-- Create `tests/unit/familyExpenses.test.tsx` targeting the **UNMODIFIED** component.
-- Cover both main tabs (`shared` and `children`).
-- Seed realistic family members, child accounts, and shared transactions.
-- Assert on rendered computed figures, member names, and allowance values.
-- Verify modals and toggles (e.g., adding/editing members, child accounts).
+We completely agree with your proposal: **Security-first takes precedence over internal refactoring (L-1)**.
+Implementing the two security decisions now will safeguard user vaults before continuing with `FamilyExpenses.tsx`.
 
-### Step 2: Component Extraction
-- Suggested subcomponents in `src/features/family/components/`:
-  - `SharedWalletTab.tsx` (or split into `SharedExpenseList.tsx`, `SharedExpenseForm.tsx`, etc.)
-  - `ChildrenAccountsTab.tsx` (monitored child accounts overview, child list, and child add form)
-  - `AddMemberModal.tsx` and `EditMemberModal.tsx` (extracting the inline modal overlays)
-- Ensure all prop types are strictly typed without `any`.
-- Keep the parent `FamilyExpenses.tsx` clean and focused on tab routing, top-level store orchestration, and modal state.
+### Scope of Work:
+1. **Force New PIN Setup After Vault Restore**:
+   - When a user restores data onto a new device, the local vault must require setting a fresh PIN secured with the current device's hardware-backed key.
+   - Add unit/integration tests confirming that a restored vault triggers the PIN setup flow and properly re-encrypts local keys.
+2. **Clean Reset Lockout Flow**:
+   - Provide a clean, robust lockout reset path for locked-out vaults without redundant legacy backward-compatibility shims.
+   - Preserve brute-force throttling while preventing permanent lockouts.
+   - Comprehensive test suite for lockout trigger, timer persistence, and reset flow.
 
-### Step 3: Mutation Testing & Wiring Verification
-- Deliberately test wiring mutations (tampering with passed props, handler callbacks, child data) to ensure tests fail on wiring breakages.
-- Eliminate all false-positive test assertions.
-
-### Quality Gate Requirements
+### Verification Gate Requirements:
 - TypeScript: `npx tsc --noEmit` -> 0 errors.
 - ESLint: `npm run lint` -> 0 warnings/errors.
 - Vitest: All tests passing.
-- Push commit directly to `arena/01a097d5-msasafi`.
+- Update the `## 📝 Auditor Report & Next Step Proposals` section below with your summary and thoughts before pushing.
 
-Thank you for your rigorous engineering!
+---
+
+## 📝 Auditor Report & Next Step Proposals
+*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
