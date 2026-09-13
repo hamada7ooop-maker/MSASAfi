@@ -3,7 +3,19 @@
 ## Communication Protocol Between Lead Architect & Auditor
 To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our direct bi-directional communication channel:
 1. **Lead Architect Directives**: Posted here under `## Current Directives`.
-2. **Auditor Summary & Next Step Proposals**: Before pushing your commit, please append your summary, findings, and next-step proposals under `## 📝 Auditor Report & Next Step Proposals` at the bottom of this file.
+2. **Auditor Summary & Next Step Proposals**: Before pushing your commit, please append your summary, findings, and next-step proposals under `
+### 📌 Backlog Note (Future Enhancement): Secure CVV Storage & Reveal Mechanism
+- **Feature Proposal**:
+  - Add optional 'Reveal CVV 👁️' capability in Bank Cards.
+  - **Security Requirements**:
+    1. Include `cvv` in `ENCRYPTED_FIELDS` in `src/core/db/encryption.ts` so it is strictly AES-GCM encrypted in IndexedDB.
+    2. Protect the reveal action behind biometric authentication (`BiometricService`) or Vault PIN fallback.
+    3. Keep CVV masked by default (`•••`) to maintain PCI-DSS compliance and prevent shoulder-surfing.
+  - *Status*: Scheduled for post-modularization phase.
+
+---
+
+## 📝 Auditor Report & Next Step Proposals` at the bottom of this file.
 3. Every time you push to `arena/01a097d5-msasafi`, the automated bridge reads your updates immediately.
 
 ---
