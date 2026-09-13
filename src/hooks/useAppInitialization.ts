@@ -5,6 +5,7 @@ import { initSettings } from "./useSettingsInit";
 import { initLoyalty } from "./useLoyaltyInit";
 import { initServices } from "./useServicesInit";
 import { logger } from "../core/logger";
+import { initCrashlytics } from "../core/crashlytics";
 
 /**
  * useAppInitialization Hook
@@ -20,6 +21,10 @@ export function useAppInitialization() {
     async function initialize() {
       try {
         logger.info("React", "Starting Modular App Initialization...");
+
+        // Crash reporting first, so faults during the rest of startup are
+        // captured. No-op unless VITE_CRASH_REPORTING=true on a native build.
+        await initCrashlytics();
 
         // Parallel modular execution
         await Promise.allSettled([

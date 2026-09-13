@@ -34,19 +34,37 @@ describe('AppLogger Unit Tests (logger.ts)', () => {
     warnSpy.mockRestore();
   });
 
-  it('logs error and dispatches to crashlytics on native platform', () => {
+  it('logs error and dispatches to crashlytics when reporting is enabled', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // Crash reporting is gated on native AND VITE_CRASH_REPORTING=true; the
+    // flag is off by default because the Gradle plugin is not applied yet.
     vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+    vi.stubEnv('VITE_CRASH_REPORTING', 'true');
+    const { initCrashlytics } = await import('@/core/crashlytics');
+    await initCrashlytics();
 
     const testError = new Error('Logger failure test');
     logger.error('LoggerTag', 'Critical error occurred', testError);
 
     expect(errorSpy).toHaveBeenCalled();
-    expect(FirebaseCrashlytics.recordException).toHaveBeenCalledWith({
-      message: '[LoggerTag] Critical error occurred',
-      stacktrace: expect.stringContaining('Logger failure test'),
-    });
+    expect(FirebaseCrashlytics.recordException).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('[LoggerTag] Critical error occurred'),
+        stacktrace: expect.stringContaining('Logger failure test'),
+      })
+    );
 
+    errorSpy.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it('does not dispatch to crashlytics while the reporting flag is off', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+    logger.error('LoggerTag', 'Critical error occurred', new Error('x'));
+
+    expect(FirebaseCrashlytics.recordException).not.toHaveBeenCalled();
     errorSpy.mockRestore();
   });
 });
