@@ -118,6 +118,12 @@ export function cooldownForAttempts(attempts: number): number {
   const steps = Math.floor((attempts - MAX_ATTEMPTS) / MAX_ATTEMPTS);
   // Cap the exponent before the shift: 2 ** 1024 is Infinity, and
   // Infinity * 30000 is NaN once it meets arithmetic elsewhere.
+  //
+  // Belt-and-braces, and knowingly so: mutation testing showed no input can
+  // distinguish this guard from its absence, because `Math.min` below already
+  // clamps long before the exponent could overflow. It is kept because it costs
+  // nothing and makes the function total even if the cap is ever raised or
+  // removed -- but no test asserts it, since none can fail.
   const growth = steps >= 32 ? Infinity : BASE_COOLDOWN_MS * 2 ** steps;
   return Math.min(growth, MAX_COOLDOWN_MS);
 }

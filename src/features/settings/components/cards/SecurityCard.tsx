@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useI18n } from '../../../../i18n/index';
 import { hashPin, generateSalt } from '../../../../core/security';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { bridge } from '../../../../core/AppBridge';
 import { useAppStore } from '../../../../store/appStore';
 import { useSettingsStore } from '../../../../store/settingsStore';
 import { logger } from '../../../../core/logger';
+import { silentFail } from '../../../../core/utils';
 
 interface SecurityCardProps {
   settings: Record<string, unknown>;
@@ -84,10 +85,32 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
   const navigate = useNavigate();
   const [newPin, setNewPin] = useState('');
 
+  /**
+   * True when a restore has landed on a device with no vault of its own.
+   *
+   * Until a PIN is set, the restored records sit in plaintext: the encryption
+   * middleware is a no-op with no key loaded. The user has no way to know that
+   * from the UI, so the banner below says it plainly rather than leaving them
+   * to assume the lock carried over from their old device.
+   */
+  const [pendingRestorePin, setPendingRestorePin] = useState(false);
+
   const hasPinSet = !!(settings.pinHash || settings.pin);
   const autoLockEnabled = Boolean(settings.autoLock ?? true);
   const dbEncryption = Boolean(settings.dbEncryption ?? true);
   const incognito = Boolean(settings.incognito || false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const { isPinSetupPending } = await import('@core/security/vaultRecovery');
+      const pending = await isPinSetupPending();
+      if (!cancelled) setPendingRestorePin(pending);
+    })().catch(silentFail('[SecurityCard] pending PIN check failed'));
+    return () => {
+      cancelled = true;
+    };
+  }, [hasPinSet]);
 
   const handleSavePin = async () => {
     if (newPin && newPin.length === 4) {
@@ -192,6 +215,30 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
       </p>
 
       <div className="bg-white/40 dark:bg-white/[0.02] backdrop-blur-md rounded-[1.75rem] overflow-hidden border border-white/20 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(31,38,135,0.03)] divide-y divide-slate-100/70 dark:divide-white/[0.04]">
+
+        {/* Post-restore warning. Shown only while data is genuinely exposed. */}
+        {pendingRestorePin && !hasPinSet && (
+          <div className="px-4 py-3.5 bg-amber-50 dark:bg-amber-500/10">
+            <div className="flex items-start gap-3">
+              <span
+                className="material-symbols-outlined text-[20px] text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+                aria-hidden="true"
+              >
+                warning
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-bold text-amber-900 dark:text-amber-200 leading-tight">
+                  {t('security.postRestorePinTitle') || 'Set a new PIN for this device'}
+                </p>
+                <p className="text-[11px] text-amber-800/80 dark:text-amber-200/70 font-medium mt-1 leading-relaxed">
+                  {t('security.postRestorePinBody') ||
+                    'Your data was restored but is not yet encrypted on this device.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* App Lock */}
         <div className="flex items-center justify-between px-4 py-3.5 gap-3 hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-all duration-150 active:scale-[0.99]">

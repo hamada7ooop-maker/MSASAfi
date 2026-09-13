@@ -103,10 +103,40 @@ I also **removed my own retry workaround** once the root cause was fixed (5 cons
 
 ---
 
+### Mutation testing — `vaultRecovery.ts`
+
+Step 3 of the agreed method, run against the 29 tests as they stood at `ac97159`. Twelve mutants, chosen to attack security invariants rather than syntax.
+
+**First pass: 7/12 killed.** The five survivors were each investigated rather than assumed to be gaps:
+
+| # | Mutation | First pass | Verdict |
+|---|---|---|---|
+| M2 | cap removed (`Math.min` → `Math.max`) | ✅ killed (5) | the fix itself is well covered |
+| M5 | fail-open: encrypt with no key loaded | ✅ killed | |
+| M4 | restore detection inverted | ✅ killed (3) | |
+| M1, M8, M11, M12 | threshold, counter, envelope, lockout clearing | ✅ killed | |
+| **M9** | **flag cleared BEFORE encryption** | ❌ survived | **real gap — the interruption-safety property was asserted nowhere** |
+| **M7** | **a failed attempt zeroes an active lockout** | ❌ survived | **real gap — an attacker could clear a running cooldown by guessing again** |
+| **M6** | `isLockedOut` boundary `>` → `>=` | ❌ survived | real gap (off-by-one at the expiry instant) |
+| **M10** | `auditLog` exclusion removed | ❌ survived | real gap — a deliberate decision nothing pinned |
+| M3 | Infinity guard disabled | ❌ survived | **equivalent mutant — proven, see below** |
+
+**Five tests added; second pass 11/12 killed.** The one survivor is M3, and I did not write a test for it because none can fail: I checked every input 0–20000 plus `NaN`/`Infinity`/`MAX_SAFE_INTEGER` and the guarded and unguarded functions agree everywhere, since `Math.min` clamps long before `2 ** steps` could overflow. It is unreachable defensive code. Rather than fake coverage with a tautological test, I documented it as knowingly-untestable in the source. A bonus mutant (cooldown not restarting the clock) is also killed by the new tests.
+
+**Two of my new tests failed on first run against unmutated source — both were my errors, and one taught me something about the code.** I had assumed `registerFailedAttempt` only issues a cooldown every 5th failure; in fact `steps` is 0 across the whole first block, so attempts 5, 6, 7… each re-arm it. That is the better behaviour (a wrong guess always restarts the clock), and it is now asserted explicitly instead of being an accident nobody had read.
+
+**A third issue surfaced only under repetition.** My interruption test passed, then failed 3 runs in 6. Cause: it aborts right after `initializeVaultKey`, whose `setSetting` fires the un-awaited audit write documented above; with nothing left to await, that write lands during the *next* test's wipe and kills an unrelated transaction (`TransactionInactiveError`). Every other test masks this by awaiting a real transaction afterwards. Fixed by draining, then confirmed **8/8 consecutive clean runs**. Worth noting as further evidence for proposal (2) below — this is the same un-awaited-write hazard, showing up a second time.
+
+### Post-restore banner
+
+The two `security.postRestorePin*` keys were unused; the flag was honoured but never explained. `SecurityCard` now shows an amber warning above the PIN row, only while `isPinSetupPending()` and no PIN is set, stating that the restored data is not yet encrypted. Without it the user sees an ordinary "set a PIN" row and reasonably assumes the lock carried over from their old device.
+
+**Gate after this work: tsc 0 · eslint 0 · build 0 · 658/658 · i18n 100%.**
+
 ### Next Step Proposals
 
 1. **Resume L-1 with `FamilyExpenses.tsx` (1095 lines)** — the agreed next file, same order: characterization tests → extraction → mutation testing.
 2. **Audit other async-in-transaction sites (recommended first).** The `Dexie.waitFor` defect suggests a class of bug, not an instance. `recordAction` in `schema.ts` fires audit writes **without awaiting** (`.catch(silentFail)` and returns), so audit entries can race any transaction. Worth a focused sweep — it is cheap to check and the failure mode is silent data loss.
 3. **Post-restore prompt at launch.** The flag is set and honoured when the user opens Settings → PIN, but nothing yet *forces* the prompt on next launch. A gate in `AppRoot` reading `isPinSetupPending()` would close the window where a user simply never visits Settings. I did not add it unasked because it touches app-wide routing; say the word and it is a small change.
 
-*Auditor: security items complete; awaiting your call on ordering (2) vs (1).*
+*Auditor: security items complete, mutation-tested at 11/12 with the survivor proven equivalent. Awaiting your call on ordering (2) vs (1) — my recommendation is (2) first, now reinforced by the audit-write hazard resurfacing during this round.*

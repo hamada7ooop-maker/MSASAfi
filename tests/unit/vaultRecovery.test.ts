@@ -153,6 +153,53 @@ describe('Lockout state — persistence and reset', () => {
     expect(await remainingLockoutSeconds(now + 31_000)).toBe(0);
   });
 
+  it('treats an expired cooldown as over at the exact expiry instant', async () => {
+    // The boundary matters: `lockedUntil` is a timestamp, and `>= now` instead
+    // of `> now` would hold the user one extra tick past their sentence. It is
+    // one character in the source and no test noticed it.
+    const now = 1_000_000;
+    await setLockoutState(10, now);
+    expect(await isLockedOut(now - 1)).toBe(true); // a tick early: still locked
+    expect(await isLockedOut(now)).toBe(false); // the instant it expires: free
+    expect(await remainingLockoutSeconds(now)).toBe(0);
+  });
+
+  it('re-arms the cooldown on every failure past the threshold, never shortening it', async () => {
+    // Worth stating explicitly because it is easy to misread the formula:
+    // `steps` is 0 for the whole first block of failures, so attempts 5, 6, 7…
+    // each yield the base cooldown rather than only every 5th one. A wrong
+    // guess therefore always restarts the clock — an attacker cannot whittle
+    // down a running lockout by guessing through it.
+    const now = 2_000_000;
+    await setLockoutState(MAX_ATTEMPTS - 1, 0); // one short of the threshold
+
+    const first = await registerFailedAttempt(now);
+    expect(first.cooldownMs).toBe(BASE_COOLDOWN_MS);
+
+    const second = await registerFailedAttempt(now + 5_000); // guessing again
+    expect(second.cooldownMs).toBe(BASE_COOLDOWN_MS);
+    // The new deadline is measured from the latest attempt, so it is strictly
+    // later: the clock restarts rather than running down.
+    expect(second.lockedUntil).toBeGreaterThan(first.lockedUntil);
+    expect(await isLockedOut(first.lockedUntil + 1)).toBe(true);
+  });
+
+  it('preserves an active lockout on a failure that does not itself trigger one', async () => {
+    // Defensive: below the threshold `registerFailedAttempt` takes the branch
+    // that carries `lockedUntil` forward. Writing 0 there instead would let a
+    // stray sub-threshold attempt wipe a deadline that is still being served.
+    // The app's own flows keep attempts and lockout in step, so this state is
+    // only reachable directly — but the safe branch is the one worth pinning.
+    const now = 3_000_000;
+    const deadline = now + 60_000;
+    await setLockoutState(1, deadline); // active deadline, low attempt count
+
+    const next = await registerFailedAttempt(now);
+    expect(next.cooldownMs).toBe(0); // below threshold: no new cooldown
+    expect(next.lockedUntil).toBe(deadline); // carried, NOT zeroed
+    expect(await isLockedOut(now + 1)).toBe(true);
+  });
+
   it('clearLockout frees the keypad without touching anything else', async () => {
     await DB.setSetting('pinHash', 'keep-me');
     await setLockoutState(99, Date.now() + 60_000);
@@ -271,6 +318,75 @@ describe('Post-restore PIN setup — encrypting what the restore left exposed', 
 
     await completePostRestorePinSetup('1111', generateSalt());
     expect(await isPinSetupPending()).toBe(false);
+  });
+
+  it('keeps the pending flag set if encryption fails, so an interrupted setup retries', async () => {
+    // The ordering inside completePostRestorePinSetup is a safety property, not
+    // a style choice. If the flag were cleared BEFORE the records were
+    // encrypted, a crash in between would leave the user with no prompt and a
+    // database still in plaintext -- silently unprotected, forever.
+    //
+    // Forcing that failure: make one encrypted table throw on read, which
+    // aborts the encryption pass after the envelope has been created.
+    await DB.transactions.put({ id: 't1', type: 'expense', amount: 10 } as never);
+    await evaluateRestoreProtection();
+    expect(await isPinSetupPending()).toBe(true);
+
+    const realTransaction = DB.transaction.bind(DB);
+    DB.transaction = (() => {
+      throw new Error('simulated interruption mid-encryption');
+    }) as typeof DB.transaction;
+
+    try {
+      await expect(completePostRestorePinSetup('1111', generateSalt())).rejects.toThrow(
+        /simulated interruption/
+      );
+    } finally {
+      DB.transaction = realTransaction;
+    }
+
+    // The flag MUST survive: it is the only thing that will bring the user back.
+    expect(await isPinSetupPending()).toBe(true);
+
+    // Drain before leaving. `initializeVaultKey` succeeded before the induced
+    // failure, and its `setSetting` fires an audit write that schema.ts does
+    // NOT await. Aborting here means nothing else waits on that write either,
+    // so it lands during the next test's wipe and kills an unrelated
+    // transaction (TransactionInactiveError, ~50% of runs). Every other test
+    // hides this by awaiting a real transaction afterwards.
+    await new Promise((r) => setTimeout(r, 0));
+  });
+
+  it('leaves auditLog out of the encryption pass, by deliberate design', async () => {
+    // Pinning a decision, not an accident. `DB.setSetting` writes an audit
+    // entry WITHOUT awaiting it (schema.ts fires `.catch(silentFail)`), and
+    // `initializeVaultKey` calls setSetting immediately before this pass runs.
+    // Holding auditLog in a long write transaction while a detached write
+    // targets the same store produced a reproducible InvalidStateError.
+    //
+    // The trade is sound: audit rows are local-only breadcrumbs, pruned to 30
+    // days, and every later entry is written under the new key anyway. If
+    // someone re-adds auditLog here, this test should make them read that
+    // reasoning first -- while the assertions below prove the FINANCIAL tables
+    // are all still covered, which is what actually matters.
+    await DB.auditLog.add({
+      id: 'a1',
+      timestamp: new Date().toISOString(),
+      action: 'test',
+      description: 'breadcrumb',
+    } as never);
+    await DB.transactions.put({ id: 't1', type: 'expense', amount: 10 } as never);
+    await DB.goals.put({ id: 'g1', name: 'car', target: 100 } as never);
+
+    await evaluateRestoreProtection();
+    const n = await completePostRestorePinSetup('2468', generateSalt());
+
+    // The financial rows are counted and enveloped...
+    expect(n).toBe(2);
+    expect(await isStoredEncrypted('transactions', 't1')).toBe(true);
+    expect(await isStoredEncrypted('goals', 'g1')).toBe(true);
+    // ...and the breadcrumb table is untouched by this pass.
+    expect(await isStoredEncrypted('auditLog', 'a1')).toBe(false);
   });
 
   it('refuses to encrypt records when no key is loaded, instead of silently doing nothing', async () => {
