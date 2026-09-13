@@ -9,6 +9,8 @@ import { BiometricService } from '../../../core/services/BiometricService';
 import { toast } from '../../../toast';
 import { logger } from '../../../core/logger';
 import { silentFail } from '../../../core/utils';
+import { bridge } from '../../../core/AppBridge';
+import { cooldownForAttempts } from '@core/security/vaultRecovery';
 
 /**
  * Restores the AES-GCM data key after a successful unlock.
@@ -54,8 +56,6 @@ export function PinScreen() {
   // rather than being dropped, so a tap made during startup still counts but
   // can never slip in ahead of a cooldown that is still being loaded.
   const lockoutReadyRef = useRef<Promise<{ attempts: number; lockedUntil: number }> | null>(null);
-
-  const MAX_ATTEMPTS = 5;
 
   // ── Persisted brute-force cooldown ──────────────────────────────────────
   // These used to live in useState alone, so force-quitting the app reset the
@@ -236,9 +236,13 @@ export function PinScreen() {
         setError(true);
         setPin('');
 
-        if (newAttempts >= MAX_ATTEMPTS) {
-          // Progressive cooldown: 30s, 60s, 120s...
-          const cooldownMs = 30000 * Math.pow(2, Math.floor((newAttempts - MAX_ATTEMPTS) / MAX_ATTEMPTS));
+        // Progressive cooldown, capped. The previous formula was uncapped and
+        // reached 182 days at 100 wrong guesses and ~186,000 days at 150 — a
+        // permanent lockout produced by the defence itself, surviving reinstall
+        // because it is persisted. `cooldownForAttempts` keeps the doubling but
+        // stops at 15 minutes; see core/security/vaultRecovery.ts.
+        const cooldownMs = cooldownForAttempts(newAttempts);
+        if (cooldownMs > 0) {
           const lockTime = Date.now() + cooldownMs;
           setLockedUntil(lockTime);
           await persistLockout(newAttempts, lockTime);
@@ -254,6 +258,40 @@ export function PinScreen() {
   const handleDelete = () => {
     setPin(pin.slice(0, -1));
     setError(false);
+  };
+
+  /**
+   * The way out of a lockout nobody can otherwise escape.
+   *
+   * The PIN derives the key that unwraps the vault, so a forgotten PIN means
+   * the records are unrecoverable by anyone — there is no reset that keeps the
+   * data. This therefore destroys it, and says so plainly before doing
+   * anything. Offered only after the user has genuinely struggled (a cooldown
+   * is in force) so it cannot be tapped by accident.
+   */
+  const handleResetVault = () => {
+    bridge.confirmSheet(
+      t('security.resetVaultTitle') ||
+        'Resetting the lock permanently deletes your financial data. Are you sure?',
+      async () => {
+        try {
+          const { resetVault } = await import('@core/security/vaultRecovery');
+          await resetVault();
+          setAttempts(0);
+          setLockedUntil(0);
+          setCooldownText('');
+          setPin('');
+          setError(false);
+          useAppStore.getState().setHasPin(false);
+          toast(t('security.resetVaultDone') || 'Reset complete.', 'success');
+          setLocked(false);
+        } catch (e) {
+          silentFail('[PinScreen] Vault reset failed')(e);
+          toast(t('security.resetVaultFailed') || 'Reset failed. Please try again.', 'error');
+        }
+      },
+      t('security.resetVaultConfirm') || 'Yes, delete everything'
+    );
   };
 
   return (
@@ -324,6 +362,17 @@ export function PinScreen() {
           <span className="material-symbols-outlined text-3xl" aria-hidden="true">backspace</span>
         </button>
       </div>
+
+      {/* Shown only once a cooldown is actually in force, so the destructive
+          path stays out of the way of everyday use. */}
+      {cooldownText && (
+        <button
+          onClick={handleResetVault}
+          className="mt-8 text-xs font-bold text-slate-400 hover:text-red-500 underline underline-offset-4 transition-colors"
+        >
+          {t('security.forgotPin') || 'Forgot your PIN?'}
+        </button>
+      )}
     </div>
   );
 }

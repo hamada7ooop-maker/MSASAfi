@@ -3096,6 +3096,13 @@ export const locale_ms = {
   "zakat.totalWithVat": "Jumlah",
   "zakat.vatLabel": "Cukai ({rate}%)",
   "zakat.vatRate": "Kadar Cukai %",
-  "zakat.yourZakat": "Zakat Anda"
+  "zakat.yourZakat": "Zakat Anda",
+  "security.forgotPin": "Forgot your PIN?",
+  "security.resetVaultTitle": "⚠️ Resetting the lock will permanently delete your financial data. Your PIN is the only key that can decrypt it, and nobody can recover it without that — not even us. Are you sure?",
+  "security.resetVaultConfirm": "Yes, delete everything",
+  "security.resetVaultDone": "Reset complete. You can start fresh and set a new PIN.",
+  "security.resetVaultFailed": "Reset failed. Please try again.",
+  "security.postRestorePinTitle": "Set a new PIN for this device",
+  "security.postRestorePinBody": "Your data was restored but is not yet encrypted on this device. Set a PIN now to encrypt it with a key that belongs to this device."
 };
 export default locale_ms;

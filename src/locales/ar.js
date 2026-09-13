@@ -3104,7 +3104,14 @@ export const locale_ar = {
   "zakat.totalWithVat": "الإجمالي",
   "zakat.vatLabel": "الضريبة ({rate}%)",
   "zakat.vatRate": "نسبة الضريبة %",
-  "zakat.yourZakat": "زكاتك"
+  "zakat.yourZakat": "زكاتك",
+  "security.forgotPin": "نسيت الرمز؟",
+  "security.resetVaultTitle": "⚠️ إعادة تعيين القفل ستحذف بياناتك المالية نهائياً. رمزك السري هو المفتاح الوحيد لفك تشفيرها، ولا يمكن لأحد استعادتها بدونه — ولا حتى نحن. هل أنت متأكد؟",
+  "security.resetVaultConfirm": "نعم، احذف كل شيء",
+  "security.resetVaultDone": "تمت إعادة التعيين. يمكنك البدء من جديد وتعيين رمز جديد.",
+  "security.resetVaultFailed": "تعذّرت إعادة التعيين. حاول مرة أخرى.",
+  "security.postRestorePinTitle": "عيّن رمزاً سرياً جديداً لهذا الجهاز",
+  "security.postRestorePinBody": "تمت استعادة بياناتك، لكنها غير مشفّرة على هذا الجهاز بعد. عيّن رمزاً سرياً الآن لتشفيرها بمفتاح خاص بهذا الجهاز."
 };
 
 export default locale_ar;

@@ -112,7 +112,18 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
 
       try {
         const { initializeVaultKey, rewrapVaultKey } = await import('@core/security/vaultKey');
-        if (hadPin && oldSalt) {
+        const { isPinSetupPending, completePostRestorePinSetup } = await import(
+          '@core/security/vaultRecovery'
+        );
+
+        if (await isPinSetupPending()) {
+          // A backup was restored onto a device with no vault of its own, so
+          // the restored records are still in plaintext — the backup's key
+          // envelope is deliberately never imported. Create this device's own
+          // envelope from the PIN just chosen and encrypt everything under it.
+          const n = await completePostRestorePinSetup(newPin, salt);
+          logger.info('SecurityCard', `Post-restore setup encrypted ${n} record(s)`);
+        } else if (hadPin && oldSalt) {
           // Changing an existing PIN. The session is already unlocked, so the
           // master data key is in memory: re-wrap that exact key under the new
           // PIN. Nothing is re-encrypted and the old PIN is never needed.

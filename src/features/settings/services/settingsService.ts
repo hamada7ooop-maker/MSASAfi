@@ -12,6 +12,7 @@ import { bridge, registerToBridge } from '../../../core/AppBridge';
 import * as Cloud from '../../../core/cloud';
 import { purifyRecord } from '../../../core/security';
 import { recordException } from '../../../core/crashlytics';
+import { evaluateRestoreProtection } from '@core/security/vaultRecovery';
 import {
   stripVaultSecretsFromRows,
   stripVaultSecretsFromObject,
@@ -294,7 +295,15 @@ async function performRestore(data: Record<string, unknown>): Promise<void> {
       }
     }
 
-    // 3. Record secure audit trace
+    // 3. If this device has no vault of its own, the restored records are
+    //    sitting in PLAINTEXT: the backup's key envelope is deliberately not
+    //    imported (see core/backupSafety.ts), so the encryption middleware had
+    //    no key to work with. Flag it so the app can require a PIN on next
+    //    launch and encrypt everything under a key belonging to this device.
+    //    See core/security/vaultRecovery.ts.
+    await evaluateRestoreProtection();
+
+    // 4. Record secure audit trace
     const exportedAt = typeof data.exportedAt === 'string' ? data.exportedAt : 'unknown';
     const version = typeof data.version === 'string' ? data.version : 'legacy';
     await DB.recordAction('import_data', `Restored local backup exported at ${exportedAt} (version: ${version})`);

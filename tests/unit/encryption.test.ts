@@ -176,3 +176,59 @@ describe('Encryption Layer Unit Tests (encryption.ts)', () => {
     expect(nonEncTable.tableName).toBe('non_encrypted_table');
   });
 });
+
+describe('Encrypting many records inside one transaction (Dexie.waitFor)', () => {
+  /**
+   * Regression test for a real defect in the middleware.
+   *
+   * `mutate` awaits WebCrypto, which is not an IndexedDB promise. An IndexedDB
+   * transaction auto-commits once its queue drains with no pending requests,
+   * so awaiting a foreign promise inside one lets it close underneath the next
+   * write — InvalidStateError, non-deterministically.
+   *
+   * Before the fix, a single encrypted write after a database wipe failed
+   * 20 times out of 20 in this environment, and multi-table passes failed at
+   * rates that varied with table count. `Dexie.waitFor` keeps the transaction
+   * alive while the crypto settles.
+   *
+   * The loop matters: one write can pass by luck. This exercises the pattern
+   * repeatedly, across several tables, inside an explicit transaction.
+   */
+  it('encrypts across several tables in one transaction, repeatedly, without InvalidStateError', async () => {
+    const { db: DB } = await import('@/core/db/core');
+    const { generateMasterDataKey, setEncryptionKey, clearEncryptionKey, setEncryptionRequired } =
+      await import('@/core/security/crypto');
+
+    for (let round = 0; round < 5; round++) {
+      clearEncryptionKey();
+      setEncryptionRequired(false);
+      await DB.transaction('rw', DB.tables, async () => {
+        for (const t of DB.tables) await t.clear();
+      });
+
+      // Seed in the clear, exactly as a restore onto a PIN-less device does.
+      await DB.transactions.put({ id: 't1', type: 'expense', amount: 11, description: 'a' } as never);
+      await DB.accounts.put({ id: 'a1', name: 'Main', balance: 22 } as never);
+      await DB.goals.put({ id: 'g1', name: 'Car', targetAmount: 33, saved: 3 } as never);
+
+      setEncryptionKey(await generateMasterDataKey());
+
+      const tables = [DB.transactions, DB.accounts, DB.goals];
+      await DB.transaction('rw', tables, async () => {
+        for (const t of tables) {
+          const rows = await t.toArray();
+          await t.bulkPut(rows);
+        }
+      });
+
+      for (const [table, id] of [['transactions', 't1'], ['accounts', 'a1'], ['goals', 'g1']] as const) {
+        const row = (await DB.table(table).get(id)) as Record<string, unknown>;
+        expect(row, `${table}/${id} missing in round ${round}`).toBeTruthy();
+        expect(row['_encrypted'], `${table}/${id} not encrypted in round ${round}`).toBeTruthy();
+      }
+    }
+
+    clearEncryptionKey();
+    setEncryptionRequired(false);
+  });
+});
