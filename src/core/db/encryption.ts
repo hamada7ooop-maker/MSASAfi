@@ -11,7 +11,7 @@ import type {
   DBCoreCursor,
   Dexie,
 } from 'dexie';
-import { encryptData, decryptData, isEncryptionKeyReady } from '@core/security/crypto';
+import { encryptData, decryptData, isEncryptionKeyReady, isVaultLocked } from '@core/security/crypto';
 import { recordException } from '../crashlytics';
 
 /**
@@ -27,16 +27,35 @@ export const ENCRYPTED_FIELDS: Record<string, string[]> = {
   subscriptions:['amount', 'name', 'notes'],
   investments:  ['amount', 'name', 'notes', 'cost', 'value'],
   installments: ['amount', 'name', 'notes'],
-  cards:        ['number', 'holder', 'expiry']
+  cards:        ['number', 'holder', 'expiry'],
+  // The audit log mirrors full financial payloads (amount, description,
+  // category) for ~63 recordAction call sites. Leaving it in plaintext
+  // defeated the encryption of `transactions` itself.
+  auditLog:     ['description', 'details'],
+  // Advisor conversations contain income/spending details. The project docs
+  // already described this table as encrypted — now it actually is.
+  chatHistory:  ['content']
 };
 
 /**
  * Encrypts sensitive fields in a record before it's written to the DB.
  */
 export async function _encryptRecord<T extends Record<string, unknown>>(table: string, obj: T): Promise<T> {
-  if (!isEncryptionKeyReady()) return obj;
   const fields = ENCRYPTED_FIELDS[table];
   if (!fields || !fields.length) return obj;
+
+  // ── FAIL CLOSED (only for an encrypted-but-locked vault) ────────────────
+  // If the user never set a PIN, plaintext storage is the intended behaviour
+  // and we must not break writes. But if the vault IS encrypted and the key
+  // has been wiped (auto-lock / backgrounding), returning `obj` unchanged
+  // would silently persist financial fields in PLAINTEXT — refuse instead.
+  // ────────────────────────────────────────────────────────────────────────
+  if (isVaultLocked() && fields.some((f) => f in obj)) {
+    throw new Error(
+      `[DB] Refusing to write plaintext to "${table}": app is locked (encryption key unavailable)`
+    );
+  }
+  if (!isEncryptionKeyReady()) return obj;
 
   const payload: Record<string, unknown> = {};
   const clean: Record<string, unknown> = { ...obj };
@@ -57,7 +76,8 @@ export async function _encryptRecord<T extends Record<string, unknown>>(table: s
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     recordException('[DB] Encryption failed for record', e instanceof Error ? e : new Error(message));
-    return obj;
+    // Propagate instead of falling back to a plaintext write.
+    throw e instanceof Error ? e : new Error(message);
   }
 }
 

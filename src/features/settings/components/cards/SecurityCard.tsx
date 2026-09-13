@@ -117,6 +117,11 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
   };
 
   const handleRemovePin = async () => {
+    // Removing the PIN turns off encryption: clear the "vault is encrypted"
+    // flag so subsequent plaintext writes are allowed again.
+    const { setEncryptionRequired, clearEncryptionKey } = await import('@core/security/crypto');
+    setEncryptionRequired(false);
+    clearEncryptionKey();
     await DB.setSetting('pinHash', null);
     await DB.setSetting('pinSalt', null);
     await DB.setSetting('pin', null);
