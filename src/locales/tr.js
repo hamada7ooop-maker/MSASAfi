@@ -2365,6 +2365,8 @@ export const locale_tr = {
   "settings.encryption": "Şifreleme",
   "settings.errInvalidFile": "Geçersiz dosya",
   "settings.errUnencryptedBlocked": "Verileriniz bir PIN ile korunuyor ve şifrelenmemiş olarak dışa aktarılamaz. Yedeği korumak için bir parola girin.",
+  "security.tamperingDetected": "⚠️ Güvenlik uyarısı: uygulama kodunda kurcalama tespit edildi!",
+  "security.runningOnEmulator": "⚠️ Güvenlik uyarısı: uygulama bir öykünücüde çalışıyor!",
   "settings.errPasswordShort": "Hata: Şifre en az 4 karakter olmalıdır.",
   "settings.errWrongPassword": "Yanlış şifre",
   "settings.exchangeRateApiKey": "ExchangeRate API Anahtarı",

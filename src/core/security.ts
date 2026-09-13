@@ -8,6 +8,7 @@ import { useAppStore } from '../store/appStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { AUTO_LOCK_MINUTES } from './constants';
 import { silentFail } from './utils';
+import { t } from '../i18n/engine';
 import { recordException } from './crashlytics';
 // Re-export all AES-GCM crypto utilities from the circular-safe security/crypto module
 import { deriveMasterKey, setEncryptionKey, getEncryptionKey, clearEncryptionKey, isEncryptionKeyReady, encryptData, decryptData, generateMasterDataKey, encryptKey, decryptKey } from './security/crypto';
@@ -129,7 +130,11 @@ export async function checkDeviceIntegrity(): Promise<boolean> {
       const fnStr = item.fn.toString();
       if (fnStr.includes('[native code]') && !fnStr.includes('function') && !fnStr.includes('class')) {
         recordException(`[Security Alert] Hooking detected on critical function: ${item.name}`, new Error('Hooking detected'));
-        toast('⚠️ تنبيه أمني: تم رصد محاولة تلاعب بالدوال البرمجية! / Security Alert: Tampering detected!', 'error');
+        toast(
+          t('security.tamperingDetected') ||
+            '⚠️ تنبيه أمني: تم رصد محاولة تلاعب بالدوال البرمجية!',
+          'error'
+        );
         return false;
       }
     }
@@ -140,7 +145,10 @@ export async function checkDeviceIntegrity(): Promise<boolean> {
       const info = await Device.getInfo();
       if (info.isVirtual) {
         recordException('[Security] App running on virtual device (Emulator)', new Error('Running on Emulator'));
-        toast('⚠️ تنبيه أمني: التطبيق يعمل على محاكي! / Warning: Running on Emulator', 'warning');
+        toast(
+          t('security.runningOnEmulator') || '⚠️ تنبيه أمني: التطبيق يعمل على محاكي!',
+          'warning'
+        );
       }
 
       // ── Root detection: REMOVED, deliberately ──────────────────────────

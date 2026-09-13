@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
+import { CSP } from './src/csp';
 
 /**
  * Strips legacy .woff formats and non-Arabic/non-Latin subsets from @fontsource
@@ -33,9 +34,30 @@ function fontOptimizerPlugin(): Plugin {
   };
 }
 
+/**
+ * Injects the Content Security Policy from src/csp.ts into index.html at build
+ * time, replacing the %CSP% placeholder. The policy previously existed as a
+ * second hand-maintained copy in the HTML; keeping one source removes the
+ * chance of the dev-server header and the shipped meta tag drifting apart.
+ */
+function cspInjectorPlugin(): Plugin {
+  return {
+    name: 'masarifi-csp-injector',
+    transformIndexHtml(html) {
+      if (!html.includes('%CSP%')) {
+        throw new Error(
+          'index.html is missing the %CSP% placeholder — the Content Security Policy would ship empty.'
+        );
+      }
+      return html.replace('%CSP%', CSP);
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
     fontOptimizerPlugin(),
+    cspInjectorPlugin(),
     react(),
     tailwindcss(),
   ],
@@ -105,16 +127,8 @@ export default defineConfig({
     port: 5173,
     host: true,
     headers: {
-      'Content-Security-Policy': [
-        "default-src 'self' data: blob: gap:",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://apis.google.com https://accounts.google.com",
-        "worker-src 'self' blob:",
-        "style-src 'self' 'unsafe-inline'",
-        "font-src 'self' data:",
-        "img-src 'self' data: blob: https://*.googleusercontent.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://*.githubusercontent.com https://*.stlouisfed.org https://api.coingecko.com https://flagcdn.com",
-        "connect-src 'self' ws: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.googleapis.com https://generativelanguage.googleapis.com https://api.exchangerate-api.com https://v6.exchangerate-api.com https://open.er-api.com https://api.frankfurter.app https://*.google.com https://text.pollinations.ai https://gen.pollinations.ai https://*.supabase.co https://bdquhhaorjrbpqkzcolj.supabase.co wss://*.supabase.co https://api.groq.com https://*.puter.com wss://*.puter.com https://ipapi.co https://freeipapi.com http://ip-api.com https://api.stlouisfed.org https://api.coingecko.com https://api.currentsapi.services https://restcountries.com https://*.open-meteo.com",
-        "frame-src 'self' https://accounts.google.com"
-      ].join('; ')
+      // Single source of truth: src/csp.ts (also injected into index.html).
+      'Content-Security-Policy': CSP
     },
     watch: {
       ignored: [

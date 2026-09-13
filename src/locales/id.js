@@ -2366,6 +2366,8 @@ export const locale_id = {
   "settings.encryption": "Enkripsi",
   "settings.errInvalidFile": "File tidak valid",
   "settings.errUnencryptedBlocked": "Data Anda dilindungi PIN dan tidak dapat diekspor tanpa enkripsi. Masukkan kata sandi untuk melindungi cadangan.",
+  "security.tamperingDetected": "⚠️ Peringatan keamanan: gangguan pada kode aplikasi terdeteksi!",
+  "security.runningOnEmulator": "⚠️ Peringatan keamanan: aplikasi berjalan di emulator!",
   "settings.errPasswordShort": "Kesalahan: Kata sandi minimal harus 4 karakter.",
   "settings.errWrongPassword": "Kata sandi salah",
   "settings.exchangeRateApiKey": "Kunci API Nilai Tukar",

@@ -2366,6 +2366,8 @@ export const translations = {
   "settings.encryption": "التشفير",
   "settings.errInvalidFile": "ملف غير صالح",
   "settings.errUnencryptedBlocked": "Your data is protected by a PIN and cannot be exported unencrypted. Enter a password to protect the backup.",
+  "security.tamperingDetected": "⚠️ تنبيه أمني: تم رصد محاولة تلاعب بالدوال البرمجية!",
+  "security.runningOnEmulator": "⚠️ تنبيه أمني: التطبيق يعمل على محاكي!",
   "settings.errPasswordShort": "خطأ: يجب أن تكون كلمة المرور 4 رموز على الأقل.",
   "settings.errWrongPassword": "كلمة المرور غير صحيحة",
   "settings.exchangeRateApiKey": "مفتاح ExchangeRate-API (العملات)",

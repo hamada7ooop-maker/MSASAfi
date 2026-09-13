@@ -2365,6 +2365,8 @@ export const locale_ur = {
   "settings.encryption": "خفیہ کاری",
   "settings.errInvalidFile": "غلط فائل",
   "settings.errUnencryptedBlocked": "آپ کا ڈیٹا PIN سے محفوظ ہے اور غیر خفیہ کردہ برآمد نہیں کیا جا سکتا۔ بیک اپ کی حفاظت کے لیے پاس ورڈ درج کریں۔",
+  "security.tamperingDetected": "⚠️ سیکیورٹی الرٹ: ایپلیکیشن کوڈ میں چھیڑ چھاڑ کا پتہ چلا ہے!",
+  "security.runningOnEmulator": "⚠️ سیکیورٹی الرٹ: ایپ ایمولیٹر پر چل رہی ہے!",
   "settings.errPasswordShort": "خرابی: پاس ورڈ کم از کم 4 حروف کا ہونا چاہیے۔",
   "settings.errWrongPassword": "غلط پاس ورڈ",
   "settings.exchangeRateApiKey": "ExchangeRate API کلید",

@@ -2365,6 +2365,8 @@ export const locale_de = {
   "settings.encryption": "Verschlüsselung",
   "settings.errInvalidFile": "Ungültige Datei",
   "settings.errUnencryptedBlocked": "Ihre Daten sind durch eine PIN geschützt und können nicht unverschlüsselt exportiert werden. Geben Sie ein Passwort ein, um das Backup zu schützen.",
+  "security.tamperingDetected": "⚠️ Sicherheitswarnung: Manipulation am Anwendungscode erkannt!",
+  "security.runningOnEmulator": "⚠️ Sicherheitswarnung: Die App läuft auf einem Emulator!",
   "settings.errPasswordShort": "Fehler: Das Passwort muss mindestens 4 Zeichen lang sein.",
   "settings.errWrongPassword": "Falsches Passwort",
   "settings.exchangeRateApiKey": "ExchangeRate-API-Schlüssel",

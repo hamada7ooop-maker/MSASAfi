@@ -2365,6 +2365,8 @@ export const locale_ms = {
   "settings.encryption": "Penyulitan",
   "settings.errInvalidFile": "Fail tidak sah",
   "settings.errUnencryptedBlocked": "Data anda dilindungi PIN dan tidak boleh dieksport tanpa penyulitan. Masukkan kata laluan untuk melindungi sandaran.",
+  "security.tamperingDetected": "⚠️ Amaran keselamatan: gangguan pada kod aplikasi dikesan!",
+  "security.runningOnEmulator": "⚠️ Amaran keselamatan: aplikasi berjalan pada emulator!",
   "settings.errPasswordShort": "Ralat: Kata laluan mestilah sekurang-kurangnya 4 aksara.",
   "settings.errWrongPassword": "Kata laluan salah",
   "settings.exchangeRateApiKey": "Kunci API Kadar Pertukaran",
