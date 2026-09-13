@@ -3,24 +3,12 @@ import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { hashPin, generateSalt } from '../../../core/security';
+import { timingSafeEqual } from '../../../core/security/crypto';
 import { db as DB } from '@/core/db/core';
 import { BiometricService } from '../../../core/services/BiometricService';
 import { toast } from '../../../toast';
 import { logger } from '../../../core/logger';
 import { silentFail } from '../../../core/utils';
-
-/**
- * Constant-time string comparison to avoid leaking match length/position
- * through timing differences.
- */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
-  return diff === 0;
-}
 
 /**
  * Re-derives the AES-GCM master key after a successful unlock.

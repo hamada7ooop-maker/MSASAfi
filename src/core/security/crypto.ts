@@ -184,3 +184,20 @@ function base64ToUint8Array(str: string): Uint8Array {
   }
   return arr;
 }
+
+/**
+ * Constant-time string comparison.
+ *
+ * Compares every character regardless of where the first mismatch occurs, so
+ * the time taken does not reveal how much of a secret was guessed correctly.
+ * Use this for any comparison of hashes, tokens or secrets — never `===`.
+ */
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}

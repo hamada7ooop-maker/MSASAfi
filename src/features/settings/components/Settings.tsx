@@ -8,6 +8,7 @@ import { APP_VERSION } from '../../../core/constants';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { useAppStore } from '../../../store/appStore';
 import { db as DB } from '@/core/db/core';
+import { timingSafeEqual } from '@/core/security/crypto';
 
 
 import { GeneralSettingsCard } from './cards/GeneralSettingsCard';
@@ -120,7 +121,20 @@ export function Settings() {
   const [showBankModal, setShowBankModal] = useState(false);
   const [masterPass, setMasterPass] = useState('');
 
+  // ── Developer unlock ──────────────────────────────────────────────────────
+  // Every branch below is guarded by `import.meta.env.DEV`, which Vite
+  // statically replaces with `false` in a production build. The dead code —
+  // and, critically, the VITE_MASTER_HASH / VITE_MASTER_SALT literals that
+  // would otherwise be inlined into the client bundle — is then removed by
+  // tree-shaking. The backdoor is therefore absent from shipped APKs rather
+  // than merely disabled in them.
+  //
+  // Never relax this guard. If support staff ever need this capability in
+  // production, it must be a server-issued, time-limited, single-use token —
+  // not a secret compiled into the client.
+  // ──────────────────────────────────────────────────────────────────────────
   const onVersionClick = () => {
+    if (!import.meta.env.DEV) return;
     const newCount = versionClicks + 1;
     setVersionClicks(newCount);
     if (newCount === 7) {
@@ -131,6 +145,8 @@ export function Settings() {
   };
 
   const handleMasterPass = async () => {
+    if (!import.meta.env.DEV) return;
+
     const targetHash = import.meta.env.VITE_MASTER_HASH as string | undefined;
     const salt = import.meta.env.VITE_MASTER_SALT as string | undefined;
 
@@ -159,12 +175,16 @@ export function Settings() {
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
 
-      if (inputHash === targetHash) {
+      // Constant-time: `===` on strings short-circuits at the first differing
+      // byte, which leaks how much of the secret was guessed correctly.
+      if (timingSafeEqual(inputHash, targetHash)) {
+        await DB.recordAction('DEV_UNLOCK', 'Developer master unlock used');
         await unlockEverything();
         setShowMasterModal(false);
         setMasterPass('');
         toast(t('settings.masterSuccess'), 'success');
       } else {
+        await DB.recordAction('DEV_UNLOCK_FAILED', 'Developer master unlock attempt failed');
         toast(t('common.error'), 'error');
         setMasterPass('');
       }
@@ -571,8 +591,8 @@ export function Settings() {
         </button>
       </div>
 
-      {/* ─── Master Password Modal ────────────────────────────────────────── */}
-      {showMasterModal && (
+      {/* ─── Master Password Modal (development builds only) ──────────────── */}
+      {import.meta.env.DEV && showMasterModal && (
         <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white dark:bg-[#1c1f23] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
             <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-5">
