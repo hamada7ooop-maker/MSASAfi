@@ -5,13 +5,20 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#002b59",
   "theme_color": "#002b59",
   "lang": "ar",
   "dir": "rtl",
-  "categories": ["finance", "productivity", "utilities"],
+  "categories": [
+    "finance",
+    "productivity",
+    "utilities"
+  ],
   "screenshots": [],
   "icons": [
     {
@@ -29,25 +36,40 @@
   ],
   "shortcuts": [
     {
-      "name": "إضافة مصروف",
-      "short_name": "مصروف",
-      "description": "إضافة مصروف جديد بسرعة",
-      "url": "/?page=add&type=expense",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "إضافة دخل",
-      "short_name": "دخل",
-      "description": "إضافة دخل جديد بسرعة",
-      "url": "/?page=add&type=income",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+      "name": "إضافة معاملة",
+      "short_name": "إضافة",
+      "description": "إضافة مصروف أو دخل جديد بسرعة",
+      "url": "/#/transactions/add",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "التقارير",
       "short_name": "تقارير",
       "description": "عرض التقارير المالية",
-      "url": "/?page=reports",
-      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+      "url": "/#/reports",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "المعاملات",
+      "short_name": "معاملات",
+      "description": "تصفح سجل المعاملات",
+      "url": "/#/transactions",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "prefer_related_applications": false,

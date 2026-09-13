@@ -6,6 +6,27 @@ import { silentFail, ignore } from '@/core/utils';
 import { logger } from '../../logger';
 
 /**
+ * Applies a signed delta to an account balance.
+ * Must be called from inside a Dexie 'rw' transaction covering db.accounts.
+ * Returns false when the account no longer exists.
+ */
+async function applyBalanceDelta(accountId: string, delta: number): Promise<boolean> {
+  const acc = await db.accounts.get(accountId);
+  if (!acc) return false;
+  acc.balance += delta;
+  await db.accounts.put(acc);
+  return true;
+}
+
+/**
+ * Net balance effect of a transaction (positive = increases the balance).
+ */
+function balanceEffect(type: string, amount: unknown): number {
+  const amt = Number(amount) || 0;
+  return type === 'income' ? amt : -amt;
+}
+
+/**
  * Repository for Transaction-related database operations.
  */
 export const TransactionRepository = {
@@ -40,9 +61,30 @@ export const TransactionRepository = {
       date: t.date || createdAt 
     };
 
-    await db.transactions.put(item);
+    // ── ATOMIC ────────────────────────────────────────────────────────────
+    // The transaction row and the account balance must commit together.
+    // Previously these were two independent writes: a crash, an app kill, or
+    // two rapid saves in between left balances permanently out of sync.
+    // ──────────────────────────────────────────────────────────────────────
+    await db.transaction('rw', db.transactions, db.accounts, async () => {
+      await db.transactions.put(item);
 
-    // ── Audit Log ──────────────────────────────────────────────────
+      if (item.isDraft !== true) {
+        const targetAccId = item.accountId || item.account;
+        if (targetAccId) {
+          const amt = Number(item.amount) || 0;
+          const applied = await applyBalanceDelta(
+            targetAccId,
+            item.type === 'income' ? amt : -amt
+          );
+          if (!applied) {
+            silentFail('[TxnRepo] Account not found for balance update')(new Error(targetAccId));
+          }
+        }
+      }
+    });
+
+    // ── Audit Log (outside the tx: best-effort, must never roll back data) ──
     db.recordAction('add_transaction', `Added: ${item.description || item.amount}`, {
       amount: item.amount,
       type: item.type,
@@ -51,23 +93,6 @@ export const TransactionRepository = {
       description: item.description,
       date: item.date,
     }).catch(silentFail('recordAction:add_transaction'));
-
-    // Update Account Balance
-    if (item.isDraft !== true) {
-      const targetAccId = item.accountId || item.account;
-      
-      if (targetAccId) {
-        const acc = await db.accounts.get(targetAccId);
-        if (acc) {
-          const amt = Number(item.amount) || 0;
-          const newBalance = item.type === 'income' ? (acc.balance + amt) : (acc.balance - amt);
-          acc.balance = newBalance;
-          await db.accounts.put(acc);
-        } else {
-          silentFail('[TxnRepo] Account not found for balance update')(new Error(targetAccId));
-        }
-      }
-    }
 
     // Side Effects (Compatibility with Vanilla)
     updateHomeWidget().catch(ignore());
@@ -84,9 +109,35 @@ export const TransactionRepository = {
     if (!existing) return null;
 
     const updated: Transaction = { ...existing, ...data };
-    await db.transactions.put(updated);
 
-    // ── Audit Log ──────────────────────────────────────────────────
+    // ── ATOMIC ────────────────────────────────────────────────────────────
+    // This path can touch the row plus two different accounts. All writes
+    // must commit or roll back as a unit.
+    //
+    // The balance maths is expressed as "reverse the old effect, then apply
+    // the new one", which collapses the previous four-branch tree (draft
+    // transitions, amount change, type flip, account move) into one rule.
+    // ──────────────────────────────────────────────────────────────────────
+    await db.transaction('rw', db.transactions, db.accounts, async () => {
+      await db.transactions.put(updated);
+
+      const oldAccId = existing.isDraft === true ? null : (existing.accountId || existing.account);
+      const newAccId = updated.isDraft === true ? null : (updated.accountId || updated.account);
+
+      const oldEffect = oldAccId ? balanceEffect(existing.type, existing.amount) : 0;
+      const newEffect = newAccId ? balanceEffect(updated.type, updated.amount) : 0;
+
+      if (oldAccId && oldAccId === newAccId) {
+        // Same account: apply only the net difference.
+        const delta = newEffect - oldEffect;
+        if (delta !== 0) await applyBalanceDelta(oldAccId, delta);
+      } else {
+        if (oldAccId && oldEffect !== 0) await applyBalanceDelta(oldAccId, -oldEffect);
+        if (newAccId && newEffect !== 0) await applyBalanceDelta(newAccId, newEffect);
+      }
+    });
+
+    // ── Audit Log (outside the tx: best-effort, must never roll back data) ──
     db.recordAction('update_transaction', `Updated: ${updated.description || updated.amount}`, {
       amount: updated.amount,
       type: updated.type,
@@ -94,75 +145,6 @@ export const TransactionRepository = {
       currency: updated.currency,
       description: updated.description,
     }).catch(silentFail('recordAction:update_transaction'));
-
-    // Balance adjustment logic
-    const wasDraft = existing.isDraft === true;
-    const isDraft = updated.isDraft === true;
-
-    if (wasDraft && isDraft) {
-      // Both are drafts, do absolutely nothing to balances.
-    } else if (wasDraft && !isDraft) {
-      // Transition from Draft to Active (Publishing)
-      const newAccId = updated.accountId || updated.account;
-      const newAmt = updated.amount || 0;
-      if (newAccId) {
-        const newAcc = await db.accounts.get(newAccId);
-        if (newAcc) {
-          newAcc.balance = updated.type === 'income' ? (newAcc.balance + newAmt) : (newAcc.balance - newAmt);
-          await db.accounts.put(newAcc);
-        }
-      }
-    } else if (!wasDraft && isDraft) {
-      // Transition from Active to Draft (Reversing previous balance)
-      const oldAccId = existing.accountId || existing.account;
-      const oldAmt = existing.amount || 0;
-      if (oldAccId) {
-        const oldAcc = await db.accounts.get(oldAccId);
-        if (oldAcc) {
-          oldAcc.balance = existing.type === 'income' ? (oldAcc.balance - oldAmt) : (oldAcc.balance + oldAmt);
-          await db.accounts.put(oldAcc);
-        }
-      }
-    } else {
-      // Both are active: Apply standard balance adjustment logic
-      const oldAccId = existing.accountId || existing.account;
-      const newAccId = updated.accountId || updated.account;
-      const oldAmt = existing.amount || 0;
-      const newAmt = updated.amount || 0;
-
-      if (oldAccId === newAccId && oldAccId) {
-        const acc = await db.accounts.get(oldAccId);
-        if (acc) {
-          let diff = 0;
-          if (existing.type === updated.type) {
-             diff = newAmt - oldAmt;
-             acc.balance = updated.type === 'income' ? (acc.balance + diff) : (acc.balance - diff);
-             await db.accounts.put(acc);
-          } else {
-             // Type changed (income <-> expense)
-             const tempBal = existing.type === 'income' ? (acc.balance - oldAmt) : (acc.balance + oldAmt);
-             acc.balance = updated.type === 'income' ? (tempBal + newAmt) : (tempBal - newAmt);
-             await db.accounts.put(acc);
-          }
-        }
-      } else {
-        // Account changed
-        if (oldAccId) {
-          const oldAcc = await db.accounts.get(oldAccId);
-          if (oldAcc) {
-            oldAcc.balance = existing.type === 'income' ? (oldAcc.balance - oldAmt) : (oldAcc.balance + oldAmt);
-            await db.accounts.put(oldAcc);
-          }
-        }
-        if (newAccId) {
-          const newAcc = await db.accounts.get(newAccId);
-          if (newAcc) {
-            newAcc.balance = updated.type === 'income' ? (newAcc.balance + newAmt) : (newAcc.balance - newAmt);
-            await db.accounts.put(newAcc);
-          }
-        }
-      }
-    }
 
     updateHomeWidget().catch(ignore());
     triggerNotificationRefresh().catch(ignore());
@@ -177,24 +159,25 @@ export const TransactionRepository = {
     try {
       const existing = await db.transactions.get(id);
       if (existing && !existing.isDeleted) {
-        // Reverse balance impact if it wasn't a draft
-        if (existing.isDraft !== true) {
-          const targetAccId = existing.accountId || existing.account;
-          if (targetAccId) {
-            const acc = await db.accounts.get(targetAccId);
-            if (acc) {
-              const amt = Number(existing.amount) || 0;
-              acc.balance = existing.type === 'income' ? (acc.balance - amt) : (acc.balance + amt);
-              await db.accounts.put(acc);
-              logger.debug('TxnRepo', 'Reverted balance for soft delete:', targetAccId);
+        // ── ATOMIC: reverse the balance and flag the row in one commit ─────
+        await db.transaction('rw', db.transactions, db.accounts, async () => {
+          if (existing.isDraft !== true) {
+            const targetAccId = existing.accountId || existing.account;
+            if (targetAccId) {
+              const reverted = await applyBalanceDelta(
+                targetAccId,
+                -balanceEffect(existing.type, existing.amount)
+              );
+              if (reverted) {
+                logger.debug('TxnRepo', 'Reverted balance for soft delete:', targetAccId);
+              }
             }
           }
-        }
-        
-        // Flag as deleted
-        existing.isDeleted = true;
-        existing.deletedAt = new Date().toISOString();
-        await db.transactions.put(existing);
+
+          existing.isDeleted = true;
+          existing.deletedAt = new Date().toISOString();
+          await db.transactions.put(existing);
+        });
 
         // ── Audit Log ──────────────────────────────────────────────────
         db.recordAction('soft_delete_transaction', `Soft Deleted: ${existing.description || existing.amount}`, {
@@ -236,15 +219,6 @@ export const TransactionRepository = {
         }
       }
 
-      for (const [accId, diff] of Object.entries(accountImpacts)) {
-        const acc = await db.accounts.get(accId);
-        if (acc) {
-          acc.balance += diff;
-          await db.accounts.put(acc);
-          logger.debug('TxnRepo', `Bulk updated balance for account ${accId} by ${diff}`);
-        }
-      }
-
       const now = new Date().toISOString();
       const updatedTxns = activeTxns.map(t => ({
         ...t,
@@ -252,7 +226,16 @@ export const TransactionRepository = {
         deletedAt: now
       }));
 
-      await db.transactions.bulkPut(updatedTxns);
+      // ── ATOMIC: all balance adjustments + all row flags in one commit ────
+      await db.transaction('rw', db.transactions, db.accounts, async () => {
+        for (const [accId, diff] of Object.entries(accountImpacts)) {
+          const applied = await applyBalanceDelta(accId, diff);
+          if (applied) {
+            logger.debug('TxnRepo', `Bulk updated balance for account ${accId} by ${diff}`);
+          }
+        }
+        await db.transactions.bulkPut(updatedTxns);
+      });
 
       db.recordAction('bulk_soft_delete_transactions', `Bulk Soft Deleted ${updatedTxns.length} transactions`, {
         count: updatedTxns.length,
@@ -275,23 +258,25 @@ export const TransactionRepository = {
     try {
       const existing = await db.transactions.get(id);
       if (existing && existing.isDeleted) {
-        // Re-apply balance impact if not a draft
-        if (existing.isDraft !== true) {
-          const targetAccId = existing.accountId || existing.account;
-          if (targetAccId) {
-            const acc = await db.accounts.get(targetAccId);
-            if (acc) {
-              const amt = Number(existing.amount) || 0;
-              acc.balance = existing.type === 'income' ? (acc.balance + amt) : (acc.balance - amt);
-              await db.accounts.put(acc);
-              logger.debug('TxnRepo', 'Re-applied balance for restore:', targetAccId);
+        // ── ATOMIC: re-apply the balance and clear the flag in one commit ──
+        await db.transaction('rw', db.transactions, db.accounts, async () => {
+          if (existing.isDraft !== true) {
+            const targetAccId = existing.accountId || existing.account;
+            if (targetAccId) {
+              const applied = await applyBalanceDelta(
+                targetAccId,
+                balanceEffect(existing.type, existing.amount)
+              );
+              if (applied) {
+                logger.debug('TxnRepo', 'Re-applied balance for restore:', targetAccId);
+              }
             }
           }
-        }
 
-        existing.isDeleted = false;
-        delete existing.deletedAt;
-        await db.transactions.put(existing);
+          existing.isDeleted = false;
+          delete existing.deletedAt;
+          await db.transactions.put(existing);
+        });
 
         // ── Audit Log ──────────────────────────────────────────────────
         db.recordAction('restore_transaction', `Restored: ${existing.description || existing.amount}`, {

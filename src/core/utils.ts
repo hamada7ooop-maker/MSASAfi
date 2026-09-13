@@ -505,3 +505,44 @@ export async function loadImageFromFS(fileName?: string | null): Promise<string 
     return null;
   }
 }
+
+/**
+ * Combines an optional caller-supplied AbortSignal with a timeout signal.
+ *
+ * The previous pattern across the codebase was:
+ *
+ *   const controller = new AbortController();
+ *   setTimeout(() => controller.abort(), 10000);
+ *   const signal = callerSignal || controller.signal;   // ← bug
+ *
+ * When the caller passed a signal, the timeout controller was discarded, so
+ * the timeout never applied and the request could hang indefinitely.
+ *
+ * Returns the combined signal plus a `cancel()` to clear the pending timer.
+ */
+export function withTimeoutSignal(
+  timeoutMs: number,
+  callerSignal?: AbortSignal | null
+): { signal: AbortSignal; cancel: () => void } {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const cancel = () => clearTimeout(timer);
+
+  if (!callerSignal) return { signal: controller.signal, cancel };
+
+  // Prefer the native combinator when available.
+  const anyFn = (AbortSignal as unknown as {
+    any?: (signals: AbortSignal[]) => AbortSignal;
+  }).any;
+  if (typeof anyFn === 'function') {
+    return { signal: anyFn([callerSignal, controller.signal]), cancel };
+  }
+
+  // Fallback: mirror the caller's abort onto our controller.
+  if (callerSignal.aborted) {
+    controller.abort();
+  } else {
+    callerSignal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  return { signal: controller.signal, cancel };
+}

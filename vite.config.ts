@@ -51,15 +51,19 @@ export default defineConfig({
       '@i18n': path.resolve(__dirname, './src/i18n'),
     },
   },
+  // ─── Strip dev-only code in production ───────────────────────────────────
+  // NOTE: this MUST live at the config root. `build.esbuild` is not a valid
+  // Vite option and is silently ignored (verified: console.log/debugger
+  // survived into dist/ while it was nested under `build`).
+  // `console.error` is intentionally NOT dropped — it is used by ErrorBoundary
+  // and critical failure paths; `logger.ts` already gates dev-only output.
+  esbuild: {
+    drop: ['debugger'],
+    pure: ['console.log', 'console.warn', 'console.debug', 'console.info'],
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    // ─── Strip ALL dev-only code in production ─────────────────────────────
-    esbuild: {
-      drop: ['debugger'],
-      pure: ['console.log', 'console.warn', 'console.debug', 'console.info', 'console.error'],
-      treeShaking: true,
-    },
     // ─── Chunk Strategy ───────────────────────────────────────────────────
     rollupOptions: {
       output: {

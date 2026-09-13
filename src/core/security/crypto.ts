@@ -7,6 +7,17 @@
 let _encryptionKey: CryptoKey | null = null;
 
 /**
+ * Whether this installation has encryption configured (i.e. the user set a
+ * PIN). It is deliberately separate from `_encryptionKey`, which is wiped on
+ * auto-lock: together they distinguish two very different situations —
+ *
+ *   required=false, key=null → no PIN set; plaintext storage is by design.
+ *   required=true,  key=null → encrypted vault that is currently LOCKED.
+ *                              Writing here would silently leak plaintext.
+ */
+let _encryptionRequired = false;
+
+/**
  * Derive a CryptoKey from PIN + salt using PBKDF2 → AES-GCM.
  * Iterations: 600,000 (SHA-256)
  */
@@ -88,10 +99,30 @@ export async function decryptKey(encryptedKeyBase64: string, kek: CryptoKey): Pr
 }
 
 // In-memory key management
-export function setEncryptionKey(key: CryptoKey | null) { _encryptionKey = key; }
+export function setEncryptionKey(key: CryptoKey | null) {
+  _encryptionKey = key;
+  // Holding a key implies this vault is encrypted.
+  if (key) _encryptionRequired = true;
+}
 export function getEncryptionKey(): CryptoKey | null { return _encryptionKey; }
+
+/** Wipes the key from memory (auto-lock / backgrounding) but remembers that
+ *  this vault IS encrypted, so writes while locked are refused. */
 export function clearEncryptionKey() { _encryptionKey = null; }
+
 export function isEncryptionKeyReady(): boolean { return _encryptionKey !== null; }
+
+/**
+ * Marks whether this installation uses encryption. Call with `true` at startup
+ * when a PIN exists, and `false` when the PIN is removed.
+ */
+export function setEncryptionRequired(required: boolean) { _encryptionRequired = required; }
+
+/**
+ * True when the vault is encrypted but the key is not currently loaded —
+ * i.e. writing sensitive fields right now would persist them in plaintext.
+ */
+export function isVaultLocked(): boolean { return _encryptionRequired && _encryptionKey === null; }
 
 /**
  * Encrypt a plain object → Base64 string (iv + ciphertext).

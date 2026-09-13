@@ -172,6 +172,11 @@ export function renderSplashPage(renderApp: () => void): string {
       useAppStore.getState().setCurrentPage('onboarding');
     } else {
       const hasPin = (await DB.getSetting('pinHash')) || (await DB.getSetting('pin'));
+      // Flag the vault as encrypted BEFORE the PIN screen appears, so any
+      // write attempted while locked is refused rather than silently stored
+      // in plaintext.
+      const { setEncryptionRequired } = await import('./security/crypto');
+      setEncryptionRequired(Boolean(hasPin));
       useAppStore.getState().setCurrentPage(hasPin ? 'pin' : 'home');
     }
     renderApp();

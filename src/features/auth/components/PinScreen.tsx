@@ -2,10 +2,42 @@ import React, { useState, useEffect } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useSettingsStore } from '../../../store/settingsStore';
-import { hashPin } from '../../../core/security';
+import { hashPin, generateSalt } from '../../../core/security';
 import { db as DB } from '@/core/db/core';
 import { BiometricService } from '../../../core/services/BiometricService';
 import { toast } from '../../../toast';
+import { logger } from '../../../core/logger';
+
+/**
+ * Constant-time string comparison to avoid leaking match length/position
+ * through timing differences.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
+ * Re-derives the AES-GCM master key after a successful unlock.
+ *
+ * Auto-lock and app-backgrounding wipe the key from memory via
+ * clearEncryptionKey(). Without this step the DB middleware cannot decrypt
+ * existing records, and — worse — _encryptRecord would write new records in
+ * plaintext because it bails out when no key is loaded.
+ */
+async function restoreEncryptionKey(pin: string, salt: string): Promise<void> {
+  try {
+    const { deriveMasterKey, setEncryptionKey } = await import('@core/security/crypto');
+    setEncryptionKey(await deriveMasterKey(pin, salt));
+  } catch (e) {
+    logger.error('PinScreen', 'Failed to restore encryption key after unlock', e);
+    throw e;
+  }
+}
 
 export function PinScreen() {
   const { t } = useI18n();
@@ -85,17 +117,39 @@ export function PinScreen() {
       const legacyPin = (await DB.getSetting('pin')) as string | undefined;
       
       if (!pinSalt || !pinHash) {
-        if (legacyPin && newPin === legacyPin) {
+        if (legacyPin && timingSafeEqual(newPin, legacyPin)) {
+          // Migrate the legacy plaintext PIN to a salted PBKDF2 hash on the
+          // fly, then derive the encryption key from the new salt.
+          const salt = generateSalt();
+          const migrated = await hashPin(newPin, salt);
+          await DB.setSetting('pinSalt', salt);
+          await DB.setSetting('pinHash', migrated);
+          await DB.setSetting('pin', null);
+          await restoreEncryptionKey(newPin, salt);
           setAttempts(0);
           setLocked(false);
           return;
         }
-        setLocked(false);
+        // ── FAIL CLOSED ───────────────────────────────────────────────────
+        // Previously this called setLocked(false), meaning ANY 4 digits
+        // unlocked the app whenever pinHash/pinSalt were missing or had been
+        // tampered with (e.g. cleared directly from IndexedDB).
+        // ──────────────────────────────────────────────────────────────────
+        setError(true);
+        setPin('');
+        toast(t('settings.pinError') || 'Wrong PIN', 'error');
         return;
       }
 
       const hashed = await hashPin(newPin, pinSalt);
-      if (hashed === pinHash) {
+      if (timingSafeEqual(hashed, pinHash)) {
+        // ── CRITICAL ──────────────────────────────────────────────────────
+        // Auto-lock / backgrounding calls clearEncryptionKey(), wiping the
+        // AES-GCM key from memory. Unlocking MUST re-derive it, otherwise
+        // every encrypted record silently fails to decrypt and any
+        // subsequent write is persisted in PLAINTEXT.
+        // ──────────────────────────────────────────────────────────────────
+        await restoreEncryptionKey(newPin, pinSalt);
         setAttempts(0);
         setLocked(false);
       } else {

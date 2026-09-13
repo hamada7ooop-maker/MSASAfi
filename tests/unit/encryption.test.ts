@@ -8,7 +8,8 @@ import {
   deriveMasterKey,
   setEncryptionKey,
   clearEncryptionKey,
-  isEncryptionKeyReady
+  isEncryptionKeyReady,
+  setEncryptionRequired
 } from '@/core/security/crypto';
 
 describe('Encryption Layer Unit Tests (encryption.ts)', () => {
@@ -20,6 +21,9 @@ describe('Encryption Layer Unit Tests (encryption.ts)', () => {
 
   afterEach(() => {
     clearEncryptionKey();
+    // Reset the "vault is encrypted" flag so a locked-vault assertion in one
+    // test cannot make unrelated tests refuse their writes.
+    setEncryptionRequired(false);
   });
 
   it('verifies master key readiness state', () => {
@@ -50,11 +54,21 @@ describe('Encryption Layer Unit Tests (encryption.ts)', () => {
   });
 
   it('handles edge cases in _encryptRecord and _decryptRecord', async () => {
-    // 1. Key not ready -> returns original
+    // 1a. No PIN configured (vault not encrypted) -> plaintext is by design
     clearEncryptionKey();
+    setEncryptionRequired(false);
     const plain = { id: 'txn_plain', amount: 50 };
     const notEncrypted = await _encryptRecord('transactions', plain);
     expect(notEncrypted).toEqual(plain);
+
+    // 1b. Vault IS encrypted but currently locked -> must REFUSE the write
+    // rather than silently persisting the amount in plaintext.
+    setEncryptionRequired(true);
+    await expect(_encryptRecord('transactions', plain)).rejects.toThrow(/app is locked/);
+    // ...but a record with no sensitive fields is still allowed through.
+    await expect(
+      _encryptRecord('transactions', { id: 'txn_meta', type: 'income' })
+    ).resolves.toEqual({ id: 'txn_meta', type: 'income' });
 
     const key = await deriveMasterKey('test-pin-1234', 'test-salt-abc');
     setEncryptionKey(key);

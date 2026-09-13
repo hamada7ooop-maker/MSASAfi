@@ -1,0 +1,72 @@
+# ── Dependencies ──────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────
+dist/
+dist-ssr/
+build/
+coverage/
+*.local
+
+# ── Environment & secrets ─────────────────────
+.env
+.env.*
+!.env.example
+secrets.properties
+service-account.json
+
+# ── Firebase / Google service configs ─────────
+google-services.json
+android/app/google-services.json
+GoogleService-Info.plist
+ios/App/App/GoogleService-Info.plist
+
+# ── Signing keys (NEVER commit) ───────────────
+*.keystore
+*.jks
+*.p12
+*.pem
+key.properties
+android/key.properties
+
+# ── Native build artifacts ────────────────────
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+*.apk
+*.aab
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/src/main/res/xml/config.xml
+android/capacitor-cordova-android-plugins/
+ios/App/Pods/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App/config.xml
+
+# ── Logs ──────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Editors & OS ──────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+vite.preview.config.local.ts
+
+# ── Temp & scratch ────────────────────────────
+.nyc_output/
+scratch/
+*.backup
+*.bak
