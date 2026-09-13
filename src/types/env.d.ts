@@ -8,24 +8,9 @@ declare module '@fontsource/*' {
   export default content;
 }
 
-declare module '*.svg' {
-  import React = require('react');
-  export const ReactComponent: React.FC<React.SVGProps<SVGSVGElement>>;
-  const src: string;
-  export default src;
-}
-
-declare module '*.png' {
-  const content: string;
-  export default content;
-}
-
-declare module '*.jpg' {
-  const content: string;
-  export default content;
-}
-
-declare module '*.webp' {
-  const content: string;
-  export default content;
-}
+// NOTE: *.svg, *.png, *.jpg and *.webp are intentionally NOT declared here.
+// vite/client already declares all four (plus apng, bmp, jpeg, gif, ico,
+// avif and more). Redeclaring them produced "Duplicate identifier 'src'"
+// against vite/client, an error masked only by skipLibCheck. The former svg
+// block also exported a `ReactComponent` for svgr, which this project does
+// not use — nothing imports it.

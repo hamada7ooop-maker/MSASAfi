@@ -11,9 +11,21 @@
     "allowJs": true,
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    // Kept true, deliberately (L-6). With it off, the only remaining errors
+    // are three in third-party .d.ts files for optional peers this project
+    // does not install: dexie-react-hooks references y-dexie and yjs for its
+    // unused useDocument hook, and tesseract.js names Buffer. The fix for the
+    // last one would be @types/node, which pollutes browser code with Node
+    // globals — a worse trade than the flag. Everything genuinely ours was
+    // fixed instead: see the types field below and src/types/env.d.ts.
+    // Re-check with: tsc --noEmit after flipping this to false.
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "@testing-library/jest-dom"],
+    // jest-dom's default entrypoint references its jest.d.ts, which needs
+    // @types/jest — removed with the rest of the unused Jest toolchain in
+    // L-3. The /vitest entrypoint augments Vitest's own Assertion interface
+    // instead, which is what this project actually runs.
+    "types": ["vite/client", "@testing-library/jest-dom/vitest"],
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "paths": {
