@@ -6,7 +6,7 @@
 import { db as DB } from '@/core/db/core';
 import { useSettingsStore } from '../store/settingsStore';
 import { CURRENCY_RATES } from '../core/currency';
-import { silentFail } from '../core/utils';
+import { silentFail, withTimeoutSignal } from '../core/utils';
 
 const GOLD_API_BASE = import.meta.env.DEV ? '/api/gold' : 'https://www.goldapi.io/api';
 
@@ -51,9 +51,7 @@ export async function fetchLiveGoldPrice(
   if (!apiKey) return null;
 
   const tryFetch = async (curr: string) => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const combinedSignal = signal || controller.signal;
+    const { signal: combinedSignal, cancel: timeout } = withTimeoutSignal(10000, signal);
 
     try {
       const response = await fetch(`${GOLD_API_BASE}/${symbol}/${curr}`, {
@@ -63,14 +61,14 @@ export async function fetchLiveGoldPrice(
         },
         signal: combinedSignal
       });
-      clearTimeout(timeout);
+      timeout();
       if (!response.ok) {
         const err = (await response.json().catch(() => ({}))) as { error?: string };
         throw new Error(`GoldAPI Error ${response.status}: ${err.error || 'Unknown'}`);
       }
       return response.json() as Promise<{ price_gram_24k?: number; price?: number }>;
     } finally {
-      clearTimeout(timeout);
+      timeout();
     }
   };
 
@@ -110,14 +108,12 @@ export async function fetchExchangeRates(
   }
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const combinedSignal = signal || controller.signal;
+    const { signal: combinedSignal, cancel: timeout } = withTimeoutSignal(10000, signal);
 
     const response = await fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/${base}`, {
       signal: combinedSignal
     });
-    clearTimeout(timeout);
+    timeout();
     if (!response.ok) throw new Error('Failed to fetch exchange rates');
 
     const data = (await response.json()) as { conversion_rates?: Record<string, number> };
@@ -136,15 +132,13 @@ export async function fetchFinancialNews(signal?: AbortSignal): Promise<NewsArti
   if (!apiKey) return null;
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const combinedSignal = signal || controller.signal;
+    const { signal: combinedSignal, cancel: timeout } = withTimeoutSignal(10000, signal);
 
     const response = await fetch(
       `https://api.currentsapi.services/v1/latest-news?category=business&apiKey=${encodeURIComponent(apiKey)}`,
       { signal: combinedSignal }
     );
-    clearTimeout(timeout);
+    timeout();
     if (!response.ok) {
       const errData = (await response.json().catch(() => ({}))) as { message?: string };
       throw new Error(`News API Error: ${response.status} - ${errData.message || 'Unknown'}`);
@@ -184,15 +178,13 @@ export async function fetchEconomicIndicators(signal?: AbortSignal): Promise<Eco
     const results = await Promise.all(
       series.map(async (s) => {
         try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 10000);
-          const combinedSignal = signal || controller.signal;
+          const { signal: combinedSignal, cancel: timeout } = withTimeoutSignal(10000, signal);
 
           const url = `${FRED_BASE}/fred/series/observations?series_id=${s.id}&api_key=${encodeURIComponent(
             apiKey
           )}&file_type=json&limit=2&sort_order=desc`;
           const resp = await fetch(url, { signal: combinedSignal });
-          clearTimeout(timeout);
+          timeout();
 
           if (!resp.ok) throw new Error(`FRED ${s.id} error: ${resp.status}`);
           const data = (await resp.json()) as { observations?: Array<{ value: string; date: string }> };
@@ -240,15 +232,13 @@ export async function fetchEconomicIndicators(signal?: AbortSignal): Promise<Eco
  */
 export async function fetchCryptoPrices(signal?: AbortSignal): Promise<CryptoPrice[]> {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const combinedSignal = signal || controller.signal;
+    const { signal: combinedSignal, cancel: timeout } = withTimeoutSignal(10000, signal);
 
     const resp = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,cardano&vs_currencies=usd,sar&include_24hr_change=true',
       { signal: combinedSignal }
     );
-    clearTimeout(timeout);
+    timeout();
     const data = (await resp.json()) as Record<string, { usd: number; sar: number; usd_24h_change: number }>;
 
     const mapping: Record<string, { symbol: string; name: string }> = {

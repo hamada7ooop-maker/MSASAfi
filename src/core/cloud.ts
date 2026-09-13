@@ -8,7 +8,7 @@ import { toast } from '../toast';
 import { t } from '../i18n/engine';
 import { secureGet, secureSet, secureRemove } from './secureStore';
 import { APP_VERSION } from './constants';
-import { silentFail } from './utils';
+import { silentFail, withTimeoutSignal } from './utils';
 
 const PROXY_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3000/supabase';
 
@@ -76,13 +76,11 @@ async function sbFetch<T = unknown>(path: string, options: RequestInit = {}, ret
 
   let lastError: unknown;
   for (let attempt = 0; attempt < retries; attempt++) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-    const signal = options.signal || controller.signal;
+    const { signal, cancel: timeout } = withTimeoutSignal(15000, options.signal);
 
     try {
       const res = await fetch(url, { ...options, headers, signal });
-      clearTimeout(timeout);
+      timeout();
       if (!res.ok) {
         const errText = await res.text();
         throw new Error(`Supabase error ${res.status}: ${errText}`);
@@ -90,7 +88,7 @@ async function sbFetch<T = unknown>(path: string, options: RequestInit = {}, ret
       const text = await res.text();
       return (text ? JSON.parse(text) : null) as T;
     } catch (error) {
-      clearTimeout(timeout);
+      timeout();
       lastError = error;
       silentFail(`[Cloud] Network request failed (Attempt ${attempt + 1}/${retries})`)(error);
       if (attempt < retries - 1) {
