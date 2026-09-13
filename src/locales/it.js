@@ -2460,6 +2460,7 @@ export const locale_it = {
   "settings.enabled": "Abilitato",
   "settings.encryption": "Crittografia",
   "settings.errInvalidFile": "File non valido",
+  "settings.errUnencryptedBlocked": "I tuoi dati sono protetti da un PIN e non possono essere esportati non cifrati. Inserisci una password per proteggere il backup.",
   "settings.errPasswordShort": "Errore: La password deve contenere almeno 4 caratteri.",
   "settings.errWrongPassword": "Password errata",
   "settings.exchangeRateApiKey": "Chiave API ExchangeRate",

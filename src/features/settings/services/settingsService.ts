@@ -5,12 +5,20 @@
  */
 
 import { db as DB } from '@/core/db/core';
+import { APP_VERSION } from '../../../core/constants';
 import { toast } from '../../../toast';
 import { t } from '../../../i18n/engine';
 import { bridge, registerToBridge } from '../../../core/AppBridge';
 import * as Cloud from '../../../core/cloud';
 import { purifyRecord } from '../../../core/security';
 import { recordException } from '../../../core/crashlytics';
+import {
+  stripVaultSecretsFromRows,
+  stripVaultSecretsFromObject,
+  stripVaultSecretsFromLocalStorage,
+  isVaultSecretKey,
+  VAULT_SECRET_KEYS,
+} from '../../../core/backupSafety';
 
 // Re-export cloud functions
 export const cloudSignIn = Cloud.cloudSignIn;
@@ -32,8 +40,26 @@ export function exportEncrypted(): void {
   bridge.promptSheet(
     t('settings.exportEncPassword') || 'أدخل كلمة مرور التشفير للنسخة الاحتياطية (أو اتركها فارغة للحفظ بدون تشفير):',
     async (password) => {
-      // If user confirms with empty password, offer unencrypted backup
+      // If user confirms with empty password, offer unencrypted backup.
       if (!password) {
+        // ── Refuse to export an encrypted vault in clear text ───────────────
+        // The Dexie middleware DECRYPTS on read, so collectAllLocalData()
+        // returns plaintext amounts and descriptions. Writing that to a file
+        // would hand out the user's entire financial history in the clear and
+        // silently undo the protection they enabled by setting a PIN.
+        // ────────────────────────────────────────────────────────────────────
+        const vaultIsEncrypted = Boolean(
+          (await DB.getSetting('pinHash')) || (await DB.getSetting('pin'))
+        );
+        if (vaultIsEncrypted) {
+          toast(
+            t('settings.errUnencryptedBlocked') ||
+              'بياناتك محمية برمز PIN، ولا يمكن تصديرها بدون كلمة مرور. أدخل كلمة مرور لحماية النسخة الاحتياطية.',
+            'error'
+          );
+          return;
+        }
+
         bridge.confirmSheet(
           'هل تريد تصدير نسخة احتياطية غير مشفرة؟ / Export unencrypted backup?',
           async () => {
@@ -92,13 +118,22 @@ export function exportEncrypted(): void {
  */
 async function collectAllLocalData(): Promise<Record<string, unknown>> {
   const allData: Record<string, unknown> = {};
-  
-  // 1. Read all IndexedDB tables dynamically
+
+  // 1. Read all IndexedDB tables dynamically.
+  //    The `settings` table holds this installation's key envelope
+  //    (wrappedMDK) and PIN hash. Those are properties of THIS DEVICE, not of
+  //    the data: exporting them lets a restore overwrite the target device's
+  //    envelope, leaving the user unable to unlock with their own PIN.
+  //    See core/backupSafety.ts.
   for (const table of DB.tables) {
-    allData[table.name] = await table.toArray();
+    const rows = await table.toArray();
+    allData[table.name] =
+      table.name === 'settings'
+        ? stripVaultSecretsFromRows(rows as Record<string, unknown>[])
+        : rows;
   }
 
-  // 2. Read all relevant localStorage values
+  // 2. Read all relevant localStorage values (device-scoped secrets removed).
   const localStoreData: Record<string, string> = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -106,10 +141,10 @@ async function collectAllLocalData(): Promise<Record<string, unknown>> {
       localStoreData[key] = localStorage.getItem(key) || '';
     }
   }
-  
-  allData['localStorage'] = localStoreData;
+
+  allData['localStorage'] = stripVaultSecretsFromLocalStorage(localStoreData);
   allData['exportedAt'] = new Date().toISOString();
-  allData['version'] = '21.7.16';
+  allData['version'] = APP_VERSION;
 
   return allData;
 }
@@ -197,6 +232,18 @@ async function performRestore(data: Record<string, unknown>): Promise<void> {
     throw new Error('ملف النسخة الاحتياطية فارغ أو غير متوافق');
   }
 
+  // ── Preserve this device's vault identity across the restore ─────────────
+  // A backup may originate from another device (or from before a PIN change).
+  // Its `settings` rows can contain that device's key envelope and PIN hash.
+  // Writing those here would replace the local envelope with one the current
+  // PIN cannot open — locking the user out of their own app, with the records
+  // unreadable even under the source PIN. Snapshot the local values and put
+  // them back verbatim. See core/backupSafety.ts.
+  const localVaultState = new Map<string, unknown>();
+  for (const key of VAULT_SECRET_KEYS) {
+    localVaultState.set(key, await DB.getSetting(key));
+  }
+
   try {
     toast(t('settings.importing') || 'جاري استيراد البيانات وتأمينها...', 'info');
 
@@ -207,27 +254,42 @@ async function performRestore(data: Record<string, unknown>): Promise<void> {
         await table.clear();
       }
 
-      // Restore all tables dynamically (including newly added tables like cards, assets)
+      // Restore all tables dynamically (including newly added tables like cards, assets).
+      // Writes go through the encryption middleware, so incoming records are
+      // re-encrypted under THIS device's key — which is exactly what makes a
+      // cross-device restore readable afterwards.
       for (const table of DB.tables) {
         const items = data[table.name];
         if (Array.isArray(items)) {
           // Permanently block Stored XSS by recursively sanitizing all string values in the records
-          const purifiedItems = purifyRecord(items);
-          await table.bulkPut(purifiedItems);
+          const purifiedItems = purifyRecord(items) as Record<string, unknown>[];
+          const safeItems =
+            table.name === 'settings' ? stripVaultSecretsFromRows(purifiedItems) : purifiedItems;
+          await table.bulkPut(safeItems);
         }
       }
 
       // Restore legacy settings format if present (when settings were saved as dict instead of table entries)
       if (data.settings && !Array.isArray(data.settings) && typeof data.settings === 'object') {
-        for (const [k, v] of Object.entries(data.settings as Record<string, unknown>)) {
+        const safeSettings = stripVaultSecretsFromObject(data.settings as Record<string, unknown>);
+        for (const [k, v] of Object.entries(safeSettings)) {
           await DB.settings.put({ id: k, key: k, value: v });
+        }
+      }
+
+      // Re-instate this installation's own vault secrets, which `clear()`
+      // removed along with everything else.
+      for (const [key, value] of localVaultState) {
+        if (value !== undefined && value !== null) {
+          await DB.settings.put({ id: key, key, value });
         }
       }
     });
 
-    // 2. Restore localStorage state
+    // 2. Restore localStorage state (never device-scoped key material)
     if (data.localStorage && typeof data.localStorage === 'object') {
       for (const [k, v] of Object.entries(data.localStorage as Record<string, string>)) {
+        if (isVaultSecretKey(k)) continue;
         localStorage.setItem(k, v);
       }
     }

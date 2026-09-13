@@ -2364,6 +2364,7 @@ export const locale_fr = {
   "settings.enabled": "Activé",
   "settings.encryption": "Chiffrement",
   "settings.errInvalidFile": "Fichier invalide",
+  "settings.errUnencryptedBlocked": "Vos données sont protégées par un code PIN et ne peuvent pas être exportées non chiffrées. Saisissez un mot de passe pour protéger la sauvegarde.",
   "settings.errPasswordShort": "Erreur : Le mot de passe doit comporter au moins 4 caractères.",
   "settings.errWrongPassword": "Mot de passe incorrect",
   "settings.exchangeRateApiKey": "Clé API ExchangeRate",

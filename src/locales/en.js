@@ -2364,6 +2364,7 @@ export const locale_en = {
   "settings.enabled": "Enabled",
   "settings.encryption": "Encryption",
   "settings.errInvalidFile": "Invalid file",
+  "settings.errUnencryptedBlocked": "Your data is protected by a PIN and cannot be exported unencrypted. Enter a password to protect the backup.",
   "settings.errPasswordShort": "Error: Password must be at least 4 characters.",
   "settings.errWrongPassword": "Incorrect password",
   "settings.exchangeRateApiKey": "ExchangeRate API Key",

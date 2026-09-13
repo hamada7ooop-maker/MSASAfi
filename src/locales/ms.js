@@ -2364,6 +2364,7 @@ export const locale_ms = {
   "settings.enabled": "Diaktifkan",
   "settings.encryption": "Penyulitan",
   "settings.errInvalidFile": "Fail tidak sah",
+  "settings.errUnencryptedBlocked": "Data anda dilindungi PIN dan tidak boleh dieksport tanpa penyulitan. Masukkan kata laluan untuk melindungi sandaran.",
   "settings.errPasswordShort": "Ralat: Kata laluan mestilah sekurang-kurangnya 4 aksara.",
   "settings.errWrongPassword": "Kata laluan salah",
   "settings.exchangeRateApiKey": "Kunci API Kadar Pertukaran",

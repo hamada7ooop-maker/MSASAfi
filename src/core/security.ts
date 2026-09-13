@@ -143,15 +143,26 @@ export async function checkDeviceIntegrity(): Promise<boolean> {
         toast('⚠️ تنبيه أمني: التطبيق يعمل على محاكي! / Warning: Running on Emulator', 'warning');
       }
 
-      // 3. Root detection check
-      if (typeof window !== 'undefined' && window.navigator && window.navigator.userAgent) {
-        const ua = window.navigator.userAgent.toLowerCase();
-        if (ua.includes('test-keys') || ua.includes('superus') || ua.includes('superuser') || ua.includes('rooted')) {
-          recordException('[Security Alert] Compromised device signature detected (Rooted)', new Error('Rooted device detected'));
-          toast('🚨 تحذير أمني: تم كشف صلاحيات الروت! الجهاز غير آمن! / Warning: Rooted device detected!', 'error');
-          return false;
-        }
-      }
+      // ── Root detection: REMOVED, deliberately ──────────────────────────
+      // This slot previously matched the WebView User-Agent against
+      // 'test-keys' / 'superuser' / 'rooted'. That check could never fire:
+      // 'test-keys' is a value in the Android build fingerprint
+      // (ro.build.tags), and 'superuser' is an app name — neither appears in
+      // a WebView UA on any device, rooted or not. It also returned `false`
+      // into a call site that discards the result.
+      //
+      // It was therefore pure security theatre: it detected nothing, blocked
+      // nothing, and its presence implied the app was checking for a
+      // compromised device when it was not. Code that appears to guard
+      // something but does not is worse than no code, because it stops anyone
+      // from asking whether the guard exists.
+      //
+      // Genuine root/tamper detection cannot be done from the WebView at all;
+      // it requires reading the filesystem, package list and build properties
+      // from native code (e.g. freeRASP or a small custom Capacitor plugin).
+      // That is a new native feature, scheduled separately — not a patch to
+      // this function. See AUDIT_REPORT.md, finding M-4.
+      // ────────────────────────────────────────────────────────────────────
     }
   } catch (error) {
     silentFail('[Security] Integrity check failed')(error);
@@ -234,9 +245,12 @@ export async function setupPrivacyShield(): Promise<void> {
     else removeBlur();
   });
 
-  // Dynamic integrity check
+  // Dynamic integrity check.
+  // The boolean result is intentionally not used to block the app: the only
+  // remaining check is anti-hooking, and a false positive there must not lock
+  // a legitimate user out of their own finances. It warns and reports.
   setTimeout(() => {
-    checkDeviceIntegrity();
+    void checkDeviceIntegrity();
   }, 1000);
 }
 

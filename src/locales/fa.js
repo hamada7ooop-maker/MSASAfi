@@ -2364,6 +2364,7 @@ export const locale_fa = {
   "settings.enabled": "فعال",
   "settings.encryption": "رمزگذاری",
   "settings.errInvalidFile": "فایل نامعتبر است",
+  "settings.errUnencryptedBlocked": "داده‌های شما با PIN محافظت می‌شود و بدون رمزگذاری قابل خروجی گرفتن نیست. برای محافظت از پشتیبان یک گذرواژه وارد کنید.",
   "settings.errPasswordShort": "خطا: رمز عبور باید حداقل 4 کاراکتر باشد.",
   "settings.errWrongPassword": "رمز عبور نادرست است",
   "settings.exchangeRateApiKey": "کلید Exchange Rate API",

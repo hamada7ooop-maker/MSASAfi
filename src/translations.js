@@ -2365,6 +2365,7 @@ export const translations = {
   "settings.enabled": "مفعّل",
   "settings.encryption": "التشفير",
   "settings.errInvalidFile": "ملف غير صالح",
+  "settings.errUnencryptedBlocked": "Your data is protected by a PIN and cannot be exported unencrypted. Enter a password to protect the backup.",
   "settings.errPasswordShort": "خطأ: يجب أن تكون كلمة المرور 4 رموز على الأقل.",
   "settings.errWrongPassword": "كلمة المرور غير صحيحة",
   "settings.exchangeRateApiKey": "مفتاح ExchangeRate-API (العملات)",

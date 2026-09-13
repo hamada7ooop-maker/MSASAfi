@@ -2364,6 +2364,7 @@ export const locale_tr = {
   "settings.enabled": "Etkin",
   "settings.encryption": "Şifreleme",
   "settings.errInvalidFile": "Geçersiz dosya",
+  "settings.errUnencryptedBlocked": "Verileriniz bir PIN ile korunuyor ve şifrelenmemiş olarak dışa aktarılamaz. Yedeği korumak için bir parola girin.",
   "settings.errPasswordShort": "Hata: Şifre en az 4 karakter olmalıdır.",
   "settings.errWrongPassword": "Yanlış şifre",
   "settings.exchangeRateApiKey": "ExchangeRate API Anahtarı",
