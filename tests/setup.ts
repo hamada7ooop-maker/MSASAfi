@@ -7,7 +7,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, beforeAll } from 'vitest';
 import nodeCrypto from 'node:crypto';
 
 // ── Polyfills ──────────────────────────────────────────────────────────────
@@ -34,6 +34,8 @@ if (!globalThis.crypto || !globalThis.crypto.subtle) {
 
 // IndexedDB for Dexie.
 await import('fake-indexeddb/auto');
+
+
 
 // ── Browser globals ────────────────────────────────────────────────────────
 
@@ -104,3 +106,16 @@ vi.mock('@capgo/capacitor-native-biometric', () => ({
     }),
   },
 }));
+
+// ── i18n fallback ──────────────────────────────────────────────────────────
+// Locales are fetched on demand; the app awaits the Arabic fallback before it
+// renders (see useAppInitialization). Tests call t() synchronously, so mirror
+// that guarantee here.
+//
+// This MUST be a beforeAll hook rather than a top-level await: a top-level
+// dynamic import runs before each file's vi.mock factories are hoisted, which
+// would load the real @capacitor-firebase modules and defeat those mocks.
+beforeAll(async () => {
+  const { ensureFallbackLoaded } = await import('../src/i18n/engine');
+  await ensureFallbackLoaded();
+});

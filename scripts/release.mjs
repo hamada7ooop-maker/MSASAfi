@@ -99,11 +99,12 @@ try {
         console.log("📝 Updated android/app/build.gradle versions");
     }
 
-    // Update translations.js and locales
-    const translationFiles = [
-        'src/translations.js',
-        ...fs.readdirSync('src/locales').map(f => path.join('src/locales', f))
-    ];
+    // Update every locale file. Arabic used to sit apart in
+    // src/translations.js; it now lives in src/locales/ar.js with the rest so
+    // it can be code-split, and this glob therefore already covers it.
+    const translationFiles = fs
+        .readdirSync('src/locales')
+        .map(f => path.join('src/locales', f));
     translationFiles.forEach(tf => {
         if (!tf.endsWith('.js')) return;
         let tContent = fs.readFileSync(tf, 'utf8');

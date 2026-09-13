@@ -2,7 +2,7 @@ import { useSettingsStore } from '@store/settingsStore';
 import { useAppStore } from '@store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { CURRENCIES } from '@/core/currency';
-import { translations } from '@/translations';
+import { getLoadedTranslations } from '@/i18n/engine';
 import { parseNum, sanitizeNumericInput, sanitizeIntegerInput, sanitizeNameInput } from '@/core/utils';
 
 /**
@@ -99,7 +99,7 @@ export function useFormat() {
     const mode = currencyDisplayMode || 'symbol';
     const lang = localStorage.getItem('masarifi_lang') || 'ar';
 
-    const transMap = translations as unknown as Record<string, Record<string, string>>;
+    const transMap = getLoadedTranslations();
     switch (mode) {
       case 'code':
         return baseCurrency;

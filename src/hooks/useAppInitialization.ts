@@ -26,9 +26,15 @@ export function useAppInitialization() {
         // captured. No-op unless VITE_CRASH_REPORTING=true on a native build.
         await initCrashlytics();
 
+        // Resolve and load the user's language BEFORE the concurrent
+        // initializers run. Locales are fetched on demand now, and several of
+        // those initializers (auth, notifications, services) call t() while
+        // they work — without this await they would render raw key names.
+        // This is the ordering guarantee the old static import gave for free.
+        await initSettings();
+
         // Parallel modular execution
         await Promise.allSettled([
-          initSettings(),
           initAuth(),
           initLoyalty(),
           initServices()

@@ -6,7 +6,9 @@ const CONFIG = {
     srcDir: 'src',
     localesDir: 'src/locales',
     backupDir: 'protected/translations_backup',
-    mainFile: 'src/translations.js',
+    // Arabic moved to src/locales/ar.js so it can be lazily loaded like the
+    // other languages; src/translations.js no longer exists.
+    mainFile: 'src/locales/ar.js',
 };
 
 async function getVersion() {
@@ -42,7 +44,7 @@ function validate() {
             execSync(`node -c ${file}`);
 
             // 3. Special check for translations.js (Arabic in EN)
-            if (file.endsWith('translations.js')) {
+            if (file.endsWith('ar.js')) {
                 const arabicRegex = /[\u0600-\u06FF]/;
                 const lines = content.split('\n');
                 let inEn = false;
@@ -55,7 +57,7 @@ function validate() {
                     if (inEn && arabicRegex.test(line)) {
                         // Ignore app name/info which we know has Arabic
                         if (!line.includes('app_info')) {
-                            console.warn(`⚠️ [translations.js:L${i+1}] Potential Arabic in English section: ${line.trim()}`);
+                            console.warn(`⚠️ [ar.js:L${i+1}] Potential Arabic in English section: ${line.trim()}`);
                         }
                     }
                 });
@@ -111,7 +113,7 @@ async function backup() {
     ensureDir(targetDir);
     ensureDir(path.join(targetDir, 'locales'));
 
-    fs.copyFileSync(CONFIG.mainFile, path.join(targetDir, 'translations.js'));
+    fs.copyFileSync(CONFIG.mainFile, path.join(targetDir, 'ar.js'));
     const locales = fs.readdirSync(CONFIG.localesDir);
     locales.forEach(f => {
         fs.copyFileSync(path.join(CONFIG.localesDir, f), path.join(targetDir, 'locales', f));
@@ -139,7 +141,7 @@ function restore() {
     const latest = path.join(CONFIG.backupDir, backups[0]);
     console.log(`⏪ Restoring from: ${latest}...`);
 
-    fs.copyFileSync(path.join(latest, 'translations.js'), CONFIG.mainFile);
+    fs.copyFileSync(path.join(latest, 'ar.js'), CONFIG.mainFile);
     const locales = fs.readdirSync(path.join(latest, 'locales'));
     locales.forEach(f => {
         fs.copyFileSync(path.join(latest, 'locales', f), path.join(CONFIG.localesDir, f));

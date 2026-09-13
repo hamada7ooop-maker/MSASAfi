@@ -1,5 +1,12 @@
-export const translations = {
-  "ar": {
+/**
+ * Arabic locale — loaded on demand, exactly like every other language.
+ *
+ * This used to live inline in src/translations.js, which the i18n engine
+ * imported statically. That pulled ~296 KB of Arabic strings into the eagerly
+ * preloaded app-i18n chunk for EVERY user, including those running the app in
+ * English, because Arabic doubles as the final fallback in t().
+ */
+export const locale_ar = {
   "a11y.back": "رجوع",
   "a11y.backHome": "العودة للرئيسية",
   "a11y.chatAssistant": "المساعد المالي الذكي",
@@ -3095,5 +3102,6 @@ export const translations = {
   "zakat.vatLabel": "الضريبة ({rate}%)",
   "zakat.vatRate": "نسبة الضريبة %",
   "zakat.yourZakat": "زكاتك"
-}
 };
+
+export default locale_ar;

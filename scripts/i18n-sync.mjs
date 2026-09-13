@@ -10,14 +10,13 @@ import fs from "fs";
 import path from "path";
 
 const LOCALES_DIR = "src/locales";
-const MAIN_FILE = "src/translations.js";
+// Arabic now lives in src/locales/ar.js like every other language, so it can
+// be code-split and loaded on demand. It used to be inlined in
+// src/translations.js, which forced it into the startup bundle for all users.
+const MAIN_FILE = "src/locales/ar.js";
 const ALL_LOCALES = ["ar", "en", "fr", "tr", "ur", "ms", "id", "fa", "es", "de", "it"];
 
 async function getLanguageKeys(lang) {
-  if (lang === "ar") {
-    const mod = await import("../src/translations.js");
-    return mod.translations?.ar || {};
-  }
   const mod = await import("../src/locales/" + lang + ".js");
   return mod.default || mod["locale_" + lang] || {};
 }

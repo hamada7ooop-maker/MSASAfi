@@ -105,8 +105,14 @@ export default defineConfig({
           if (normId.includes('react-router'))                    return 'vendor-router';
           // ── Capacitor & native bridge — unified to eliminate circular chunk TDZ ───
           if (normId.includes('@capacitor') || normId.includes('@ionic/pwa-elements')) return 'vendor-capacitor';
-          // ── Translations & i18n engine — isolated so components don't drag in AI ──
-          if (normId.includes('translations.js') || normId.includes('/src/i18n/')) return 'app-i18n';
+          // ── i18n engine — the locale DICTIONARIES are deliberately absent ──
+          // Each language in src/locales/ is dynamically imported by the
+          // engine, so Rollup gives every one its own chunk and a user
+          // downloads only the language they use. Listing them here would
+          // undo that. Arabic moved out of translations.js for the same
+          // reason: it is t()'s final fallback, so a static import forced the
+          // whole Arabic dictionary into the startup payload for everyone.
+          if (normId.includes('/src/i18n/')) return 'app-i18n';
           // ── AI Engine — strictly AI algorithms and assistant ──────────
           if (normId.includes('/src/core/ai/') || normId.includes('/src/ai.')) return 'feature-ai';
           // ── Core DB + security — always needed ────────────────────────

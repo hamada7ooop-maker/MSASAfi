@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
 import { useI18n } from '../../../i18n/index';
 import { toast } from '../../../toast';
-import { translations } from '../../../translations.js';
+import { getLoadedTranslations } from '../../../i18n/engine';
 import { APP_VERSION } from '../../../core/constants';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { useAppStore } from '../../../store/appStore';
@@ -447,7 +447,7 @@ export function Settings() {
     }
 
     const q = searchQuery.toLowerCase().trim();
-    const transMap = translations as unknown as Record<string, Record<string, string>>;
+    const transMap = getLoadedTranslations();
     // Search within current translation, English, Arabic, or custom keywords
     const matchesKeys = item.keys.some(key => {
       const currentVal = t(key).toLowerCase();

@@ -1,4 +1,3 @@
-import { translations } from '../translations.js';
 import { registerToBridge } from '../core/AppBridge';
 import { useSettingsStore } from '../store/settingsStore';
 import { silentFail } from '../core/errors';
@@ -49,7 +48,18 @@ export function setLang(l: LanguageCode | string): void {
   }
 }
 
-const PARTIAL_LOCALES: Record<Exclude<LanguageCode, 'ar'>, () => Promise<Record<string, unknown>>> = {
+/**
+ * Every language, Arabic included, is fetched on demand.
+ *
+ * Arabic used to be imported statically from ../translations.js. Because it is
+ * also the last-resort fallback in t(), that static import forced ~296 KB of
+ * Arabic strings into the eagerly preloaded startup chunk for every user — an
+ * English speaker paid for the whole Arabic dictionary before the first paint.
+ * Loading it through the same dynamic path as the others lets Rollup split it
+ * into its own chunk, so each user downloads one language.
+ */
+const LOCALE_LOADERS: Record<LanguageCode, () => Promise<Record<string, unknown>>> = {
+  ar: () => import('../locales/ar.js'),
   en: () => import('../locales/en.js'),
   fr: () => import('../locales/fr.js'),
   tr: () => import('../locales/tr.js'),
@@ -62,22 +72,70 @@ const PARTIAL_LOCALES: Record<Exclude<LanguageCode, 'ar'>, () => Promise<Record<
   it: () => import('../locales/it.js')
 };
 
-const trans = translations as Record<string, Record<string, string>>;
+/**
+ * The live translation registry. Starts empty and is filled by loadLanguage().
+ * Exported through getLoadedTranslations() for the few call sites that need to
+ * read another language's table directly (currency names, settings search).
+ */
+const trans: Record<string, Record<string, string>> = {};
+
+/** In-flight loads, so concurrent callers share one network/parse pass. */
+const inFlight = new Map<string, Promise<void>>();
+
+export function getLoadedTranslations(): Record<string, Record<string, string>> {
+  return trans;
+}
+
+/** True once the language's strings are resident and t() can resolve them. */
+export function isLanguageLoaded(lang: string): boolean {
+  return Boolean(trans[lang]);
+}
 
 export async function loadLanguage(targetLang: string): Promise<void> {
-  if (trans[targetLang] && targetLang !== 'ar') return; 
-  if (targetLang === 'ar') return;
+  if (trans[targetLang]) return;
 
-  if (PARTIAL_LOCALES[targetLang as Exclude<LanguageCode, 'ar'>]) {
+  const loader = LOCALE_LOADERS[targetLang as LanguageCode];
+  if (!loader) return;
+
+  const existing = inFlight.get(targetLang);
+  if (existing) return existing;
+
+  const task = (async () => {
     try {
-      const module = await PARTIAL_LOCALES[targetLang as Exclude<LanguageCode, 'ar'>]();
+      const module = await loader();
       // Support both default and named exports (locale_xx)
-      const localeData = (module.default || module[`locale_${targetLang}`] || Object.values(module)[0]) as Record<string, string>;
+      const localeData = (module.default ||
+        module[`locale_${targetLang}`] ||
+        Object.values(module)[0]) as Record<string, string>;
       trans[targetLang] = localeData;
     } catch (e) {
       silentFail(`[i18n] Failed to load locale: ${targetLang}`)(e);
+    } finally {
+      inFlight.delete(targetLang);
     }
-  }
+  })();
+
+  inFlight.set(targetLang, task);
+  return task;
+}
+
+/**
+ * Ensure the strings needed to render are resident — the user's language, and
+ * nothing else.
+ *
+ * t() keeps an English-then-Arabic fallback chain, but those are a runtime
+ * safety net, not something to preload: every shipped locale is verified at
+ * 100% coverage of the Arabic key set (scripts/i18n-sync.mjs, and
+ * tests/unit/i18nLazyLoading.test.ts), so the chain never actually resolves a
+ * key. Eagerly loading a fallback would mean every user downloading and
+ * parsing a SECOND full dictionary — ~224 KB for Arabic, ~168 KB for English —
+ * that is never read. That was precisely the L-4 defect.
+ *
+ * If a key ever does go missing the chain degrades to the key name, and the
+ * coverage test fails long before that reaches a user.
+ */
+export async function ensureFallbackLoaded(lang?: string): Promise<void> {
+  await loadLanguage(lang ?? getLang());
 }
 
 export function t(key: string, params: Record<string, string | number> = {}, fallback?: string): string {
@@ -182,7 +240,7 @@ export async function initLanguage(): Promise<void> {
   const { db: DB } = await import('../core/db/core');
   const saved = (await DB.getSetting('language')) as string | undefined;
   if (saved) {
-    await loadLanguage(saved);
+    await ensureFallbackLoaded(saved);
     setLang(saved);
   } else {
     // 100% Offline & Private: Guess language based on device locale settings, avoiding external network requests.
@@ -191,7 +249,7 @@ export async function initLanguage(): Promise<void> {
 
     const supported = Object.keys(LANGUAGE_META);
     const targetLang = supported.includes(deviceLang) ? deviceLang : 'en';
-    await loadLanguage(targetLang);
+    await ensureFallbackLoaded(targetLang);
     setLang(targetLang);
   }
   applyDirection();
@@ -208,7 +266,7 @@ export function applyDirection(): void {
 }
 
 export async function changeLanguage(newLang: string): Promise<void> {
-  await loadLanguage(newLang);
+  await ensureFallbackLoaded(newLang);
   setLang(newLang);
   const { db: DB } = await import('../core/db/core');
   await DB.setSetting('language', newLang);

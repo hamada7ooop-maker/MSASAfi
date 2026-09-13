@@ -5,7 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { bridge } from './AppBridge';
 import { CURRENCIES, CURRENCY_RATES } from './currency';
-import { translations } from '../translations.js';
+import { getLoadedTranslations } from '../i18n/engine';
 export const $ = (sel: string): HTMLElement | null => document.querySelector(sel);
 export const $$ = (sel: string): NodeListOf<HTMLElement> => document.querySelectorAll(sel);
 export const sanitize = (html: string): string => DOMPurify.sanitize(html);
@@ -48,7 +48,7 @@ export function getCurrencySymbol(): string {
   const mode = settings.currencyDisplayMode || 'symbol';
   const lang = localStorage.getItem('masarifi_lang') || settings.language || 'ar';
 
-  const transMap = translations as unknown as Record<string, Record<string, string>>;
+  const transMap = getLoadedTranslations();
   switch (mode) {
     case 'code':
       return baseCurrency;
