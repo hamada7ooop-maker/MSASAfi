@@ -1,5 +1,25 @@
 # Masarifi Project Status (v23.0.6)
 
+- **التوجيه 15 — الخيار A: تدقيق الإخفاقات الصامتة والاستثناءات المبتلعة وتصعيد الإخفاقات الحرجة إلى المستخدم (Directive 15: silentFail & Swallowed Exception Audit)**:
+  - **1. المنهجية والمسح الشامل (Full-Surface Scan)**:
+    - بناء ماسح برمجي مخصص [`scripts/directive15-scan.cjs`](file:///home/user/MSASAfi/scripts/directive15-scan.cjs) (قائم على مطابقة الأقواس مع تجريس التعليقات والنصوص) رصد **167 كتلة catch** و**261 موقع silentFail** عبر الكود المصدري، وصنّفها آلياً إلى: `SILENT_FAIL` (83) · `OTHER` (41) · `COMMENT_ONLY` (24) · `DOT_CATCH` (6) · `CRASHLYTICS` (5) · `LOGS_DEV` (5) · `PROPAGATES` (3).
+    - مراجعة يدوية لكل موقع من الطبقتين الحرجة والرمادية وتصنيفه وفق التوجيه إلى: **حميد فعلاً** (زخارف الكونفيتي، الاهتزاز، localStorage الاختياري — تُركت كما هي) / **يجب تسجيله** (silentFail → Crashlytics + سجل التطوير — المسار الصحيح أصلاً) / **يجب إظهاره للمستخدم** (عمليات كتابة مالية حرجة — وهنا اكتُشفت الفجوة).
+  - **2. الإصلاحات الحرجة — سبعة مواقع كانت تخفي فشلاً مالياً عن المستخدم (Tier-3: Should-Surface)**:
+    - **استعادة النسخة الاحتياطية** في [`BackupSyncCard.tsx`](file:///home/user/MSASAfi/src/features/settings/components/cards/BackupSyncCard.tsx): فشل `restoreBackup` (مثل فشل قراءة الملف) كان يمر بصمت تام — أخطر مسار ممكن لأن المستخدم يظن بياناته عادت. أُضيف toast خطأ بمفتاح جديد `settings.msg.restoreFailed`.
+    - **حذف الرحلة** في [`TravelBudget.tsx`](file:///home/user/MSASAfi/src/features/budgets/components/TravelBudget.tsx): فشل الحذف كان صامتاً بينما توست النجاح كان يجعل المستخدم يفترض أنه تم. أُضيف `travel.errDelete`.
+    - **حذف البطاقة** في [`BankCardsManager.tsx`](file:///home/user/MSASAfi/src/features/cards/components/BankCardsManager.tsx): البطاقة تبقى في المجموعة بلا تفسير. أُضيف `deleteFailed` في LOCAL_TEXTS.
+    - **تصدير التقارير** في [`ReportBuilderModal.tsx`](file:///home/user/MSASAfi/src/features/reports/components/ReportBuilderModal.tsx): المودال الوحيد في التطبيق الذي يبتلع فشل التصدير (كل مسارات التصدير الأخرى تعلن). أُضيف toast بمفتاح `report.exportFail` الموجود، والمودال يبقى مفتوحاً عند الفشل.
+    - **حفظ إعداد فاشل** في [`useSettings.ts`](file:///home/user/MSASAfi/src/features/settings/hooks/useSettings.ts): التحديث المتفائل كان يبقى معلقاً إلى الأبد بعد فشل الكتابة في IndexedDB (مفتاح TOGGLE يبدو مفعلاً وهو غير مخزن). أصبح الفشل **يعيد القيمة السابقة (rollback) + toast**.
+    - **تحميل نموذج المعاملة** في [`useAddTransactionForm.ts`](file:///home/user/MSASAfi/src/features/transactions/hooks/useAddTransactionForm.ts): فشل تحميل الحسابات/الفئات كان صامتاً وأول إشارة للمستخدم خطأ تحقق عند الحفظ. أصبح يُعلن فوراً.
+    - **رسالة حفظ البطاقة المضللة** في [`AddCardModal.tsx`](file:///home/user/MSASAfi/src/features/cards/components/AddCardModal.tsx): أي فشل حفظ — بما فيه خطأ قاعدة بيانات على نموذج مكتمل — كان يعرض «يرجى ملء جميع الحقول المطلوبة» فيبحث المستخدم عن حقل ناقص غير موجود. أصبحت الرسالة `saveFailed` الصادقة.
+  - **3. ترقيات التسجيل — خمسة فراغات مطلقة أصبحت مرصودة (Tier-2: Should-Log)**:
+    - توصيات لوحة التحكم في [`useHomeData.ts`](file:///home/user/MSASAfi/src/features/home/hooks/useHomeData.ts) (`.catch(() => {})` ← `silentFail`)، تغذية تصنيف AI في `useAddTransactionForm.ts`، كتابة `fcmLastError` في [`fcm.ts`](file:///home/user/MSASAfi/src/core/fcm.ts) (موقعان)، وحذف مرحلة التصفية في الاستعادة السحابية [`cloud.ts`](file:///home/user/MSASAfi/src/core/cloud.ts) — حيث كان الحذف المبتلع يعني استعادة فوق صفوف قديمة (تكرارات) بلا أثر.
+  - **4. التوطين والاختبارات (i18n & Verification)**:
+    - مفتاحان جديدان (`settings.msg.restoreFailed`، `travel.errDelete`) في **11 لغة** بتغطية 100% (3,142 مفتاحاً في العربية)، ومفتاحا LOCAL_TEXTS (`deleteFailed`، `saveFailed`) في **11 لغة** داخل `cardConstants.ts`.
+    - **6 اختبارات توصيف** جديدة في [`tests/unit/silentFailSurfacing.test.tsx`](file:///home/user/MSASAfi/tests/unit/silentFailSurfacing.test.tsx) — على مستوى الواجهة (توست `role=alert` فعلي) لا على مستوى التجسس على الدوال، لأن الخاصية المثبَّتة هي «المستخدم أُخبر».
+    - **اختبار الطفرات: 6/6 قُتلت** عبر [`scripts/directive15-mutations.cjs`](file:///home/user/MSASAfi/scripts/directive15-mutations.cjs) — كل طفرة تزيل إصلاحاً فتكشفها اختباراتها فوراً.
+  - **5. بوابات الجودة المعتمدة (Quality Gates)**: **882/882 اختباراً بنسبة 100% عبر 103 أجنحة** · `tsc --noEmit` صفر أخطاء · `eslint` صفر تحذيرات · `guardian.mjs validate` نظيف عبر 11 لغة.
+
 - **الإصدار الرسمي الشامل: التطهير الكامل للنسخة النظيفة، إحكام التبعيات وعلاج تدقيق الحزم، وترحيل أعلام NextGen، وتفعيل أمر الإطلاق المعتمد @abc (Official Release v23.0.5 & Clean Source Zero-Leak Milestone)**:
   - **1. بيانات التوزيع والتحقق الرسمية المعتمدة (Release Verification Data)**:
     - **ملف حزمة تطبيق الأندرويد الموقعة**: `Masarifi_V23.0.5_Signed_Release.apk` (الحجم: `16,612,598 bytes` / `15.84 MB`، بصمة التشفير SHA256: `1500C8034143AC63AA28DAF67AB05D2D1BCF125C09024F078DA533306AA5F44D`).

@@ -55,4 +55,32 @@ With structural L-1 deconstruction completed, we agree that transitioning from s
 ---
 
 ## 📝 Auditor Report & Next Step Proposals
-*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
+
+### Directive 15 — Option A: `silentFail` & Swallowed Exception Audit — COMPLETE ✅
+
+**1. Full-surface scan.** Built a purpose-made catch-block scanner (`scripts/directive15-scan.cjs`, brace-matching with comment/string masking — plain grep misses multi-line catches). Findings: **167 catch blocks + 261 `silentFail` sites**, auto-classified then hand-reviewed into the three directive tiers:
+
+| Tier | Count | Disposition |
+|---|---|---|
+| 1 — Truly benign | 24 comment-only + most `DOT_CATCH` | Left as-is (confetti, haptics, optional localStorage, offline session, `recordException`'s own guard) |
+| 2 — Should log | 83 `SILENT_FAIL` + 5 `CRASHLYTICS` | Correct by design (dev console + staged Crashlytics) |
+| 3 — Should surface | **7 critical sites** | **FIXED** — see below |
+
+**2. The core discovery — "the silent truth about silentFail".** In production (Crashlytics still staged/not active), a Tier-2 `silentFail` goes **nowhere at all**. The real risk was never the logged tier — it was the **7 money-path mutations sitting in Tier 2 when they belonged in Tier 3**: restore-backup failure, settings-persist failure (optimistic toggle stuck forever), card delete, trip delete, report-builder export, transaction-form load, and a *misleading* card-save message ("please fill all fields" shown for DB errors on a complete form).
+
+**3. Fixes shipped.**
+- **Tier-3 (surface)**: `BackupSyncCard` restore · `useSettings` update (with **optimistic-state rollback**) · `BankCardsManager` delete · `TravelBudget` trip delete · `ReportBuilderModal` export (modal now stays open on failure) · `useAddTransactionForm` load · `AddCardModal` honest save-error message.
+- **Tier-2 (un-void)**: 5 absolute voids upgraded to telemetry — `useHomeData` recommendations, AI category feedback, `fcm.ts` ×2 (`fcmLastError` persistence), and `cloud.ts` restore clear-phase delete (a swallowed delete there could resurrect stale rows as duplicates).
+- **i18n**: `settings.msg.restoreFailed` + `travel.errDelete` × 11 locales (100% parity, 3,142 ar keys) · `deleteFailed` + `saveFailed` in cards `LOCAL_TEXTS` × 11 languages.
+
+**4. Verification.**
+- **6 characterization tests** (`tests/unit/silentFailSurfacing.test.tsx`) — deliberately UI-level (assert the actual `.masarifi-toast[role=alert]` element, not function spies, because the pinned property is "the user is told").
+- **Mutation testing: 6/6 killed** (`scripts/directive15-mutations.cjs`) — removing any toast, removing the settings rollback, or reverting to the misleading `fillAll` message each fails its test immediately.
+- **Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · **882/882 tests (100%) across 103 suites** · `guardian.mjs validate` clean · i18n 100% coverage.
+- **Permanent memory updated**: `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.13).
+
+### Next Step Proposals (for Directive 16)
+
+1. **(Recommended) Fetch-error disambiguation**: the 12 data hooks (`useTransactions`, `useDebts`, `useGoals`, `useBudgets`, `useAccounts`, `useBills`, `useInvestments`, `useHomeData`, `useSearch`, `useReportsData`, `useLoyalty`, `useAdvisorData`) still swallow fetch failures at Tier 2 — an empty list is ambiguous between "no data" and "load failed". Each hook needs an explicit `error` state + empty-vs-error UI split. This is the natural continuation of the runtime-reliability phase.
+2. **Crashlytics activation** (the 4 documented steps in `src/core/crashlytics.ts`): until it ships, the entire Tier-2 layer is dev-only. This is the single highest-leverage step to make every remaining `silentFail` actually observable in production.
+3. **Option B from Directive 15** (modal backdrop sibling refactor, 25 panels) remains available if structural work is preferred.
