@@ -99,7 +99,12 @@ export function ReportBuilderModal() {
       setReportBuilderOpen(false);
       toast(t('report.success'));
     } catch (err) {
+      // Directive 15 (silentFail audit): surfaced — the user pressed
+      // "generate report", the spinner stopped, and nothing else happened.
+      // Every other export path in the app toasts on failure; this modal was
+      // the only one that swallowed it.
       silentFail('[ReportBuilderModal] Export error')(err);
+      toast(t('report.exportFail') || 'فشل التصدير', 'error');
     } finally {
       setIsGenerating(false);
     }

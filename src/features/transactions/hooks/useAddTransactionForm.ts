@@ -14,6 +14,7 @@ import { useIsMounted } from '../../../hooks/useIsMounted';
 import { parseVoiceInput, detectDuplicates } from '../../../core/ai/detectors';
 import { voiceAssistant } from '../../../services/voiceAssistant';
 import { silentFail } from '../../../core/utils';
+import { t as tStatic } from '../../../i18n/engine';
 
 export function useAddTransactionForm() {
   const { t } = useI18n();
@@ -183,7 +184,12 @@ export function useAddTransactionForm() {
         if (defaultCat && isMounted.current) setSelectedCategory(defaultCat.name);
       }
     } catch (err) {
+      // Directive 15 (silentFail audit): surfaced. If accounts/categories
+      // fail to load here the form renders with empty pickers, and the first
+      // feedback the user gets is a validation error on save — long after
+      // the actual failure. Say it when it happens.
       silentFail('[AddTransaction] Error loading data')(err);
+      toast(tStatic('common.error') || 'Error', 'error');
     }
     // `editId` IS a real dependency: it comes from the URL, so navigating
     // from one transaction's edit screen to another must reload the form.
@@ -313,9 +319,12 @@ export function useAddTransactionForm() {
 
     // Record category feedback if AI was used
     if (description && selectedCategory) {
+      // Directive 15: best-effort learning signal — the save already
+      // succeeded, so this must never disturb the user. But a total void
+      // hid persistent feedback-pipeline failures; route to telemetry.
       import('../../../ai.js')
         .then((m) => m.recordCategoryFeedback(description, selectedCategory))
-        .catch(() => {});
+        .catch(silentFail('[AddTransaction] AI category feedback error'));
     }
 
     try {

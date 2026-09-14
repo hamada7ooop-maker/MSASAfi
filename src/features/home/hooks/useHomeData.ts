@@ -303,7 +303,7 @@ export function useHomeData(
           if (isMounted.current) {
             setExtras(prev => ({ ...prev, recommendations: recs }));
           }
-        }).catch(() => {});
+        }).catch(silentFail('[useHomeData] recommendations error'));
 
         if (isMounted.current) {
           setExtras(prev => ({ 

@@ -359,7 +359,13 @@ export async function cloudRestore(encPassword: string): Promise<{ backed_up_at:
       const delFn = `delete${storeKey.charAt(0).toUpperCase() + storeKey.slice(1, -1)}`;
       const delFunc = dbRecord[delFn];
       if (delFunc && typeof item === 'object' && item !== null && 'id' in item) {
-        await delFunc((item as { id: string }).id).catch(() => {});
+        // Directive 15: a swallowed delete here means the restore proceeds
+        // over stale rows — duplicates or resurrected records. The restore
+        // itself still reports its overall failure to the user; this log
+        // makes the clear-phase visible to telemetry instead of void.
+        await delFunc((item as { id: string }).id).catch(
+          silentFail('[CloudRestore] clear-phase delete failed')
+        );
       }
     }
   }

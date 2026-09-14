@@ -89,7 +89,7 @@ export async function initFCM(
       const errorObj = err as { error?: string; message?: string };
       const errMsg = String(errorObj?.error || errorObj?.message || JSON.stringify(err) || 'unknown');
       silentFail('[FCM] registrationError: ' + errMsg)(err);
-      await DB.setSetting('fcmLastError', errMsg).catch(() => {});
+      await DB.setSetting('fcmLastError', errMsg).catch(silentFail('[FCM] persist fcmLastError'));
       toast(t('push.failed') || '❌ فشل تسجيل الإشعارات: ' + errMsg.slice(0, 60), 'error');
     }).catch(silentFail('[FCM] addListener registrationError'));
 
@@ -130,7 +130,7 @@ export async function initFCM(
     const err = e as Error;
     const msg = String(err?.message || e);
     silentFail('[FCM] Error: ' + msg)(e);
-    await DB.setSetting('fcmLastError', msg).catch(() => {});
+    await DB.setSetting('fcmLastError', msg).catch(silentFail('[FCM] persist fcmLastError'));
     return { ok: false, reason: msg };
   }
 }

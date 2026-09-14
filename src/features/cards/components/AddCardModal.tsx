@@ -174,8 +174,14 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
       }
       onClose();
     } catch (e) {
+      // Directive 15 (silentFail audit): this catch used to show the
+      // "please fill in all required fields" message for EVERY failure —
+      // including a DB write error on a fully valid form. A validation
+      // message on a non-validation error sends the user hunting for a
+      // missing field that does not exist. Keep silentFail for telemetry,
+      // but say what actually happened.
       silentFail('[BankCardsManager] handleSave error')(e);
-      toast(getTxt('fillAll'), 'error');
+      toast(getTxt('saveFailed'), 'error');
     }
   };
 

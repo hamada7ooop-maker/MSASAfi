@@ -255,7 +255,11 @@ export function TravelBudget() {
         setSelectedTrip(null);
         loadData();
       } catch (err) {
+        // Directive 15 (silentFail audit): surfaced — a failed delete left the
+        // trip on screen with no explanation, while the success toast for
+        // deletes made users assume it had worked.
         silentFail('[TravelBudget] Failed to delete trip')(err);
+        toast(t('travel.errDelete') || 'حدث خطأ أثناء الحذف', 'error');
       }
     },
     t('action.delete') || 'حذف',

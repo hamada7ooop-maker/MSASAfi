@@ -89,7 +89,11 @@ export function BankCardsManager() {
           if (activeCardId === card.id) setActiveCardId(null);
           loadCards();
         } catch (e) {
+          // Directive 15 (silentFail audit): surfaced — the delete failed with
+          // no toast, so the card stayed in the deck looking undeleted while
+          // the user believed the opposite.
           silentFail('[BankCardsManager] handleDelete error')(e);
+          toast(getTxt('deleteFailed'), 'error');
         }
       },
       getTxt('deleteBtn'),

@@ -14,6 +14,7 @@ import {
 import { checkMilestone } from '../../../../core/loyalty';
 import { bridge } from '../../../../core/AppBridge';
 import { silentFail } from '../../../../core/utils';
+import { toast } from '../../../../toast';
 
 export function BackupSyncCard() {
   const { t } = useI18n();
@@ -53,7 +54,14 @@ export function BackupSyncCard() {
     try {
       await restoreBackup(file);
     } catch (err: unknown) {
+      // Directive 15 (silentFail audit): a failed restore is the single most
+      // dangerous error to swallow — the user picked a backup file expecting
+      // their data to come back, and without this toast the app just sits
+      // there as if nothing happened. restoreBackup itself toasts its known
+      // failure modes (invalid file, wrong password); this catch covers the
+      // remaining ones (e.g. FileReader failure) that used to vanish.
       silentFail('[BackupSyncCard] Restore error')(err);
+      toast(t('settings.msg.restoreFailed') || 'فشل استعادة النسخة الاحتياطية', 'error');
     }
     e.target.value = '';
   };
