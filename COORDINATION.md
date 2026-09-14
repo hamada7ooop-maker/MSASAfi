@@ -7,80 +7,53 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ---
 
-## Current Directives: Release v23.1.14 Approved & Directive 15 Authorized
+## Current Directives: Release v23.1.15 Approved & Directive 16 Authorized
 
-Monumental achievement on Directive 14! With the deconstruction of `AddCardModal.tsx` (632 ➔ 307 lines, -51%), **the entire >600-line God Component list (L-1) from `AUDIT_REPORT.md` is now 100% CLEARED across the entire codebase!**
+Outstanding execution on Directive 15! Unmasking silently-swallowed exceptions, classifying 167 catch blocks, implementing optimistic-state rollbacks in `useSettings`, surfacing real toasts on 7 critical data-mutation paths, and killing 6/6 mutations elevates runtime reliability and transparency to a new standard.
+
 - **Release Verification Data (Built, Tested & Signed Locally)**:
-  - **Release Tag**: **v23.1.14** (`55773164fbe167905cd464e642dbd20a25f527c7`)
-  - **APK**: `Masarifi_V23.1.14_Signed_Release.apk` (16,637,083 bytes / 15.87 MB) — SHA256: `4D2318EFAD8E585EFC58FBA68EC1DC3C83B27C7CF08919A56F0E826CE7797048`
-  - **Clean Source ZIP**: `Masarifi_V23.1.14_Source_Clean.zip` (9,212,194 bytes / 8.79 MB) — SHA256: `C9C4814BACEBCB0327D94C5252EFDC553D10ED8D9E5240EFD73B6DA20C3BDD5A`
-  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` 189 tips clean across 11 locales.
-  - **Tests**: **876 / 876 passing (100%)** across **102 test suites**.
+  - **Release Tag**: **v23.1.15** (`bfef892ce1473c58777e24b841efd6c5947757c1`)
+  - **APK**: `Masarifi_V23.1.15_Signed_Release.apk` (16,637,835 bytes / 15.87 MB) — SHA256: `BF1A19D8C64DDE05FE791812B529BE3D77692447DCB9638EB664BA61324E6B8D`
+  - **Clean Source ZIP**: `Masarifi_V23.1.15_Source_Clean.zip` (9,223,684 bytes / 8.80 MB) — SHA256: `0F26B3B59FDF0B8B0E4E36CD5FB2577999B43E0C5288D042243194E2574CF40A`
+  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean across all 11 locales.
+  - **Tests**: **882 / 882 passing (100%)** across **103 test suites**.
+  - **Permanent Memory Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (Section 12.30) permanently recorded.
 
 - **Architectural Findings & Approvals**:
-  - **Validation Invariant Maintained**: Strongly applaud keeping all card saving/validation logic in the parent `handleSave` while isolating formatting and input pure functions into `cardInputFormat.ts`. This prevents data-contract divergence between UI and storage.
-  - **Network Isolation**: `useBinDetection.ts` cleanly encapsulates the single outbound network surface of the card feature with fail-soft guarantees.
-  - **Mutation Testing Rigor**: 11/11 mutants killed across 4 iterative rounds, successfully surfacing live preview sync, reverse CVV card flip, and active theme switches.
-  - **Permanent Memory Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (Section 12.29) have been permanently updated.
+  - **Toast-Level Characterization**: Testing `.masarifi-toast[role=alert]` elements directly ensures tests assert what the user actually experiences rather than verifying internal function mocks.
+  - **Optimistic State Rollback Invariant**: `useSettings` now properly reverts state when IndexedDB/Dexie write fails, preventing silent desync between UI switches and storage.
+  - **Honest Error Messaging**: Replacing the misleading "fill all fields" toast with genuine failure toasts prevents user confusion during transient database errors.
 
 ---
 
-### Authorized Directive 15: Behavioural Hardening — Silent Fail Audit OR Modal Sibling Refactor
+### Authorized Directive 16: Data Fetch Hook Disambiguation (Empty State vs. Load Failure)
 
-With structural L-1 deconstruction completed, we agree that transitioning from structural refactoring to **behavioural correctness and runtime reliability** is the optimal next phase:
+We authorize **Option 1 (Fetch-Error Disambiguation)** as the primary objective for Directive 16, continuing the runtime reliability initiative:
 
-#### Option A (Recommended by Auditor — Runtime Reliability): `silentFail` & Swallowed Exception Audit
-- **Problem**: Catch-all blocks and `silentFail` patterns scattered across storage and service boundaries can silently swallow actual errors, masking regressions or leaving state inconsistent without alerting the user or telemetry.
-- **Scope**:
-  - Review `silentFail` invocations and empty `catch (e) {}` blocks across `src/core/` and `src/features/`.
-  - Classify each into:
-    1. **Truly benign** (e.g. non-critical optional cache miss, unsupported optional hardware feature).
-    2. **Should log** (route through `Crashlytics` / `AppLogger.warn` in dev).
-    3. **Should surface** (propagate to UI toast / error state for user visibility).
-  - Add characterization tests verifying that critical errors are no longer silently masked.
+#### Objective:
+Currently, the 12 core data hooks (`useTransactions`, `useDebts`, `useGoals`, `useBudgets`, `useAccounts`, `useBills`, `useInvestments`, `useHomeData`, `useSearch`, `useReportsData`, `useLoyalty`, `useAdvisorData`) catch fetch failures and return empty arrays/default state. This creates an ambiguity: the UI cannot differentiate between a genuinely empty entity list (e.g. new user with zero transactions) and a broken database/query failure.
 
-#### Option B (Structural Modal Hygiene): Modal Backdrop & Content Sibling Refactor
-- Refactor the 25 modal propagation-guard panels noted in Directive 13 so that modal backdrops and dialog containers are rendered as clean siblings rather than nested click-eaters with `e.stopPropagation()`.
+#### Scope of Work:
+1. **Hook Error Surface**:
+   - Expose explicit `error: Error | null` (or boolean `isError`, plus optional `retry()` callback) from each data hook.
+2. **UI Disambiguation**:
+   - Ensure corresponding views render distinct states for "No items recorded yet" vs. "Failed to load data (Retry)".
+3. **Graceful Fallback & i18n**:
+   - Include clear localized error messages across all 11 languages using existing keys or standard translation patterns.
+4. **Verification & Mutation Testing**:
+   - Add characterization tests confirming the hook exposes `error` when DB queries reject.
+   - Run mutation testing (e.g. flipping error catch back to returning `[]`) to verify tests catch regressions.
 
-#### Option C (Data Structure Pruning): Split Static Data Arrays
-- Modularize `cardConstants.ts` (775 lines) or `demoData.ts` (875 lines) by category/region if organizational neatness is desired.
+*(Secondary Options: Crashlytics native activation or modal sibling refactor remain optional bonus items if time permits).*
 
 ### Verification Gate Requirements:
 - TypeScript: `npx tsc --noEmit` -> 0 errors.
 - ESLint: `npm run lint` -> 0 warnings/errors.
-- Vitest: All 876 existing + new tests passing (100%).
+- Vitest: All 882 existing + new tests passing (100%).
 - Translations: Validate any newly introduced keys with `node scripts/guardian.mjs validate`.
 - Update `## 📝 Auditor Report & Next Step Proposals` before committing and pushing.
 
 ---
 
 ## 📝 Auditor Report & Next Step Proposals
-
-### Directive 15 — Option A: `silentFail` & Swallowed Exception Audit — COMPLETE ✅
-
-**1. Full-surface scan.** Built a purpose-made catch-block scanner (`scripts/directive15-scan.cjs`, brace-matching with comment/string masking — plain grep misses multi-line catches). Findings: **167 catch blocks + 261 `silentFail` sites**, auto-classified then hand-reviewed into the three directive tiers:
-
-| Tier | Count | Disposition |
-|---|---|---|
-| 1 — Truly benign | 24 comment-only + most `DOT_CATCH` | Left as-is (confetti, haptics, optional localStorage, offline session, `recordException`'s own guard) |
-| 2 — Should log | 83 `SILENT_FAIL` + 5 `CRASHLYTICS` | Correct by design (dev console + staged Crashlytics) |
-| 3 — Should surface | **7 critical sites** | **FIXED** — see below |
-
-**2. The core discovery — "the silent truth about silentFail".** In production (Crashlytics still staged/not active), a Tier-2 `silentFail` goes **nowhere at all**. The real risk was never the logged tier — it was the **7 money-path mutations sitting in Tier 2 when they belonged in Tier 3**: restore-backup failure, settings-persist failure (optimistic toggle stuck forever), card delete, trip delete, report-builder export, transaction-form load, and a *misleading* card-save message ("please fill all fields" shown for DB errors on a complete form).
-
-**3. Fixes shipped.**
-- **Tier-3 (surface)**: `BackupSyncCard` restore · `useSettings` update (with **optimistic-state rollback**) · `BankCardsManager` delete · `TravelBudget` trip delete · `ReportBuilderModal` export (modal now stays open on failure) · `useAddTransactionForm` load · `AddCardModal` honest save-error message.
-- **Tier-2 (un-void)**: 5 absolute voids upgraded to telemetry — `useHomeData` recommendations, AI category feedback, `fcm.ts` ×2 (`fcmLastError` persistence), and `cloud.ts` restore clear-phase delete (a swallowed delete there could resurrect stale rows as duplicates).
-- **i18n**: `settings.msg.restoreFailed` + `travel.errDelete` × 11 locales (100% parity, 3,142 ar keys) · `deleteFailed` + `saveFailed` in cards `LOCAL_TEXTS` × 11 languages.
-
-**4. Verification.**
-- **6 characterization tests** (`tests/unit/silentFailSurfacing.test.tsx`) — deliberately UI-level (assert the actual `.masarifi-toast[role=alert]` element, not function spies, because the pinned property is "the user is told").
-- **Mutation testing: 6/6 killed** (`scripts/directive15-mutations.cjs`) — removing any toast, removing the settings rollback, or reverting to the misleading `fillAll` message each fails its test immediately.
-- **Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · **882/882 tests (100%) across 103 suites** · `guardian.mjs validate` clean · i18n 100% coverage.
-- **Permanent memory updated**: `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.13).
-
-### Next Step Proposals (for Directive 16)
-
-1. **(Recommended) Fetch-error disambiguation**: the 12 data hooks (`useTransactions`, `useDebts`, `useGoals`, `useBudgets`, `useAccounts`, `useBills`, `useInvestments`, `useHomeData`, `useSearch`, `useReportsData`, `useLoyalty`, `useAdvisorData`) still swallow fetch failures at Tier 2 — an empty list is ambiguous between "no data" and "load failed". Each hook needs an explicit `error` state + empty-vs-error UI split. This is the natural continuation of the runtime-reliability phase.
-2. **Crashlytics activation** (the 4 documented steps in `src/core/crashlytics.ts`): until it ships, the entire Tier-2 layer is dev-only. This is the single highest-leverage step to make every remaining `silentFail` actually observable in production.
-3. **Option B from Directive 15** (modal backdrop sibling refactor, 25 panels) remains available if structural work is preferred.
+*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
