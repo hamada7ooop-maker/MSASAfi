@@ -40,17 +40,25 @@ import { sanitizeCrashPayload } from './crashSanitizer';
  *     `initCrashlytics` first, and a `silentFail` reaches the plugin through
  *     the sanitizer without throwing (the "safe test trigger").
  *
- * ## Enabling it later (owner steps — in this order)
+ * ## Enabling it (Directive 17 part 2 — everything is staged conditionally)
  *
- *   1. Add `android/app/google-services.json` from the Firebase console
- *      (owner-only credential).
- *   2. Add `apply plugin: 'com.google.gms.google-services'` and
- *      `apply plugin: 'com.google.firebase.crashlytics'` to android/app/build.gradle.
- *   3. Set `VITE_CRASH_REPORTING=true` for the release build
- *      (guards already verified by tests — see above).
- *   4. Run a release build and confirm a test crash arrives.
+ * The native side now ACTIVATES ITSELF when the credential is present:
+ * `android/app/build.gradle` applies the Google Services + Crashlytics
+ * plugins **only if `android/app/google-services.json` exists**, and
+ * `scripts/release.mjs` sets `VITE_CRASH_REPORTING=true` for the web build
+ * under the same condition. Therefore the owner's activation checklist is:
  *
- * Nothing in step 3 can leak data on its own: every payload still passes
+ *   1. Download `google-services.json` from the Firebase console (package
+ *      name `com.masarifi.app`) and drop it into `android/app/`.
+ *   2. Run the release script — plugins apply, the flag is set, and a test
+ *      crash arrives in the Firebase console. Done.
+ *
+ * Until then both sides stay safely inert: builds are green without the
+ * file, the runtime gate is a no-op, and `recordException` on web falls
+ * back to the dev log (or full silence in production web builds, where
+ * `import.meta.env.DEV` is statically false).
+ *
+ * Nothing in this path can leak data on its own: every payload still passes
  * through the sanitizer first.
  */
 

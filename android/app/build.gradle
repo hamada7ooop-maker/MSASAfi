@@ -1,5 +1,19 @@
 apply plugin: 'com.android.application'
 
+// ─── Directive 17 part 2: conditional Crashlytics activation ────────────────
+// google-services.json is a per-owner Firebase credential, deliberately
+// gitignored (see .gitignore). The plugin classpaths are already declared in
+// the root build.gradle, and the native library already arrives through
+// @capacitor-firebase/crashlytics (see capacitor.build.gradle). Applying the
+// Google Services + Crashlytics plugins ONLY when the file exists keeps every
+// build green without it — dropping the file into android/app/ is then the
+// ONLY step needed to activate crash reporting end-to-end (scripts/release.mjs
+// mirrors this check and sets VITE_CRASH_REPORTING=true accordingly).
+if (file('google-services.json').exists()) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+}
+
 android {
     namespace "com.masarifi.app"
     compileSdk rootProject.ext.compileSdkVersion

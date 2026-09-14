@@ -36,4 +36,35 @@ As noted in your next-step proposal, proceed with **Crashlytics Native Activatio
 ---
 
 ## 📝 Auditor Report & Next Step Proposals
-*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
+
+## Directive 17 Part 2 — Final Report (authorized in 41707e8)
+
+**The engineering move: inversion of the activation dependency.** The four documented steps were blocked as long as they required the owner's `google-services.json` to be present *simultaneously* with manual gradle edits and a build flag. Part 2 inverts that: **the build system now senses the file and activates itself**. Steps 2–3 are no longer owner steps at all.
+
+### What was executed
+
+1. **Conditional native activation** — `android/app/build.gradle` now applies `com.google.gms.google-services` and `com.google.firebase.crashlytics` **only when `android/app/google-services.json` exists**. The classpaths were already declared in the root gradle and the native library already arrives via `@capacitor-firebase/crashlytics` (capacitor.build.gradle) — only the two `apply plugin` lines were ever missing, and they are now condition-gated.
+2. **Automated release flag** — `scripts/release.mjs` mirrors the same condition before building web assets: file present → builds with `VITE_CRASH_REPORTING=true` (loud status line); absent → builds as today with an explicit warning that crash reports will not arrive.
+3. **Owner checklist collapsed from 4 steps to 1:** drop `google-services.json` (package `com.masarifi.app`) into `android/app/`, run the release script. Plugins apply, the flag sets itself, reports flow. Documentation updated in `src/core/crashlytics.ts` and `.env.example`.
+4. **Verification item 3 (web + native, non-fatal exceptions and dev logs):** new test case pins the web path — gate closed → nothing transmitted, unsanitized dev log to the developer's own console, never throws. The production-web path needs no test: `import.meta.env.DEV` is statically replaced with `false` by vite at build time (dead-code elimination) — the first attempt to test it via `vi.stubEnv('DEV','false')` failed for exactly this reason, which is itself the proof that the value is build-time, not runtime; documented in-test. The native path remains fully covered (13 module tests + 3 wiring tests).
+
+### Verification item 2 (build & signing integrity)
+
+- The signing path (`MASARIFI_RELEASE_*` signingConfigs / release buildType) is untouched, verbatim.
+- **Web build verified both ways**: `npm run build` clean, and `VITE_CRASH_REPORTING=true npm run build` clean (only asset hashes differ — env is inlined).
+- **Native gradle build**: this workspace has no java/Android SDK, so the actual `gradlew assembleRelease` must run on the owner's machine. The conditional pattern is a standard, stable idiom for repos that keep Firebase credentials out of Git. Owner verification command (run before and after dropping the file): `cd android && ./gradlew assembleRelease` — both runs must be green.
+
+### Verification item (the test crash, step 4)
+
+Cannot be executed from this workspace (no device/emulator). After the owner drops the file and runs `npm run release`, any non-fatal error the app hits (or a manual `recordException` via the debug path) should appear in Firebase Console within minutes; the safe-trigger semantics (never throwing into the caller, payload redaction, first-position init) are all test-pinned in `crashlytics.test.ts` and `crashlyticsWiring.test.tsx`.
+
+### Gates (all green)
+
+**918/918 tests (100%) across 107 suites** (917 prior + 1 new; zero regressions) · `tsc --noEmit` 0 · `npm run lint` 0 · `guardian.mjs validate` clean · web build clean both flag states · zero new i18n keys.
+
+**Permanent memory updated:** `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.18).
+
+### Next Step Proposals
+
+1. **(Owner, single step) Drop `google-services.json` into `android/app/`** and run `npm run release` — then confirm a test crash arrives in Firebase Console. This is the entire remaining distance to full production observability; everything else is staged, conditional, and test-pinned.
+2. **v23.2 release pass** once Crashlytics is confirmed live on the owner's machine — the full `ci:check` chain (coverage → security scan → audit gate → lint → build) plus the signed APK, as the closing milestone of the 23.x series.

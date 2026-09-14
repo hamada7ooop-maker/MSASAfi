@@ -75,6 +75,30 @@ describe('Crashlytics Unit Tests (crashlytics.ts)', () => {
       expect(FirebaseCrashlytics.setCrashlyticsCollectionEnabled).not.toHaveBeenCalled();
       expect(FirebaseCrashlytics.recordException).not.toHaveBeenCalled();
     });
+
+    it('on web (gate closed), recordException falls back to the dev log without throwing', () => {
+      // Directive 17 part 2, verification item 3: dev logs safely handled on
+      // the WEB target. import.meta.env.DEV is true under vitest, mirroring
+      // a development build: the unsanitized error goes to the developer's
+      // own console (redaction would only obstruct debugging), and the
+      // plugin is never touched.
+      //
+      // (A production web build needs no test: `import.meta.env.DEV` is
+      // statically replaced with `false` by vite at build time, so the dev
+      // log branch is dead-code-eliminated — there is no runtime condition
+      // left to verify.)
+      const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+
+      expect(() => recordException('dev only message', new Error('boom'))).not.toThrow();
+      expect(FirebaseCrashlytics.recordException).not.toHaveBeenCalled();
+      expect(errSpy).toHaveBeenCalledWith(
+        expect.stringContaining('dev only message'),
+        expect.any(Error)
+      );
+
+      errSpy.mockRestore();
+    });
   });
 
   describe('when enabled', () => {

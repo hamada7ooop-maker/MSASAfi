@@ -120,6 +120,22 @@ try {
     console.log("📝 Updated version strings in all translation files");
 
     // 1. Build Web Assets
+    // Directive 17 part 2: crash reporting flag mirrors the Gradle-side
+    // conditional plugin application. When the owner has placed their
+    // google-services.json, the release build carries VITE_CRASH_REPORTING=true
+    // and the native plugins activate (android/app/build.gradle applies them
+    // only when the file exists). Without the file, reporting stays safely
+    // off — the app's runtime gate (isCrashReportingEnabled) is a no-op and
+    // nothing crashes.
+    const googleServicesFile = path.join('android', 'app', 'google-services.json');
+    if (fs.existsSync(googleServicesFile)) {
+        process.env.VITE_CRASH_REPORTING = 'true';
+        console.log("🔥 google-services.json detected — building with VITE_CRASH_REPORTING=true (Crashlytics ACTIVE).");
+    } else {
+        delete process.env.VITE_CRASH_REPORTING;
+        console.warn("⚠️  android/app/google-services.json NOT found — building WITHOUT crash reporting.");
+        console.warn("    To activate: place the file from the Firebase Console, then re-run the release.");
+    }
     console.log("📦 Building web assets...");
     execSync('npm run build', { stdio: 'inherit' });
 
