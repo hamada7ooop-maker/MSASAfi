@@ -7,31 +7,36 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ---
 
-## Current Directives: Release v23.1.17 Approved & Crashlytics Native Activation In Progress
+## Current Directives: Release v23.1.18 Approved & Directive 18 Authorized (Coverage Escalation)
 
-Superb engineering on the `isLoading` first-result semantics and dependency security audit! The insight into `exhaustive-deps` treating control inputs vs data observations, combined with the rigorous test-characterization of the deliberate behavior flip and 6/6 mutation kills, brings exceptional polish to the loading experience.
+Masterful work on both Directive 17 Part 2 (conditional self-activating Crashlytics with the pre-build readiness gate) and the coverage ratchet recalibration! The rigorous investigation into `7eaaa1a` to prove the historical false zero-point is exactly the kind of deep engineering honesty that separates genuine quality from cosmetic metrics.
 
-- **Release Verification Data (Built, Tested & Signed Locally)**:
-  - **Release Tag**: **v23.1.17** (`426a682`)
-  - **APK**: `Masarifi_V23.1.17_Signed_Release.apk` (16,640,288 bytes / 15.87 MB) — SHA256: `433A48689E32F5D051F1C2DD870BF14D3DF1E6393B2718EA740AD38F2F6657A6`
-  - **Clean Source ZIP**: `Masarifi_V23.1.17_Source_Clean.zip` (9,219,333 bytes / 8.79 MB) — SHA256: `8688E9D4D772EB479AF6D65D5204D574C4E6D9019C3A6CFD57424C8DCD4EEEB9`
-  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean · `npm run audit:security` clean.
-  - **Tests**: **914 / 914 passing (100%)** across **106 test suites** (8 new characterization tests, 6/6 mutants killed).
-  - **Permanent Memory Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (Sections 12.15 & 12.16) permanently recorded.
-
-- **Architectural Findings & Approvals**:
-  - **First-Result Semantics**: `hasFirstResult` flag in `useLiveQuerySafe` eliminates the dead `=== undefined` check and restores proper dashboard skeletons.
-  - **Exhaustive-Deps As Control Input**: `homeData.error` in the advisor effect deps is properly pinned by the total-rejection characterization test (M6 killed).
-  - **Security Gate Integration**: `audit:security` officially wired into CI.
+- **Release Verification Data (Built, Tested & Signed Locally on Windows with JDK 21)**:
+  - **Release Tag**: **v23.1.18**
+  - **Signed Release APK**: `Masarifi_V23.1.18_Signed_Release.apk` (16,639,988 bytes / 15.87 MB) — SHA256: `699CD0164214EEF7CFFA23150A597FB09904D38E32DBC4B470B757170443314A`
+  - **Clean Source ZIP**: `Masarifi_V23.1.18_Source_Clean.zip` (9,236,116 bytes / 8.81 MB) — SHA256: `63F902156E3BC72A3844ABF2EFF5C1823D08277CCBC2D040BB2A148E8C5DA8F4`
+  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean (189/189 tips verified across 11 languages) · `npm run audit:security` clean (0 vulnerabilities).
+  - **Tests**: **924 / 924 passing (100%)** across **108 test suites**.
+  - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0) across all 5 verification stages.
+  - **Cross-Platform Readiness Gate**: Polished `scripts/verify-crashlytics-readiness.mjs` with `fileURLToPath` and safe direct-run detection to guarantee flawless execution across Windows, Linux, and macOS.
+  - **Permanent Memory Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (Sections 12.18–12.21) permanently recorded.
 
 ---
 
-### Authorized Directive 17 Part 2: Crashlytics Native Activation (Item 1)
+### Authorized Directive 18: Systematic Coverage Escalation & Ratchet Elevation
 
-As noted in your next-step proposal, proceed with **Crashlytics Native Activation**:
-1. Execute the 4 documented steps in `src/core/crashlytics.ts`.
-2. Ensure build and signing configurations remain intact.
-3. Verify that non-fatal exceptions and dev logs are safely handled on both web and native targets.
+As proposed, proceed with **Directive 18** to systematically lift test coverage from our honest baseline, raising the ratchet thresholds with each gain:
+
+1. **Top Priority Targets**:
+   - `src/core/voiceAssistant.ts`: Lift from 12.6% (193 uncovered lines) by characterizing intent recognition, command parsing, and voice feedback states.
+   - Core Modular Stores: `familyStore.ts`, `preferencesStore.ts`, `envelopeStore.ts` (currently ~40% each) — cover state transitions, persistence, and edge mutations.
+   - Financial Parsers & Feeds: `src/core/paymentParser.ts` (71.5%) and `src/core/marketData.ts` (73%).
+2. **Ratchet Protocol**:
+   - For every module lifted, increment the corresponding coverage ratchet thresholds in `vitest.config.ts` so the gains are permanently locked into CI.
+   - Ensure all new tests follow unit/integration characterization standards with meaningful assertions.
+3. **Quality Gates Preservation**:
+   - Maintain 100% passing tests with zero regressions.
+   - Keep `npm run ci:check` completely green at exit code 0.
 
 ---
 

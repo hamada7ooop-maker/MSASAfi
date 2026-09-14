@@ -16,7 +16,8 @@ export default tseslint.config(
       "src/translations.js",
       "coverage/**",
       "*.zip",
-      "*.apk"
+      "*.apk",
+      "Masarfi/**"
     ]
   },
   js.configs.recommended,
@@ -28,6 +29,9 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname
+      },
       globals: {
         ...globals.browser,
         ...globals.node,

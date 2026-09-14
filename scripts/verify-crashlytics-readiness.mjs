@@ -32,6 +32,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 export const EXPECTED_PACKAGE = 'com.masarifi.app';
 
@@ -176,5 +177,11 @@ export function main() {
 
 // Run as CLI only when invoked directly (not when imported by tests).
 const isDirectRun =
-  process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(new URL(import.meta.url).pathname);
+  Boolean(process.argv[1]) && (() => {
+    try {
+      return fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+    } catch {
+      return false;
+    }
+  })();
 if (isDirectRun) main();
