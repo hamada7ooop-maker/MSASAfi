@@ -102,3 +102,34 @@ Verification item 2 asked for build & signing integrity — the strongest versio
 1. **(Owner — unchanged, still the single blocking step) Drop `google-services.json` into `android/app/`** and run `npm run release`, then confirm a test crash in Firebase Console. The readiness gate now guards this step.
 2. **v23.2 release pass** — the full green `ci:check` chain plus the signed APK on the owner's machine (java/keys live there).
 3. **NEW — Candidate Directive 18: real coverage lift, laddered from the honest zero-point.** Biggest uncovered files, in order of leverage: `voiceAssistant.ts` **12.6%** (193 uncovered lines — the single largest gap in the codebase), `sabBanner.tsx` **38%**, `preferencesStore` / `envelopeStore` / `familyStore` **~40% each**, `paymentParser.ts` **71.5%**, `marketData.ts` **73%**. Each file lifted raises the ratchet with it; the ratchet now enforces every gain permanently. Awaiting owner authorization before writing test lines.
+
+---
+
+## Auditor Report — Directive 18, Step 2: Modular Stores to 100% + StatementParser to 98.9%; Two Real Defects Surfaced (One Fixed, One Awaiting Owner Decision)
+
+**Congratulations on the live Crashlytics milestone** — v23.1.19 with active crash reporting is the payoff of the whole conditional-activation architecture. Received and verified your commit `883d393`: release data recorded (APK SHA256 `943C13B0...A6D2DE`), and — security check passed — `google-services.json` remains OUT of the repository tree (0 traces): it lives only on your machine, exactly as the .gitignore convention requires.
+
+**Step 2 shipped (+59 tests → 1060/1060 across 113 suites):**
+
+1. **The three modular stores — lifted to 100% statements / 100% functions** (19 tests, `tests/unit/modularStores.test.ts`, driven through `renderHook` + `act`): full envelope lifecycle (unique-id generation, spent clamping at zero, no-ops on unknown ids), full family lifecycle (child CRUD, income/expense transactions with prepend order, `payChildAllowance` including the zero-allowance guard), and every preference setter through the slice.
+2. **`statementParser.ts` — 73.55% → 98.9% statements / 100% functions** (40 tests): multi-language header detection (English + Arabic), debit/credit vs signed-amount logic, Type-column refinement, generic-category AI escalation (specific answer adopted, generic kept when AI abstains), obscure-header content fallback, malformed-row/zero-amount skipping, account column, date normalization (ISO, Arabic + English months, PM/AM, DD-MM vs MM-DD, two-digit years), CSV splitting (quotes, semicolon/tab/Arabic-comma, blank lines).
+
+**Defect #1 — FIXED (the test that found it):** calling any of the three modular stores' exported no-selector overload returned a fresh object per render, violating zustand v5's stable-snapshot contract → "Maximum update depth exceeded" (infinite re-render). No production component currently calls that overload, but it is exported public API whose type signature invites it. Fixed with `useShallow` (the library's official remedy) in all three stores; the previously-crashing tests now pin the fix permanently.
+
+**Defect #2 — DOCUMENTED, awaiting your decision:** the statement parser's content-based column guessing fails in BOTH orderings when headers are unrecognized: date-first rows import the date as an amount (2026-09-01 → an "income of 2026"); amount-first rows import the amount as a date — because V8 considers `new Date('-44.5')` valid (May 1, 2044!). Both behaviors are pinned as named documentation tests (clearly commented as audited weaknesses), so a future fix must be a conscious decision, not an accident. Proposed fix (needs your sign-off): the guessers should skip already-assigned columns and reject date-parseable values as amount candidates.
+
+**Version gap, round two — caught by the alignment guard:** your commit bumped package.json to 23.1.19 while `APP_VERSION` stayed 23.1.18 (the signed APK displays "V23.1.18"). The `versionAlignment` test added last round flagged it immediately; constant aligned to 23.1.19. Recommendation: run `npm run ci:check` locally right after any version bump, before signing — the guard catches this in seconds.
+
+**Also received mid-round — your `8060bc9` (sec: protect google-services.json from the clean-source zip):** a sharp catch. Activation made the file exist on your machine; without this, the next clean-source packaging could have swept it into the distributed zip. Verified exclusion + 0 credential traces — the right defense, folded into this round's rebase cleanly.
+
+**Ratchet raised (second documented raise):** 62.0/57.5/46.5 → **62.5/57.8/46.9** (measured 62.59–62.62 / 58.02–58.05 / 47.24–47.27). Full history in `vitest.config.ts`.
+
+**Gates:** **1060/1060 × 113** · full `ci:check` exit 0 with the raised ratchet · guardian clean · readiness gate GREEN (inert in this repo — the activation file lives only on your machine) · 0 vulnerabilities · build clean.
+
+**Watch note:** `bankCardsManager.test.tsx` failed once under full parallel load and passed in both other runs of identical code (including this round's coverage run) — a timing flake, unrelated to this round's changes. Under observation; if it recurs, it deserves its own hardening (explicit waitFor instead of immediate DOM probing).
+
+### Next Step Proposals
+
+1. **Directive 18 continues — ladder step 3:** `marketData.ts` (73%, 264 lines), then `sabBanner.tsx` (38.46%), `exportService.ts` (0.81% — nominal test only), and `settingsStore.ts` (now 80.3%, the shared backbone of the modular stores).
+2. **(Owner decision) statementParser column-guessing fix** as described above — small, test-backed, unblocks correct imports from banks with unrecognized headers.
+3. **(Owner) v23.2 historic release** once the ladder lands — everything is staged: live Crashlytics, green ci:check, and the version-alignment guard now watching every bump.

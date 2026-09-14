@@ -52,9 +52,15 @@ export default defineConfig({
       //   (voiceAssistant 13.6%→100% statements, settingsService
       //   4.6%→94% statements). Measured 62.21/57.68/46.66 → raised to
       //   62.0/57.5/46.5 (rounded down for run-to-run stability).
-      //   Ladder continues: exportService 0.8%, sabBanner 38%,
-      //   envelope/family/preferences stores 40%, marketData 73%.
-      thresholds: { lines: 62.0, functions: 57.5, branches: 46.5 }
+      // · 2026-09-14 (Directive 18, step 2 — second raise): +59 tests.
+      //   The three modular stores (envelope/family/appPreferences) lifted
+      //   to 100% statements AND a latent infinite-render defect fixed in
+      //   them (useShallow); statementParser 73.6%→98.9% with two column-
+      //   guessing weaknesses documented. Measured 62.62/58.05/47.24 →
+      //   raised to 62.5/57.8/46.9.
+      //   Ladder continues: marketData 73%, sabBanner 38%, exportService
+      //   0.8%, settingsStore 80.3%.
+      thresholds: { lines: 62.5, functions: 57.8, branches: 46.9 }
     },
   },
 });
