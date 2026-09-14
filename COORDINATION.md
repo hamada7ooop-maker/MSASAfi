@@ -17,65 +17,49 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ## 📝 Auditor Report & Next Step Proposals
 
-### ⚠️ Fiqh defect found — needs your ruling before I touch it
+### ⏳ Still awaiting your ruling: the zakat fiqh defect
 
-While reading the file I found something that is **not** a refactoring matter, so I have changed nothing and am reporting it instead.
+Repeated from the previous report because it is unresolved and is the highest-value item outstanding. **The zakat screen does not use `core/zakatEngine.ts`** — it re-implements the sum inline and charges 2.5% on livestock, crops and real estate, which the engine deliberately excludes. Worked example: a user with 5,000 cash and 160,000 in those three buckets is told they owe **4,125** when the engine's rules say **nothing is due**.
 
-**The screen does not use `core/zakatEngine.ts` at all.** It re-implements the calculation inline (lines 311–315), and the two disagree on which wealth is zakatable:
+I have not touched it, per your fiqh invariant. It needs its own directive.
 
-| | base for the 2.5% | liabilities | hawl |
-|---|---|---|---|
-| `zakatEngine.ts` (tested, from `65f5c89`) | cash + gold + investments + trade goods | deducted | tracked |
-| the screen users actually see | **every bucket, including livestock, crops and real estate** | ignored | ignored |
+### L-1 continued — `AdvisorPage.tsx` (complete)
 
-Worked example at gold 500/g (nisab 42,500): a user with 5,000 cash, 40,000 livestock, 20,000 crops and 100,000 property is told they owe **4,125**. By the engine's rules they owe **nothing** — their monetary wealth is 5,000, far below nisab, and the other three buckets carry entirely different obligations (crops 5/10% at harvest, livestock in-kind, property exempt as an asset).
+Proceeding with the fallback I proposed while the ruling is pending.
 
-The engine's own test suite asserts this exclusion explicitly, and `core/ai/calculator.ts` already delegates to it. Only the user-facing screen was never migrated.
-
-I did not fix it because your directive was explicit that fiqh rules are out of scope for this task, and because **over-charging zakat is a religious harm, not a bug I should quietly patch inside a refactoring commit.** It deserves its own change, its own review, and possibly a scholar's confirmation of the migration. My characterization test `CURRENT BEHAVIOUR: also sweeps livestock into the 2.5% base` pins today's behaviour and carries a comment saying it must be **inverted** when the engine is adopted.
-
-**Recommendation:** authorise a separate directive to wire the screen to `calculateZakat()`. It is a contained change — the screen already has every input the engine needs except liabilities.
-
-### Directive 5 — `ZakatCalculator.tsx` modularized (complete)
-
-**964 → 423 lines (-56%)**, comfortably under the 550 target.
+**930 → 573 lines (-38%)**.
 
 | file | lines | contents |
 |---|---|---|
-| `ZakatCalculator.tsx` | **423** | state, persistence, all arithmetic, tab switch |
-| `GoldSmartCalcModal.tsx` | 302 | karat-itemised gold sheet |
-| `ZakatNisabBanner.tsx` | 188 | due banner, nisab selector, metal prices |
-| `ZakatHistoryTab.tsx` | 127 | saved calculations + breakdown |
-| `ZakatAssetsEditor.tsx` | 110 | the asset rows |
-| `AnimatedNumber.tsx` | 78 | count-up, already reduced-motion aware |
-| `assetMeta.ts` | 28 | shared label/icon metadata |
+| `AdvisorPage.tsx` | **573** | score card, insights, challenges, recommendations, export |
+| `RetirementSimulator.tsx` | 288 | six inputs, projection, wealth card, 50/30/20 advice |
+| `NecessityBreakdown.tsx` | 144 | need-vs-want bar, legend, automated recommendation |
 
-**Fiqh invariant honoured.** `git diff` on `src/core/zakatEngine.ts` is empty, and `grep` confirms `0.025`, `85` and `595` still appear in exactly one file — the parent. Every extracted component receives `zakatAmount`, `nisab`, `isAboveNisab`, `goldValue` and `equivalentWeight` as props and performs no zakat arithmetic. The prop docs say so explicitly, because the danger with this file is not a broken render but a second, divergent answer to a religious question.
+**Gate: tsc 0 · eslint 0 · build 0 · guardian 189 tips clean · 721/721 across 90 suites.**
 
-**Gate: tsc 0 · eslint 0 · build 0 · guardian 189 tips clean · 712/712 across 89 suites (run twice).**
+#### Step 1 — harness first, validated 5/6 with the sixth proven equivalent
 
-#### Step 1 — harness first, validated at 9/9
+Seven characterization tests. Expected values are taken **from `simulateRetirement` itself** rather than hard-coded: re-deriving compound growth in the test would be a second implementation to get wrong, and — more importantly — it would not notice if the screen stopped calling the engine at all, which is precisely what an extraction breaks.
 
-Eight characterization tests, then nine deliberate mutations against the untouched original. Two rounds were needed:
+Six mutants against the untouched original: **5 killed**. The survivor is the `retireAge <= currentAge` short-circuit, and it is an **equivalent mutant**: the retirement-age slider is bound to `min={currentAge + 1}`, so the condition is unreachable through the UI. My first attempt to kill it asserted the output was zero — it wasn't, because the engine always emits a starting point, which is exactly why the guard exists as defence.
 
-- **First pass 7/8.** The silver-nisab test survived two mutants because silver is a **Pro perk** — my test clicked a locked button and asserted nothing. Granting the entitlement fixed it.
-- Then a subtler one: `expect(digits).toContain('250')` also matches inside `'2500'`, so a mutated nisab producing a ten-fold amount still passed. Replaced with exact numeric parsing, and the silver test now uses 2,000 (below the real 5,355 threshold, above a shrunken one) so it pins the **595 grams** specifically rather than "some silver threshold".
+Rather than fake coverage, I replaced that test with one that pins the **real** protection: the slider's own bound, including that raising the current age drags the lower bound with it. If anyone ever loosens that binding, the guard stops being decorative and this test is where they find out.
 
-Also worth recording: the banner animates over a second with `requestAnimationFrame`, so early reads caught meaningless intermediate values. Rather than wait it out or fight rAF with fake timers, the suite declares a reduced-motion preference — `AnimatedNumber` already snaps under it, so the tests are both fast and exercising the accessibility path real users get.
+#### Step 2 — extraction
 
-#### Step 2 — presentational decomposition
+The simulator took all six `useState` calls with it; nothing outside that section read them. The only genuinely shared value is `necessityStats`, which both extracted components consume — the breakdown for its chart, the simulator for its 50/30/20 advice strip.
 
-State ownership stayed with the parent throughout, deliberately: unlike the previous three files, almost nothing here is safe to relocate, because the "state" is the calculation. The one thing that did move out was two inline `DB.setSetting` calls in the price inputs — persistence is the parent's job, so those now travel through `onGoldPriceChange` / `onSilverPriceChange`.
+#### Step 3 — mutation testing on prop wiring: **6/6 killed**
 
-#### Step 3 — mutation testing on prop wiring: **17/17 killed**
+First pass 3/4, then 4/5, then 5/6 — three rounds, each exposing a real gap in my own assertions:
 
-Three rounds, and the first was poor: **7/12**. The survivors were all things nothing clicked — a dead save button, an emptied history list, a frozen selector, a forced Pro flag, a zeroed gold value. Two rounds of added tests closed every one, including two `isPro` threads that must be tested **separately**: forcing it true on the history tab alone leaks saved calculations to non-subscribers, which the banner test could not see.
+1. **`necessityStats` dropped from the simulator survived.** The advice strip falls back to `|| 50` and `|| 30`, which lands on the *same* message branch as the seeded data, so the mutant was invisible. Fixed by asserting the specific wording, plus a second test proving exactly one of the two branches always renders.
+2. **Swapping `needPct`/`wantPct` survived**, because I asserted both numbers appeared *somewhere*. Fixed with a `legendFor()` helper scoping each figure to its own labelled block — and it had to be tightened twice, since the innermost match holds only the percentage while the amount lives one level up.
+3. **Swapping the need/want *amounts* survived** even after that, since the percentages were now pinned but the currency figures were not. Both are now asserted per bucket.
 
-No equivalent mutants this time — all 17 are genuinely observable.
+That pattern — "assert the value *beside its label*, not merely on the page" — has now caught a real gap in four consecutive directives. It is the single highest-yield check in this work.
 
 ### Next Step Proposals
 
-1. **The zakat engine migration above**, if you authorise it. I would rank it above further L-1 work: it is a correctness issue in the one feature where being wrong has consequences beyond money.
-2. Otherwise L-1 continues: `AdvisorPage.tsx` (930), `TravelBudget.tsx` (923), `demoData.ts` (875).
-
-**Housekeeping:** the sandbox rewound again before this task, losing `node_modules` and the branch pointer. All files verified byte-identical against `origin/arena/01a097d5-msasafi`, reset to `de1f4d1`, reinstalled. Nothing lost. This is the eighth occurrence; everything remains pushed after each task, which is why it keeps costing only a few minutes.
+1. **The zakat engine migration**, if you authorise it. Still my first recommendation.
+2. Otherwise L-1 continues: `TravelBudget.tsx` (923), `demoData.ts` (875), `cardConstants.ts` (775).
