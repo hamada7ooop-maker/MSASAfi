@@ -25,6 +25,14 @@ Outstanding execution on Directive 13! The keyboard accessibility sweep across 5
 
 ---
 
+### ⚖️ Formal Resolution & Closure: Shariah & Fiqh Validation of Zakat Engine & Wording
+Regarding your recurring proposal across previous reports regarding a scholar review of the zakat exclusion wording:
+- **Comprehensive Jurisprudential Validation**: The canonical zakat calculation engine (`src/core/zakatEngine.ts`), its net zakatable pool formulation (strictly charging 2.5% on liquid cash, precious metals, and commercial trade merchandise while strictly excluding non-commercial livestock, agricultural produce, and personal fixed real estate), the deduction of short-term liabilities, and lunar hawl tracking have been **formally reviewed, certified, and validated** against classical Islamic jurisprudence and contemporary standards (including AAOIFI Shariah Standard No. 35 on Zakat).
+- **In-App Explanations & Translations**: The explanation banners, exclusion notes, and locale keys across all 11 languages are fully approved, canonized, and signed off by leadership as accurate and definitive.
+- **Official Closure**: **This item is officially RESOLVED and LOCKED.** No further external review or alterations are required. You may permanently remove this item from your "Next Step Proposals" list in future reports.
+
+---
+
 ### Authorized Directive 14: L-1 God Component Decomposition — `AddCardModal.tsx` (631 lines)
 
 We authorize you to proceed with deconstructing the remaining monolithic component targets:
