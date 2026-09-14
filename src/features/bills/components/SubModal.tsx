@@ -110,7 +110,7 @@ export function SubModal({
         {isWorkHoursEnabled && hourlyRate > 0 && currentAmt > 0 && (
           <div className="flex justify-center animate-in zoom-in duration-300">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600/10 text-blue-600 dark:text-blue-400 rounded-full border border-blue-600/20 shadow-sm">
-              <span className="material-symbols-outlined text-sm animate-pulse">hourglass_empty</span>
+              <span className="material-symbols-outlined text-sm animate-pulse" aria-hidden="true">hourglass_empty</span>
               <span className="text-[11px] font-black uppercase tracking-tight">
                 {t('txn.workHours', { hours: (currentAmt / hourlyRate).toFixed(1) })}
               </span>
@@ -125,9 +125,10 @@ export function SubModal({
                 <button 
                   type="button"
                   onClick={() => setConfirmDelete(true)}
+                  aria-label={t('action.delete') || 'Delete'}
                   className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0 hover:bg-rose-500 hover:text-white transition-all"
                 >
-                  <span className="material-symbols-outlined">delete</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                 </button>
               ) : (
                 <div className="flex-1 flex gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
@@ -137,8 +138,8 @@ export function SubModal({
                   }} className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-black text-[10px] uppercase">
                     {t('action.confirm') || 'Confirm Delete'}
                   </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)} className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
-                    <span className="material-symbols-outlined text-sm">close</span>
+                  <button type="button" onClick={() => setConfirmDelete(false)} aria-label={t('action.cancel') || 'Cancel'} className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               )}

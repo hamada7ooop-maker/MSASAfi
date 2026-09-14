@@ -3216,6 +3216,8 @@ export const locale_it = {
   "zakat.hawlUnknown": "No nisab date recorded — the amount is an estimate until the hawl completes.",
   "zakat.hawlIncomplete": "The hawl is not complete — {days} days remaining.",
   "zakat.hawlComplete": "The hawl is complete; zakat is due now.",
-  "zakat.estimate": "Estimate"
+  "zakat.estimate": "Estimate",
+  "bill.markUnpaid": "Mark as unpaid",
+  "bill.workHoursToggle": "Toggle work-hours estimate"
 };
 export default locale_it;

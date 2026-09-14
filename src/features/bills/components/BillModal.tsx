@@ -106,6 +106,8 @@ export function BillModal({
           <button 
             type="button"
             onClick={() => setIsWorkHoursEnabled(!isWorkHoursEnabled)}
+            aria-label={t('bill.workHoursToggle') || 'Toggle work-hours estimate'}
+            aria-pressed={isWorkHoursEnabled}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-full border transition-all duration-300 ${
               isWorkHoursEnabled 
               ? 'bg-blue-600/10 text-blue-600 border-blue-600/20 shadow-sm' 
@@ -123,7 +125,7 @@ export function BillModal({
           {isWorkHoursEnabled && hourlyRate > 0 && currentAmt > 0 && (
             <div className="animate-in zoom-in slide-in-from-top-2 duration-500 bg-[#002b59] dark:bg-blue-600 text-white px-4 py-2 rounded-2xl shadow-xl shadow-blue-900/20 flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                <span className="material-symbols-outlined text-sm">schedule</span>
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">schedule</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-bold opacity-70 uppercase tracking-widest leading-tight">{t('settings.hourlyRatePh')}</span>
@@ -153,9 +155,10 @@ export function BillModal({
                 <button 
                   type="button"
                   onClick={() => setConfirmDelete(true)}
+                  aria-label={t('action.delete') || 'Delete'}
                   className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0 hover:bg-rose-500 hover:text-white transition-all"
                 >
-                  <span className="material-symbols-outlined">delete</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                 </button>
               ) : (
                 <div className="flex-1 flex gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
@@ -165,8 +168,8 @@ export function BillModal({
                   }} className="flex-1 py-3 rounded-2xl bg-rose-500 text-white font-black text-[10px] uppercase">
                     {t('action.confirm') || 'Confirm Delete'}
                   </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)} className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
-                    <span className="material-symbols-outlined text-sm">close</span>
+                  <button type="button" onClick={() => setConfirmDelete(false)} aria-label={t('action.cancel') || 'Cancel'} className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               )}

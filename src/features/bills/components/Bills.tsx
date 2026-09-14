@@ -136,19 +136,20 @@ export function Bills() {
           {isSelecting ? (
             <div className="flex items-center gap-2 bg-surface-container-low dark:bg-slate-800 p-1 rounded-2xl border border-black/5 dark:border-white/5">
               <button onClick={selectAll} className="w-9 h-9 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('txn.all')}>
-                <span className="material-symbols-outlined text-xl">done_all</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">done_all</span>
               </button>
               <button onClick={handleBulkDelete} className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('action.delete')}>
-                <span className="material-symbols-outlined text-xl">delete</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
               </button>
               <button onClick={clearSelection} className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('action.cancel')}>
-                <span className="material-symbols-outlined text-xl">close</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
               </button>
             </div>
           ) : (
             <button onClick={() => tab === 'bills' ? (setEditingBill(undefined), setShowBillModal(true)) : (setEditingSub(undefined), setShowSubModal(true))}
+              aria-label={tab === 'bills' ? (t('bill.add') || 'Add bill') : (t('bill.addSub') || 'Add subscription')}
               className="w-10 h-10 rounded-2xl bg-[#002b59] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-95 transition-all">
-              <span className="material-symbols-outlined text-xl">add</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
             </button>
           )}
         </div>
@@ -206,7 +207,7 @@ export function Bills() {
       {tab === 'bills' ? (
         bills.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-300">
-            <span className="material-symbols-outlined text-5xl">receipt_long</span>
+            <span className="material-symbols-outlined text-5xl" aria-hidden="true">receipt_long</span>
             <p className="text-sm font-bold">{t('bill.noBills') || 'No bills here'}</p>
             <button onClick={() => setShowBillModal(true)} className="text-xs text-blue-400 font-bold">
               {t('bill.addFirst') || '+ Add your first bill'}
@@ -251,7 +252,7 @@ export function Bills() {
                         </p>
                         {!b.isPaid && matchingHoliday && (
                           <div className="mt-1.5 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-lg text-[9px] font-black w-fit animate-pulse">
-                            <span className="material-symbols-outlined text-[10px]">calendar_month</span>
+                            <span className="material-symbols-outlined text-[10px]" aria-hidden="true">calendar_month</span>
                             <span>{(t('bill.holidayConflict') || 'تداخل مع عطلة رسمية: {holiday}').replace('{holiday}', (useI18n().isLTR) ? matchingHoliday.name : matchingHoliday.localName)}</span>
                           </div>
                         )}
@@ -262,12 +263,12 @@ export function Bills() {
                       {!b.isPaid ? (
                         <button onClick={() => markPaid(b.id)} className="bg-emerald-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">{t('bill.markPaid') || 'Pay'}</button>
                       ) : (
-                        <button onClick={() => markUnpaid(b.id)} className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center transition-colors">
-                          <span className="material-symbols-outlined text-base">check_circle</span>
+                        <button onClick={() => markUnpaid(b.id)} aria-label={`${t('bill.markUnpaid') || 'Mark unpaid'}: ${b.name}`} className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center transition-colors">
+                          <span className="material-symbols-outlined text-base" aria-hidden="true">check_circle</span>
                         </button>
                       )}
-                      <button onClick={() => { setEditingBill(b); setShowBillModal(true); }} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-400 flex items-center justify-center hover:bg-blue-500/10 transition-all">
-                        <span className="material-symbols-outlined text-base">edit</span>
+                      <button onClick={() => { setEditingBill(b); setShowBillModal(true); }} aria-label={`${t('action.edit') || 'Edit'}: ${b.name}`} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-400 flex items-center justify-center hover:bg-blue-500/10 transition-all">
+                        <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
                       </button>
                     </div>
                   </div>
@@ -279,7 +280,7 @@ export function Bills() {
       ) : (
         subscriptions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-300">
-            <span className="material-symbols-outlined text-5xl">subscriptions</span>
+            <span className="material-symbols-outlined text-5xl" aria-hidden="true">subscriptions</span>
             <p className="text-sm font-bold">{t('bill.noSubs') || 'No subscriptions here'}</p>
             <button onClick={() => setShowSubModal(true)} className="text-xs text-blue-400 font-bold">
               {t('bill.addFirst') || '+ Add your first subscription'}
@@ -321,8 +322,8 @@ export function Bills() {
                     <div className="flex items-center gap-3 shrink-0">
                       <p className="font-black text-base tabular-nums dark:text-slate-100">{fmt(s.amount)}</p>
                       <button onClick={() => paySubscription(s.id)} className="bg-blue-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-500/30 active:scale-95 transition-all">{t('bill.payNow') || 'Pay Now'}</button>
-                      <button onClick={() => { setEditingSub(s); setShowSubModal(true); }} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-400 flex items-center justify-center hover:bg-blue-500/10 transition-all">
-                        <span className="material-symbols-outlined text-base">edit</span>
+                      <button onClick={() => { setEditingSub(s); setShowSubModal(true); }} aria-label={`${t('action.edit') || 'Edit'}: ${s.name}`} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-400 flex items-center justify-center hover:bg-blue-500/10 transition-all">
+                        <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
                       </button>
                     </div>
                   </div>

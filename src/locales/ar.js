@@ -3128,7 +3128,9 @@ export const locale_ar = {
   "zakat.hawlUnknown": "لم يُحدَّد تاريخ بلوغ النصاب، والمبلغ تقديري حتى يتم الحول.",
   "zakat.hawlIncomplete": "لم يتم الحول بعد — يتبقى {days} يوماً.",
   "zakat.hawlComplete": "تمّ الحول، والزكاة مستحقة الآن.",
-  "zakat.estimate": "تقديري"
+  "zakat.estimate": "تقديري",
+  "bill.markUnpaid": "إلغاء الدفع",
+  "bill.workHoursToggle": "تبديل تقدير ساعات العمل"
 };
 
 export default locale_ar;
