@@ -101,3 +101,26 @@ Verification item 2 asked for build & signing integrity — the strongest versio
 1. **(Owner — unchanged, still the single blocking step) Drop `google-services.json` into `android/app/`** and run `npm run release`, then confirm a test crash in Firebase Console. The readiness gate now guards this step.
 2. **v23.2 release pass** — the full green `ci:check` chain plus the signed APK on the owner's machine (java/keys live there).
 3. **NEW — Candidate Directive 18: real coverage lift, laddered from the honest zero-point.** Biggest uncovered files, in order of leverage: `voiceAssistant.ts` **12.6%** (193 uncovered lines — the single largest gap in the codebase), `sabBanner.tsx` **38%**, `preferencesStore` / `envelopeStore` / `familyStore` **~40% each**, `paymentParser.ts` **71.5%**, `marketData.ts` **73%**. Each file lifted raises the ratchet with it; the ratchet now enforces every gain permanently. Awaiting owner authorization before writing test lines.
+
+---
+
+## Auditor Report — Directive 18, Step 1: Coverage Ladder (+76 tests, 1000-test milestone)
+
+**Activation:** Directive 18 (the coverage lift proposed in the previous report) was activated by the owner's direct instruction ("أكمل من حيث توقفت تماماً", 2026-09-14), given in response to that report. Step 1 is complete and shipped.
+
+**What was done (2 files, biggest gaps first, re-prioritized from the fresh coverage log):**
+
+1. **`voiceAssistant.ts` — 13.58% → 100% statements / 100% functions / 91% branches** (47 new tests, `tests/unit/voiceAssistant.test.ts`): web engine init (standard API preferred over webkit, ar-SA/non-continuous/final-results config), all four event handlers, the full 11-language locale map plus the unmapped-language fallback (persisted-store corruption), and the complete native path: both permission API generations (current checkPermissions/requestPermissions + legacy hasPermission/requestPermission) across all six outcomes, the partialResults listener, engine failures (Error and non-Error), removeAllListeners failure tolerance, no-restart-while-listening, stop().
+2. **`settingsService.ts` — discovered as the largest service gap: 408 lines at 4.57% with zero dedicated tests. 4.57% → 94.1% statements / 89.3% functions / 69.1% branches** (29 new tests, `tests/unit/settingsService.test.ts`). These pin the backup/restore security guards as executable proof: unencrypted export of a PIN-protected vault is refused (both pinHash and legacy pin), <6-char encryption passwords refused, vault secrets stripped from every export (even PIN-less), restore preserves THIS device's vault identity (local pinHash survives, foreign one dropped), localStorage restored minus secret keys, legacy dict-style settings handled, mid-restore write failure rolls back atomically, every restore audited via import_data, demo seeding, confirmed secure wipe, balance recalculation (orphan transactions ignored).
+
+**Ratchet raised (first documented raise):** 60.0/56.5/45.0 → **62.0/57.5/46.5** (measured 62.21–62.26 / 57.68–57.71 / 46.65–46.66 across two independent runs; rounded down for stability). Full history in `vitest.config.ts`.
+
+**Gates:** **1000/1000 tests across 110 suites** (924 + 76) · `tsc --noEmit` 0 · full `ci:check` exit 0 with the RAISED ratchet (security scan clean, 0 vulnerabilities, lint clean, build clean) · guardian clean.
+
+**Environmental lessons recorded for future rounds (documented in the test file itself):** the global setup's localStorage mock lacks length/key(i) enumeration (the export collection loop would see nothing — fixed with a complete Storage shim inside the test); `DB.tables` returns a fresh array per call but stable table objects (failure injection must target the tables-array instance, not the accessor).
+
+### Next Step Proposals
+
+1. **Directive 18 continues (no owner action needed) — ladder step 2:** `exportService.ts` (0.81% — its existing test file is nominal and covers almost nothing), `sabBanner.tsx` (38.46%), the `envelopeStore`/`familyStore`/`preferencesStore` trio (~40% each, pure logic), `statementParser.ts` (73.55% — name corrected from the earlier "paymentParser" record), `marketData.ts` (73%). Each file lifted raises the ratchet with it.
+2. **(Owner, unchanged, still the single blocking step for v23.2) Drop `google-services.json` into `android/app/`** and run `npm run release`, then confirm a test crash in Firebase Console. The readiness gate guards this step.
+3. **v23.2 release pass** — full ci:check chain (green as of this commit) + signed APK on the owner's machine.

@@ -41,19 +41,20 @@ export default defineConfig({
       // so the gate is green today and any regression fails the build.
       // Raise them as tests are added; never lower them.
       //
-      // Calibration history (audited 2026-09-14, pre-v23.2): the previous
-      // values (69/71/48) claimed to be "the current measured coverage" but
-      // were never real — re-measuring on the very commit that set them
-      // (7eaaa1a) yields 60.62/58.52/46.34, so the gate had been red since
-      // the day it was written (matching the original audit finding that
-      // `vitest run --coverage` failed). Recalibrated to today's HEAD
-      // measurement (60.08/56.52/45.06), rounded DOWN to a stable floor.
-      // The old aspirational TARGET (75/73/55) was likewise unmeasured;
-      // a realistic laddered target lives in the coverage directive
-      // proposal (see COORDINATION.md) — biggest uncovered files first:
-      // voiceAssistant 12.6%, sabBanner 38%, envelope/family/preferences
-      // stores 40%, marketData 73%.
-      thresholds: { lines: 60.0, functions: 56.5, branches: 45.0 }
+      // Calibration history:
+      // · 2026-09-14 (pre-v23.2): recalibrated a false zero-point. The
+      //   previous values (69/71/48) claimed to be "the current measured
+      //   coverage" but were never real — re-measuring on the very commit
+      //   that set them (7eaaa1a) yields 60.62/58.52/46.34, so the gate had
+      //   been red since the day it was written. Floor set to the true
+      //   measurement of the time: 60.0/56.5/45.0.
+      // · 2026-09-14 (Directive 18, step 1 — first raise): +76 tests
+      //   (voiceAssistant 13.6%→100% statements, settingsService
+      //   4.6%→94% statements). Measured 62.21/57.68/46.66 → raised to
+      //   62.0/57.5/46.5 (rounded down for run-to-run stability).
+      //   Ladder continues: exportService 0.8%, sabBanner 38%,
+      //   envelope/family/preferences stores 40%, marketData 73%.
+      thresholds: { lines: 62.0, functions: 57.5, branches: 46.5 }
     },
   },
 });
