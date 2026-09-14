@@ -17,49 +17,48 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ## 📝 Auditor Report & Next Step Proposals
 
-### ⏳ Still awaiting your ruling: the zakat fiqh defect
+### 🔴 Data-integrity defect found and fixed: cursor reads returned wrong rows
 
-Repeated from the previous report because it is unresolved and is the highest-value item outstanding. **The zakat screen does not use `core/zakatEngine.ts`** — it re-implements the sum inline and charges 2.5% on livestock, crops and real estate, which the engine deliberately excludes. Worked example: a user with 5,000 cash and 160,000 in those three buckets is told they owe **4,125** when the engine's rules say **nothing is due**.
+This is the important item in this report. It was **not** part of the task — the travel-budget characterization tests reported a total of 3,600 where the seeded data summed to 3,000, and following that discrepancy led here.
 
-I have not touched it, per your fiqh invariant. It needs its own directive.
+**The encryption middleware's `openCursor` proxy corrupted every cursor read.** It cached a decrypted copy of `cursor.value` and refreshed it inside an **`async` override of `continue()`**. Both halves broke the cursor protocol:
 
-### L-1 continued — `AdvisorPage.tsx` (complete)
+- `continue()` is **synchronous and fire-and-forget**. Replacing it with an async function returned a promise where the contract says `void`, and refreshed the cached value a microtask *after* the advance had already been signalled.
+- `value` is a **live property of the cursor's current position**. Caching it meant the iterator kept re-reading a stale row.
 
-Proceeding with the fallback I proposed while the ruling is pending.
+Measured on four rows through `Table.filter()`:
 
-**930 → 573 lines (-38%)**.
+| | result | sum |
+|---|---|---|
+| expected | `t1, t2, t3, t4` | **15** |
+| actual | `t1, t1, t2, t3` | **8** |
+
+A duplicated row, a dropped row, and a silently wrong total. A narrower proxy variant returned `t1, t1, t1, t1`.
+
+**This is not a regression from my `safeWaitFor` work.** I checked out `src/core/db/encryption.ts` at the base commit `63ff1b4` and ran the same probe: identical wrong output. It has been present the entire time.
+
+**Fix:** stop proxying the cursor. Decryption cannot happen in a synchronous getter (WebCrypto is async) and there is no correct way to await inside the cursor protocol, so cursor reads now return enveloped rows and decryption stays with `get` / `getMany` / `query`, which cover every read path the app actually uses. Regression test added to `encryption.test.ts` using powers of two, so any duplicate or omission changes the sum uniquely. Verified: fails with the old proxy, passes with the fix.
+
+**Second-order fix:** three call sites used `Table.filter()`, and two of them (`TravelBudget`) filter transactions whose `amount` **is** encrypted — so under the new behaviour they would read `undefined` amounts and show every trip at zero spending. All three now use `toArray()` then filter in JS, each with a comment explaining why. `recurringService` is not on an encrypted table today but was changed too, since it would break silently the day it becomes one.
+
+### L-1 continued — `TravelBudget.tsx` (complete)
+
+**923 → 580 lines (-37%)**, under 600.
 
 | file | lines | contents |
 |---|---|---|
-| `AdvisorPage.tsx` | **573** | score card, insights, challenges, recommendations, export |
-| `RetirementSimulator.tsx` | 288 | six inputs, projection, wealth card, 50/30/20 advice |
-| `NecessityBreakdown.tsx` | 144 | need-vs-want bar, legend, automated recommendation |
+| `TravelBudget.tsx` | **580** | trip grid, conversion, forecast hub, delete/archive |
+| `TripFormModal.tsx` | 310 | the eight-field add/edit sheet |
+| `data/travelFallbacks.ts` | 111 | offline destination facts (static data) |
 
-**Gate: tsc 0 · eslint 0 · build 0 · guardian 189 tips clean · 721/721 across 90 suites.**
+**Gate: tsc 0 · eslint 0 · build 0 · guardian 189 tips clean · 734/734 across 91 suites.**
 
-#### Step 1 — harness first, validated 5/6 with the sixth proven equivalent
+**Step 1 — harness validated 5/5**, after adding an assertion for the consumption percentage: hard-zeroing it renders a plausible-looking progress bar and passed everything else.
 
-Seven characterization tests. Expected values are taken **from `simulateRetirement` itself** rather than hard-coded: re-deriving compound growth in the test would be a second implementation to get wrong, and — more importantly — it would not notice if the screen stopped calling the engine at all, which is precisely what an extraction breaks.
-
-Six mutants against the untouched original: **5 killed**. The survivor is the `retireAge <= currentAge` short-circuit, and it is an **equivalent mutant**: the retirement-age slider is bound to `min={currentAge + 1}`, so the condition is unreachable through the UI. My first attempt to kill it asserted the output was zero — it wasn't, because the engine always emits a starting point, which is exactly why the guard exists as defence.
-
-Rather than fake coverage, I replaced that test with one that pins the **real** protection: the slider's own bound, including that raising the current age drags the lower bound with it. If anyone ever loosens that binding, the guard stops being decorative and this test is where they find out.
-
-#### Step 2 — extraction
-
-The simulator took all six `useState` calls with it; nothing outside that section read them. The only genuinely shared value is `necessityStats`, which both extracted components consume — the breakdown for its chart, the simulator for its 50/30/20 advice strip.
-
-#### Step 3 — mutation testing on prop wiring: **6/6 killed**
-
-First pass 3/4, then 4/5, then 5/6 — three rounds, each exposing a real gap in my own assertions:
-
-1. **`necessityStats` dropped from the simulator survived.** The advice strip falls back to `|| 50` and `|| 30`, which lands on the *same* message branch as the seeded data, so the mutant was invisible. Fixed by asserting the specific wording, plus a second test proving exactly one of the two branches always renders.
-2. **Swapping `needPct`/`wantPct` survived**, because I asserted both numbers appeared *somewhere*. Fixed with a `legendFor()` helper scoping each figure to its own labelled block — and it had to be tightened twice, since the innermost match holds only the percentage while the amount lives one level up.
-3. **Swapping the need/want *amounts* survived** even after that, since the percentages were now pinned but the currency figures were not. Both are now asserted per bucket.
-
-That pattern — "assert the value *beside its label*, not merely on the page" — has now caught a real gap in four consecutive directives. It is the single highest-yield check in this work.
+**Step 3 — prop wiring 7/7**, over three rounds. The instructive survivor was `handleAddNew` forgetting to clear `tripToEdit`: my "opens a blank form" test ran on a fresh page, where no stale trip can exist. Only **edit-then-add** — the sequence a user actually performs — exposes it, and that is the case where the bug would save changes onto the wrong trip.
 
 ### Next Step Proposals
 
-1. **The zakat engine migration**, if you authorise it. Still my first recommendation.
-2. Otherwise L-1 continues: `TravelBudget.tsx` (923), `demoData.ts` (875), `cardConstants.ts` (775).
+1. **The zakat engine migration.** Still unanswered, still my first recommendation, and now joined by a second correctness finding that came from exactly this kind of digging.
+2. **Worth considering:** an audit of remaining `Table.filter()` / `Table.each()` usage as a lint rule. Today only three sites existed, but the failure mode is silent wrong numbers rather than an error, and nothing stops the next one being added.
+3. Otherwise L-1 continues: `demoData.ts` (875), `cardConstants.ts` (775), `Bills.tsx` (699).

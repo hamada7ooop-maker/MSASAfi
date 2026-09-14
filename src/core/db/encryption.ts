@@ -199,38 +199,37 @@ export function applyEncryptionMiddleware(db: Pick<Dexie, 'use'>): void {
               const decrypted = await safeWaitFor(Promise.all(result.result.map((r: unknown) => _decryptRecord(tableName, r as Record<string, unknown>))));
               return { ...result, result: decrypted };
             },
+            /**
+             * ── Why this hook no longer proxies the cursor ──────────────────
+             *
+             * It used to return a Proxy that cached a decrypted copy of
+             * `cursor.value` and refreshed it inside an `async` override of
+             * `continue()`. Both halves were wrong:
+             *
+             *  - `continue()` is synchronous and fire-and-forget in the cursor
+             *    protocol. Replacing it with an async function returned a
+             *    promise where the contract says void, and refreshed the cached
+             *    value a microtask AFTER the advance had been signalled.
+             *  - `value` is a live property of the cursor's current position.
+             *    Caching it meant the iterator kept re-reading a stale row.
+             *
+             * Measured on four rows through `Table.filter()`: it yielded
+             * `t1, t1, t2, t3` (and `t1, t1, t1, t1` in a narrower variant)
+             * instead of `t1..t4`, so a sum of trip-linked transactions came to
+             * 8 instead of 15. Silently wrong money, present since the base
+             * commit -- verified by running the same probe against 63ff1b4.
+             *
+             * Decryption cannot be done in a synchronous getter (WebCrypto is
+             * async), and there is no correct way to await inside the cursor
+             * protocol. The rows are therefore left enveloped here and decrypted
+             * by the callers that actually surface them: `get`, `getMany` and
+             * `query` all still decrypt, and those cover every read path the app
+             * uses. `Table.filter()` runs its predicate over raw rows, which is
+             * the documented behaviour for unindexed fields either way.
+             * ───────────────────────────────────────────────────────────────
+             */
             async openCursor(req: DBCoreOpenCursorRequest): Promise<DBCoreCursor | null> {
-              const cursor = await downTable.openCursor(req);
-              if (!cursor) return cursor;
-
-              let decryptedValue = cursor.value ? await safeWaitFor(_decryptRecord(tableName, cursor.value as Record<string, unknown>)) : cursor.value;
-
-              return new Proxy(cursor, {
-                get(target, prop, receiver) {
-                  if (prop === 'value') {
-                    return decryptedValue;
-                  }
-                  if (prop === 'continue') {
-                    return async function(key?: unknown) {
-                      const res = await Reflect.apply(target.continue, target, key !== undefined ? [key] : []);
-                      decryptedValue = target.value ? await safeWaitFor(_decryptRecord(tableName, target.value as Record<string, unknown>)) : target.value;
-                      return res;
-                    };
-                  }
-                  if (prop === 'continuePrimaryKey') {
-                    return async function(key: unknown, primaryKey: unknown) {
-                      const res = await Reflect.apply(target.continuePrimaryKey, target, [key, primaryKey]);
-                      decryptedValue = target.value ? await safeWaitFor(_decryptRecord(tableName, target.value as Record<string, unknown>)) : target.value;
-                      return res;
-                    };
-                  }
-                  const val = Reflect.get(target, prop, receiver);
-                  if (typeof val === 'function') {
-                    return val.bind(target);
-                  }
-                  return val;
-                }
-              });
+              return downTable.openCursor(req);
             }
           };
         }

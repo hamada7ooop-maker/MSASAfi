@@ -9,7 +9,12 @@ export const RecurringService = {
     this.isProcessingRecurring = true;
     try {
       if (!db.recurringTransactions) return;
-      const txns = await db.recurringTransactions.filter(t => !!t.isActive && t.autoConfirm !== false).toArray();
+      // `toArray()` then filter in JS: Dexie's Table.filter walks a cursor, and
+      // the encryption middleware cannot decrypt inside the cursor protocol, so
+      // cursor-read rows keep their envelope. recurringTransactions is not an
+      // encrypted table today, but using the cursor form here would silently
+      // break the moment it becomes one.
+      const txns = (await db.recurringTransactions.toArray()).filter(t => !!t.isActive && t.autoConfirm !== false);
       if (!txns.length) {
         this.isProcessingRecurring = false;
         return;

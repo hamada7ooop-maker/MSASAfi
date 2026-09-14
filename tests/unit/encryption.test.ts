@@ -315,4 +315,51 @@ describe('Encrypting many records inside one transaction (Dexie.waitFor)', () =>
     const row = (await DB.transactions.get('rr1')) as { description?: string } | undefined;
     expect(row?.description).toBe('d1');
   });
+
+  /**
+   * Cursor reads must return every row exactly once.
+   *
+   * The middleware used to wrap `openCursor` in a Proxy that cached a
+   * decrypted copy of `cursor.value` and refreshed it inside an `async`
+   * override of `continue()`. Both halves broke the cursor protocol:
+   * `continue()` is synchronous and fire-and-forget, and `value` is a live
+   * property of the cursor's current position, so caching it made the iterator
+   * re-read stale rows.
+   *
+   * Measured on four rows through `Table.filter()`: `t1, t1, t2, t3` instead of
+   * `t1..t4` -- a duplicated row, a dropped row, and a sum of 8 where the
+   * answer is 15. It shipped from the base commit and was found only because a
+   * travel-budget characterization test reported the wrong total.
+   */
+  it('iterates a cursor over every row exactly once', async () => {
+    clearEncryptionKey();
+    setEncryptionRequired(false);
+    await DB.transaction('rw', DB.tables, async () => {
+      for (const t of DB.tables) await t.clear();
+    });
+
+    // Powers of two: any duplicate or omission changes the sum uniquely.
+    await DB.transactions.bulkPut([
+      { id: 'c1', type: 'expense', amount: 1, tripId: 'p' },
+      { id: 'c2', type: 'expense', amount: 2, tripId: 'p' },
+      { id: 'c3', type: 'expense', amount: 4, tripId: 'p' },
+      { id: 'c4', type: 'expense', amount: 8, tripId: 'p' },
+    ] as never);
+
+    const rows = await DB.transactions
+      .filter((tx) => (tx as unknown as { tripId?: string }).tripId === 'p')
+      .toArray();
+
+    expect(rows.map((r) => r.id)).toEqual(['c1', 'c2', 'c3', 'c4']);
+    expect(
+      rows.reduce((s, r) => s + ((r as unknown as { amount: number }).amount || 0), 0)
+    ).toBe(15);
+
+    // `each` walks the same cursor machinery.
+    const seen: string[] = [];
+    await DB.transactions.each((r) => {
+      seen.push(String((r as unknown as { id: string }).id));
+    });
+    expect(seen).toEqual(['c1', 'c2', 'c3', 'c4']);
+  });
 });

@@ -3,111 +3,12 @@ import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { db } from '@/core/db/core';
 import { toast, confirmSheet } from '../../../toast';
-import { checkMilestone, triggerCoinAnimation } from '../../../core/loyalty';
-import { silentFail, sanitizeNumericInput } from '../../../core/utils';
+import { checkMilestone } from '../../../core/loyalty';
+import { silentFail } from '../../../core/utils';
 import type { Transaction, Trip } from '@/types';
+import { LOCAL_FALLBACKS } from '../data/travelFallbacks';
+import { TripFormModal } from './TripFormModal';
 
-const LOCAL_FALLBACKS: Record<string, {
-  flag: string;
-  capital: string;
-  languages: string;
-  temp: number;
-  weatherCode: number;
-  countryName: string;
-  latlng: [number, number];
-  countryCode: string;
-}> = {
-  'japan': {
-    flag: 'https://flagcdn.com/w320/jp.png',
-    capital: 'طوكيو (Tokyo)',
-    languages: 'اليابانية (Japanese)',
-    temp: 18,
-    weatherCode: 1,
-    countryName: 'اليابان (Japan)',
-    latlng: [35.6762, 139.6503],
-    countryCode: 'jp'
-  },
-  'united arab emirates': {
-    flag: 'https://flagcdn.com/w320/ae.png',
-    capital: 'أبوظبي (Abu Dhabi)',
-    languages: 'العربية (Arabic)',
-    temp: 32,
-    weatherCode: 0,
-    countryName: 'الإمارات العربية المتحدة (UAE)',
-    latlng: [25.2048, 55.2708],
-    countryCode: 'ae'
-  },
-  'united kingdom': {
-    flag: 'https://flagcdn.com/w320/gb.png',
-    capital: 'لندن (London)',
-    languages: 'الإنجليزية (English)',
-    temp: 14,
-    weatherCode: 51,
-    countryName: 'المملكة المتحدة (UK)',
-    latlng: [51.5074, -0.1278],
-    countryCode: 'gb'
-  },
-  'france': {
-    flag: 'https://flagcdn.com/w320/fr.png',
-    capital: 'باريس (Paris)',
-    languages: 'الفرنسية (French)',
-    temp: 16,
-    weatherCode: 2,
-    countryName: 'فرنسا (France)',
-    latlng: [48.8566, 2.3522],
-    countryCode: 'fr'
-  },
-  'saudi arabia': {
-    flag: 'https://flagcdn.com/w320/sa.png',
-    capital: 'الرياض (Riyadh)',
-    languages: 'العربية (Arabic)',
-    temp: 30,
-    weatherCode: 0,
-    countryName: 'المملكة العربية السعودية (KSA)',
-    latlng: [24.7136, 46.6753],
-    countryCode: 'sa'
-  },
-  'turkey': {
-    flag: 'https://flagcdn.com/w320/tr.png',
-    capital: 'أنقرة (Ankara)',
-    languages: 'التركية (Turkish)',
-    temp: 20,
-    weatherCode: 1,
-    countryName: 'تركيا (Turkey)',
-    latlng: [41.0082, 28.9784],
-    countryCode: 'tr'
-  },
-  'egypt': {
-    flag: 'https://flagcdn.com/w320/eg.png',
-    capital: 'القاهرة (Cairo)',
-    languages: 'العربية (Arabic)',
-    temp: 26,
-    weatherCode: 0,
-    countryName: 'جمهورية مصر العربية (Egypt)',
-    latlng: [30.0444, 31.2357],
-    countryCode: 'eg'
-  },
-  'malaysia': {
-    flag: 'https://flagcdn.com/w320/my.png',
-    capital: 'كوالالمبور (Kuala Lumpur)',
-    languages: 'الملايو (Malay)',
-    temp: 28,
-    weatherCode: 95,
-    countryName: 'ماليزيا (Malaysia)',
-    latlng: [3.1390, 101.6869],
-    countryCode: 'my'
-  },
-  'indonesia': {
-    flag: 'https://flagcdn.com/w320/id.png',
-    capital: 'جاكرتا (Jakarta)',
-    languages: 'الإندونيسية (Indonesian)',
-    temp: 29,
-    weatherCode: 95,
-    countryName: 'إندونيسيا (Indonesia)',
-    latlng: [-6.2088, 106.8456],
-    countryCode: 'id'
-  }
-};
 
 export function TravelBudget() {
   const { t } = useI18n();
@@ -121,14 +22,6 @@ export function TravelBudget() {
   const [tripToEdit, setTripToEdit] = useState<Trip | null>(null);
   
   // Form states
-  const [name, setName] = useState('');
-  const [currency, setCurrency] = useState('EUR');
-  const [limit, setLimit] = useState('');
-  const [exchangeRate, setExchangeRate] = useState('4.0');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [isActive, setIsActive] = useState(true);
 
   // Weather & Country Live Data States
   const [forecastLoading, setForecastLoading] = useState(false);
@@ -309,10 +202,16 @@ export function TravelBudget() {
       const allTrips = await db.trips.toArray();
       setTrips(allTrips);
 
-      // Fetch all transactions linked to these trips
-      const expenses = await db.transactions
-        .filter(tx => tx.tripId !== undefined && tx.tripId !== null)
-        .toArray();
+      // Fetch all transactions linked to these trips.
+      //
+      // Deliberately `toArray()` then filter in JS, NOT `db.transactions
+      // .filter(...)`. Dexie's `Table.filter` walks a cursor, and the
+      // encryption middleware cannot decrypt inside the cursor protocol
+      // (WebCrypto is async, a cursor's `value` getter is not). Rows arriving
+      // that way keep their envelope, so `tx.amount` reads as undefined and
+      // every trip shows zero spending for any user with a PIN set.
+      const expenses = (await db.transactions.toArray())
+        .filter(tx => tx.tripId !== undefined && tx.tripId !== null);
 
       const grouped: Record<string, Transaction[]> = {};
       allTrips.forEach(tr => {
@@ -324,93 +223,17 @@ export function TravelBudget() {
     }
   };
 
+  // These now only express intent. Prefilling and resetting the form belongs
+  // to TripFormModal, which keys off `tripToEdit` when it opens -- so the two
+  // cannot drift out of step the way two copies of the same prefill would.
   const handleAddNew = () => {
     setTripToEdit(null);
-    setName('');
-    setCurrency('EUR');
-    setLimit('');
-    setExchangeRate('4.0');
-    
-    const today = new Date().toISOString().split('T')[0];
-    const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    setStartDate(today);
-    setEndDate(nextWeek);
-    setDescription('');
-    setIsActive(true);
     setIsModalOpen(true);
   };
 
   const handleEdit = (trip: Trip) => {
     setTripToEdit(trip);
-    setName(trip.name);
-    setCurrency(trip.currency);
-    setLimit(trip.limit.toString());
-    setExchangeRate(trip.exchangeRate.toString());
-    setStartDate(trip.startDate);
-    setEndDate(trip.endDate);
-    setDescription(trip.description || '');
-    setIsActive(trip.isActive);
     setIsModalOpen(true);
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      toast(t('travel.errName') || 'يرجى إدخال اسم الرحلة', 'error');
-      return;
-    }
-    const numLimit = parseNum(limit);
-    if (numLimit <= 0) {
-      toast(t('travel.errBudget') || 'يرجى إدخال ميزانية صالحة', 'error');
-      return;
-    }
-    const numRate = parseNum(exchangeRate);
-    if (numRate <= 0) {
-      toast(t('travel.errRate') || 'يرجى إدخال سعر صرف صالح', 'error');
-      return;
-    }
-
-    const colors = [
-      'from-blue-500 to-indigo-600',
-      'from-emerald-500 to-teal-600',
-      'from-violet-500 to-purple-600',
-      'from-amber-500 to-orange-600',
-      'from-rose-500 to-pink-600',
-      'from-cyan-500 to-blue-600'
-    ];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-    const tripData: Trip = {
-      id: tripToEdit ? tripToEdit.id : crypto.randomUUID(),
-      name: name.trim(),
-      currency: currency.toUpperCase(),
-      limit: numLimit,
-      exchangeRate: numRate,
-      startDate,
-      endDate,
-      isActive,
-      color: tripToEdit ? tripToEdit.color : randomColor,
-      description: description.trim() || undefined
-    };
-
-    try {
-      if (tripToEdit) {
-        await db.trips.put(tripData);
-        toast(t('travel.tripUpdated') || 'تم تحديث ميزانية الرحلة بنجاح! ✈️', 'success');
-      } else {
-        await db.trips.add(tripData);
-        toast(t('travel.tripAdded') || 'تمت إضافة ميزانية الرحلة بنجاح! ✈️', 'success');
-        
-        // Award Loyalty 2.0 milestone
-        checkMilestone('FIRST_BUDGET');
-        triggerCoinAnimation();
-      }
-      setIsModalOpen(false);
-      loadData();
-    } catch (err) {
-      silentFail('[TravelBudget] Failed to save trip')(err);
-      toast(t('travel.errSaving') || 'حدث خطأ أثناء الحفظ', 'error');
-    }
   };
 
   const handleDelete = (tripId: string) => {
@@ -421,7 +244,8 @@ export function TravelBudget() {
           await db.trips.delete(tripId);
         
         // Unlink associated transactions safely
-        const txs = await db.transactions.filter(tx => tx.tripId === tripId).toArray();
+        // Same reason as in loadData: cursor reads skip decryption.
+        const txs = (await db.transactions.toArray()).filter(tx => tx.tripId === tripId);
         for (const tx of txs) {
           await db.transactions.update(tx.id, { tripId: undefined });
         }
@@ -745,179 +569,12 @@ export function TravelBudget() {
       </div>
 
       {/* Modal Add/Edit */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-[100000] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
-          <div 
-            className="w-full max-w-md bg-white dark:bg-[#181a1d] rounded-t-[3rem] rounded-b-[2rem] p-6 space-y-6 shadow-2xl border border-slate-100 dark:border-white/5 animate-in slide-in-from-bottom-24 duration-300 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-black text-[#002b59] dark:text-blue-100">
-                  {tripToEdit ? (t('travel.editTrip') || 'تعديل الرحلة') : (t('travel.createTrip') || 'إضافة رحلة جديدة')}
-                </h3>
-                <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-                  {t('travel.modalSubtitle') || 'أدخل تفاصيل وميزانية رحلتك القادمة'}
-                </p>
-              </div>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="space-y-4">
-              {/* Trip Name */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {t('travel.tripName') || 'اسم الرحلة / الوجهة'}
-                </label>
-                <input 
-                  type="text"
-                  dir="auto"
-                  autoComplete="off"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  onCompositionEnd={(e) => setName((e.target as HTMLInputElement).value)}
-                  onBlur={(e) => setName(e.target.value)}
-                  placeholder="رحلة اليابان، صيف 2026..."
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-sm text-[#002b59] dark:text-blue-100 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                />
-              </div>
-
-              {/* Currency & Exchange Rate Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {t('travel.currency') || 'عملة الرحلة'}
-                  </label>
-                  <select 
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-sm text-[#002b59] dark:text-blue-100 focus:outline-none"
-                  >
-                    {['USD', 'EUR', 'GBP', 'AED', 'TRY', 'JPY', 'CHF', 'CAD', 'SAR'].map(cur => (
-                      <option key={cur} value={cur}>{cur}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {t('travel.rate') || 'سعر الصرف لـ ر.س'}
-                  </label>
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    dir="ltr"
-                    autoComplete="off"
-                    required
-                    value={exchangeRate}
-                    onChange={(e) => setExchangeRate(sanitizeNumericInput(e.target.value))}
-                    onCompositionEnd={(e) => setExchangeRate(sanitizeNumericInput((e.target as HTMLInputElement).value))}
-                    onBlur={(e) => setExchangeRate(sanitizeNumericInput(e.target.value))}
-                    placeholder="4.00"
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-sm text-[#002b59] dark:text-blue-100 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Budget Limit */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {t('travel.budgetLimit') || 'الميزانية بالعملة الأجنبية'}
-                </label>
-                <div className="relative flex items-center">
-                  <input 
-                    type="text"
-                    inputMode="decimal"
-                    dir="ltr"
-                    autoComplete="off"
-                    required
-                    value={limit}
-                    onChange={(e) => setLimit(sanitizeNumericInput(e.target.value))}
-                    onCompositionEnd={(e) => setLimit(sanitizeNumericInput((e.target as HTMLInputElement).value))}
-                    onBlur={(e) => setLimit(sanitizeNumericInput(e.target.value))}
-                    placeholder="2000"
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-sm text-[#002b59] dark:text-blue-100 focus:outline-none pr-12"
-                  />
-                  <span className="absolute right-4 font-black text-sm text-slate-400 uppercase">
-                    {currency}
-                  </span>
-                </div>
-                {limit && exchangeRate && (
-                  <p className="text-[9px] text-slate-400 font-bold mt-1">
-                    ≈ {fmtRaw(((parseNum(limit) || 0) * (parseNum(exchangeRate) || 1)), 0)} {t('currency.sar') || 'ر.س'}
-                  </p>
-                )}
-              </div>
-
-              {/* Dates Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {t('travel.startDate') || 'تاريخ البدء'}
-                  </label>
-                  <input 
-                    type="date"
-                    required
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-xs text-[#002b59] dark:text-blue-100 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {t('travel.endDate') || 'تاريخ الانتهاء'}
-                  </label>
-                  <input 
-                    type="date"
-                    required
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-xs text-[#002b59] dark:text-blue-100 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Description / Notes */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {t('travel.notes') || 'ملاحظات وتفاصيل إضافية'}
-                </label>
-                <textarea 
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ملاحظات حول الطيران، الفندق، إلخ..."
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 font-bold text-sm text-[#002b59] dark:text-blue-100 focus:outline-none min-h-[80px]"
-                />
-              </div>
-
-              {/* Form buttons */}
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-500 font-black text-xs hover:bg-slate-100 transition-all active:scale-95"
-                >
-                  {t('action.cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3.5 rounded-2xl bg-blue-600 text-white font-black text-xs shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
-                >
-                  {t('action.save')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <TripFormModal
+        open={isModalOpen}
+        tripToEdit={tripToEdit}
+        onClose={() => setIsModalOpen(false)}
+        onSaved={loadData}
+      />
     </div>
   );
 }
