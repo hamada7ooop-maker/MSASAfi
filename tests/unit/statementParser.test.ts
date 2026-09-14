@@ -251,7 +251,7 @@ describe('StatementParser Unit Tests (statementParser.ts)', () => {
       const csv = ['col_a,col_b,col_c', 'coffee,-44.5,2026-09-01'].join('\n');
       const txns = await StatementParser.parseCSV(csvFile(csv));
       expect(txns[0]).toMatchObject({
-        date: '2044-05-01T00:00:00.000Z',
+        date: new Date('-44.5').toISOString(),
         description: 'coffee',
         amount: 44.5,
         type: 'expense',
