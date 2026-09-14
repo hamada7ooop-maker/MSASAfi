@@ -27,6 +27,20 @@ export interface ZakatNisabBannerProps {
   onSyncPrices: () => void;
 
   onSave: () => void;
+
+  /**
+   * Hawl state from the engine.
+   *
+   * When the status is 'unknown' or 'incomplete' the figure is presented as an
+   * estimate, because zakat is not actually due until a lunar year has passed
+   * over wealth that has held nisab. Showing a confident "you owe X" before
+   * that misstates the obligation.
+   */
+  hawl: { status: 'unknown' | 'complete' | 'incomplete'; daysRemaining: number | null };
+  isDueNow: boolean;
+  /** ISO date the wealth first reached nisab; empty when unrecorded. */
+  nisabReachedDate: string;
+  onNisabReachedDateChange: (v: string) => void;
 }
 
 /**
@@ -54,6 +68,10 @@ export function ZakatNisabBanner({
   isSyncing,
   onSyncPrices,
   onSave,
+  hawl,
+  isDueNow,
+  nisabReachedDate,
+  onNisabReachedDateChange,
 }: ZakatNisabBannerProps) {
   const { t } = useI18n();
   const { fmt } = useFormat();
@@ -73,6 +91,25 @@ export function ZakatNisabBanner({
               <AnimatedNumber value={zakatAmount} formatter={fmt} baseCurrency={baseCurrency} />
             </div>
             
+            {isAboveNisab && !isDueNow && (
+              <p className="text-[10px] mt-3 z-10 px-3 py-1 rounded-full text-amber-100 bg-amber-900/40 border border-amber-400/30 font-black">
+                {t('zakat.estimate')}
+              </p>
+            )}
+
+            {isAboveNisab && (
+              <p className="text-[10px] mt-2 z-10 text-blue-100/90 font-bold text-center max-w-xs leading-relaxed">
+                {hawl.status === 'complete'
+                  ? t('zakat.hawlComplete')
+                  : hawl.status === 'incomplete'
+                    ? (t('zakat.hawlIncomplete') || '').replace(
+                        '{days}',
+                        String(hawl.daysRemaining ?? 0)
+                      )
+                    : t('zakat.hawlUnknown')}
+              </p>
+            )}
+
             {!isAboveNisab && totalAssets > 0 && (
               <p className="text-[10px] mt-4 z-10 px-4 py-1.5 rounded-full text-red-200 bg-red-900/40 backdrop-blur-md border border-red-500/30 font-bold animate-pulse">
                 {t('zakat.belowNisab')} ({fmt(nisab)})
@@ -88,6 +125,23 @@ export function ZakatNisabBanner({
                </button>
             )}
           </section>
+
+          {/* Hawl start date — optional, drives the estimate/obligation wording */}
+          <div className="bg-white dark:bg-[#1e2124] rounded-[2rem] px-5 py-4 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+            <label
+              htmlFor="zakat-hawl-date"
+              className="text-[11px] font-black text-slate-600 dark:text-slate-300 leading-snug"
+            >
+              {t('zakat.hawlTitle')}
+            </label>
+            <input
+              id="zakat-hawl-date"
+              type="date"
+              value={nisabReachedDate}
+              onChange={(e) => onNisabReachedDateChange(e.target.value)}
+              className="bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-[11px] font-bold dark:text-white outline-none focus:ring-2 focus:ring-[#002b59]/20"
+            />
+          </div>
 
           {/* Nisab Selector */}
           <div className="bg-white dark:bg-[#1e2124] rounded-[2rem] p-2 flex border border-slate-200 dark:border-slate-800 shadow-sm">

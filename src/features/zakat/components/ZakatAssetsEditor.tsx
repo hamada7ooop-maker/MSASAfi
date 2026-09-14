@@ -4,6 +4,11 @@ import { useFormat } from '../../../core/hooks/useFormat';
 
 export type ZakatAssets = Record<string, string>;
 
+export interface ExcludedAsset {
+  key: 'livestock' | 'crops' | 'realestate';
+  value: number;
+}
+
 export interface ZakatAssetsEditorProps {
   assets: ZakatAssets;
   onAssetChange: (key: string, value: string) => void;
@@ -15,6 +20,21 @@ export interface ZakatAssetsEditorProps {
    *  `toPureGoldEquivalent`); shown as a chip, never recalculated here. */
   totalEquivalentWeight: number;
   onOpenGoldModal: () => void;
+
+  /** Immediately-due debts, deducted from the zakatable base by the engine. */
+  liabilities: string;
+  onLiabilitiesChange: (v: string) => void;
+  /** monetaryTotal - liabilities, floored at zero. Computed by the engine. */
+  netZakatableBase: number;
+
+  /**
+   * Buckets the engine excluded from the 2.5% base, with their values.
+   *
+   * Rendered with their actual rulings rather than hidden: silently dropping
+   * wealth a user entered is its own failure mode, distinct from the
+   * over-charging this replaced.
+   */
+  excludedBreakdown: ExcludedAsset[];
 }
 
 /**
@@ -32,6 +52,10 @@ export function ZakatAssetsEditor({
   goldValue,
   totalEquivalentWeight,
   onOpenGoldModal,
+  liabilities,
+  onLiabilitiesChange,
+  netZakatableBase,
+  excludedBreakdown,
 }: ZakatAssetsEditorProps) {
   const { t } = useI18n();
   const { fmt } = useFormat();
@@ -103,6 +127,86 @@ export function ZakatAssetsEditor({
               );
             })}
           </div>
+
+          {/* ── Liabilities ─────────────────────────────────────────────── */}
+          <div className="bg-white dark:bg-[#1c1f23] rounded-3xl p-4 flex items-center justify-between border border-slate-100 dark:border-slate-800 shadow-sm mt-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-rose-50 dark:bg-rose-900/20 text-rose-500">
+                <span className="material-symbols-outlined text-xl">credit_card_off</span>
+              </div>
+              <div>
+                <label className="font-black text-sm text-slate-800 dark:text-slate-200 truncate block">
+                  {t('zakat.liabilities')}
+                </label>
+                <span className="text-[9px] font-bold text-slate-400">
+                  {t('zakat.liabilitiesHint')}
+                </span>
+              </div>
+            </div>
+            <input
+              type="text"
+              inputMode="decimal"
+              dir="ltr"
+              value={liabilities}
+              onChange={(e) => onLiabilitiesChange(e.target.value)}
+              onCompositionEnd={(e) => onLiabilitiesChange(e.currentTarget.value)}
+              className="w-28 bg-slate-50 dark:bg-[#121214] border border-transparent rounded-2xl py-3 px-3 text-center font-black text-sm text-rose-600 dark:text-rose-400 focus:outline-none transition-all placeholder-slate-400"
+              placeholder="0"
+            />
+          </div>
+
+          {/* Net base, so the user can see what the 2.5% is actually taken on */}
+          <div className="flex items-center justify-between px-5 py-3 mt-2 rounded-2xl bg-slate-100/70 dark:bg-slate-900/40">
+            <span className="text-[11px] font-black text-slate-500 dark:text-slate-400">
+              {t('zakat.netBase')}
+            </span>
+            <span className="text-sm font-black text-[#002b59] dark:text-emerald-400 tnum">
+              {fmt(netZakatableBase)}
+            </span>
+          </div>
+
+          {/* ── Assets with separate rulings ────────────────────────────── */}
+          {excludedBreakdown.length > 0 && (
+            <div className="mt-4 rounded-3xl border border-amber-300/50 dark:border-amber-500/20 bg-amber-50/70 dark:bg-amber-950/20 p-4 space-y-3">
+              <div className="flex items-start gap-2">
+                <span
+                  className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-lg shrink-0"
+                  aria-hidden="true"
+                >
+                  balance
+                </span>
+                <div>
+                  <h4 className="text-[12px] font-black text-amber-900 dark:text-amber-200">
+                    {t('zakat.excludedTitle')}
+                  </h4>
+                  <p className="text-[10px] font-bold text-amber-800/80 dark:text-amber-200/70 mt-0.5 leading-relaxed">
+                    {t('zakat.excludedNotice')}
+                  </p>
+                </div>
+              </div>
+
+              <ul className="space-y-2">
+                {excludedBreakdown.map((item) => (
+                  <li
+                    key={item.key}
+                    className="rounded-2xl bg-white/70 dark:bg-slate-900/40 px-3 py-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-black text-slate-700 dark:text-slate-200">
+                        {t(`zakat.asset.${item.key}`)}
+                      </span>
+                      <span className="text-[11px] font-black text-slate-500 tnum">
+                        {fmt(item.value)}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      {t(`zakat.rule.${item.key}`)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
     </>
   );
 }

@@ -33,6 +33,13 @@ const LABEL = {
   trade: 'عروض التجارة والبضائع',
   livestock: 'الأنعام والمواشي',
   realestate: 'العقارات الاستثمارية',
+  crops: 'الزروع والثمار',
+  liabilities: 'الديون والخصوم المستحقة',
+  excludedNotice: 'هذه الأصول لا تجب فيها زكاة النقدين (٢٫٥٪) ولها أحكامها الخاصة',
+  netBase: 'الوعاء الزكوي الصافي',
+  estimate: 'تقديري',
+  hawlUnknown: 'لم يُحدَّد تاريخ بلوغ النصاب، والمبلغ تقديري حتى يتم الحول.',
+  hawlComplete: 'تمّ الحول، والزكاة مستحقة الآن.',
 } as const;
 
 const renderScreen = () =>
@@ -59,6 +66,24 @@ const assetInput = (c: HTMLElement, label: string): HTMLInputElement => {
   );
   if (!rows.length) throw new Error(`No asset row with an input for ${label}`);
   return rows[rows.length - 1].querySelector('input') as HTMLInputElement;
+};
+
+/** The liabilities input, found by its label. */
+const liabilitiesInput = (c: HTMLElement): HTMLInputElement => {
+  const rows = Array.from(c.querySelectorAll('div')).filter(
+    (d) => clean(d.textContent).includes(LABEL.liabilities) && d.querySelector('input')
+  );
+  if (!rows.length) throw new Error('No liabilities input');
+  return rows[rows.length - 1].querySelector('input') as HTMLInputElement;
+};
+
+/** The net-zakatable-base row. */
+const netBaseRow = (c: HTMLElement): string => {
+  const rows = Array.from(c.querySelectorAll('div')).filter((d) =>
+    clean(d.textContent).includes(LABEL.netBase)
+  );
+  if (!rows.length) throw new Error('No net base row');
+  return clean(rows[rows.length - 1].textContent);
 };
 
 /** A top-level tab button, matched on its visible label. */
@@ -220,26 +245,174 @@ describe('ZakatCalculator — characterization', () => {
       });
     });
 
-    it('CURRENT BEHAVIOUR: also sweeps livestock into the 2.5% base', async () => {
-      // Pinned deliberately, and flagged rather than silently "fixed".
+    it('excludes livestock from the 2.5% base, per the canonical fiqh', async () => {
+      // INVERTED from the characterization test that pinned the old defect.
       //
-      // `core/zakatEngine.ts` excludes livestock, crops and real estate from
-      // the 2.5% base because they fall under different rules entirely, and
-      // its tests assert exactly that. This screen never adopted the engine;
-      // it re-implements the sum inline and charges every bucket.
-      //
-      // That is a fiqh defect, not a refactoring concern, so it is reported
-      // separately instead of being changed under cover of a restructure. This
-      // test records today's behaviour so the extraction can be proven
-      // behaviour-preserving; it should be INVERTED when the engine is wired in.
+      // Livestock zakat is a fixed in-kind amount (one sheep per 40 head and
+      // so on), never a percentage of market value. Sweeping it into the 2.5%
+      // base over-charged users, which is a religious harm and not merely a
+      // rounding error. The screen now delegates to core/zakatEngine.ts.
       const { container } = renderScreen();
       await waitFor(() => expect(screenText(container)).toContain(LABEL.livestock));
 
       typeAsset(container, LABEL.livestock, '100000');
 
+      // Nothing due: the monetary base is still empty.
+      await waitFor(() => {
+        expect(bannerValue(container)).toBe(0);
+      });
+      // The exact figure is already pinned at 0 above. A substring check is
+      // useless here anyway: "2500" occurs inside the 42,500 nisab that the
+      // banner prints alongside it.
+      expect(screenText(container)).toContain('لا يبلغ النصاب');
+    });
+
+    it('excludes crops and property too, and reports them separately', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.crops, '50000');
+      typeAsset(container, LABEL.realestate, '300000');
+
+      await waitFor(() => {
+        expect(bannerValue(container)).toBe(0);
+      });
+      // The user is told these need a separate ruling rather than being
+      // silently dropped -- excluding wealth without saying so is its own
+      // failure mode.
+      expect(screenText(container)).toContain(LABEL.excludedNotice);
+    });
+
+    it('charges only the monetary buckets when both kinds are present', async () => {
+      // The discriminating case: 100,000 cash (chargeable) alongside 160,000
+      // of exempt wealth. The old code charged 4,125 on the combined 265,000.
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.cash, '100000');
+      typeAsset(container, LABEL.livestock, '40000');
+      typeAsset(container, LABEL.crops, '20000');
+      typeAsset(container, LABEL.realestate, '100000');
+
+      // 100,000 x 2.5% = 2,500 -- NOT 265,000 x 2.5% = 6,625.
       await waitFor(() => {
         expect(bannerValue(container)).toBe(2500);
       });
+    });
+
+    it('deducts immediately-due liabilities from the base', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.cash, '100000');
+      await waitFor(() => expect(bannerValue(container)).toBe(2500));
+
+      // 100,000 - 40,000 = 60,000 -> 1,500 due.
+      fireEvent.change(liabilitiesInput(container), { target: { value: '40000' } });
+      await waitFor(() => {
+        expect(bannerValue(container)).toBe(1500);
+      });
+    });
+
+    it('drops below nisab once liabilities eat the surplus', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.cash, '50000');
+      await waitFor(() => expect(bannerValue(container)).toBe(1250));
+
+      // 50,000 - 20,000 = 30,000, below the 42,500 gold nisab. A debtor who
+      // no longer holds a nisab owes nothing at all.
+      fireEvent.change(liabilitiesInput(container), { target: { value: '20000' } });
+      await waitFor(() => {
+        expect(bannerValue(container)).toBe(0);
+      });
+      expect(screenText(container)).toContain('لا يبلغ النصاب');
+    });
+
+    it('includes gold in the zakatable base', async () => {
+      // The gold row is not a plain input (it opens the karat calculator), so
+      // it is seeded through the persisted value the component loads.
+      await DB.setSetting('zakatAssets', JSON.stringify({
+        cash: '', gold: '100000', invest: '', trade: '',
+        livestock: '', crops: '', realestate: '',
+      }));
+
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      // 100,000 of gold x 2.5% = 2,500. Dropping gold from the engine input
+      // would silently exempt jewellery, which is squarely zakatable.
+      await waitFor(() => {
+        expect(bannerValue(container)).toBe(2500);
+      });
+    });
+
+    it('shows the net zakatable base after debts', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.cash, '100000');
+      fireEvent.change(liabilitiesInput(container), { target: { value: '30000' } });
+
+      // The user must be able to see WHAT the 2.5% was taken on: 70,000.
+      await waitFor(() => {
+        expect(digitsOf(netBaseRow(container))).toContain('70000');
+      });
+      expect(bannerValue(container)).toBe(1750);
+    });
+  });
+
+  describe('Hawl (lunar year)', () => {
+    it('presents the figure as an estimate when no nisab date is recorded', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+
+      typeAsset(container, LABEL.cash, '100000');
+      await waitFor(() => expect(bannerValue(container)).toBe(2500));
+
+      // Zakat is not actually due until a lunar year passes over wealth that
+      // has held nisab. Announcing a confident obligation before then
+      // misstates the ruling, so the screen must qualify it.
+      expect(screenText(container)).toContain(LABEL.estimate);
+      expect(screenText(container)).toContain(LABEL.hawlUnknown);
+    });
+
+    it('reports the hawl as complete once a lunar year has passed', async () => {
+      // 400 days ago -- comfortably past the 354-day hawl.
+      const past = new Date(Date.now() - 400 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+      await DB.setSetting('zakatNisabReachedDate', past);
+
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+      typeAsset(container, LABEL.cash, '100000');
+
+      await waitFor(() => {
+        expect(screenText(container)).toContain(LABEL.hawlComplete);
+      });
+      // Now it is a genuine obligation, so the estimate qualifier goes away.
+      expect(screenText(container)).not.toContain(LABEL.estimate);
+    });
+
+    it('counts down the remaining days when the hawl is incomplete', async () => {
+      // 54 days ago -> 300 remaining of 354.
+      const recent = new Date(Date.now() - 54 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+      await DB.setSetting('zakatNisabReachedDate', recent);
+
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain(LABEL.cash));
+      typeAsset(container, LABEL.cash, '100000');
+
+      await waitFor(() => {
+        expect(digitsOf(screenText(container))).toContain('300');
+      });
+      // Still an estimate: the year has not turned.
+      expect(screenText(container)).toContain(LABEL.estimate);
+      expect(screenText(container)).not.toContain(LABEL.hawlComplete);
     });
   });
 

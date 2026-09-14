@@ -3108,6 +3108,19 @@ export const locale_id = {
   "security.pinMismatch": "The two PINs do not match",
   "security.confirmPin": "Re-enter your PIN to confirm",
   "security.enterNewPin": "Enter a new PIN",
-  "security.encryptNow": "Encrypt my data"
+  "security.encryptNow": "Encrypt my data",
+  "zakat.liabilities": "Immediately-due debts",
+  "zakat.liabilitiesHint": "Deducted from the zakatable base",
+  "zakat.netBase": "Net zakatable base",
+  "zakat.excludedTitle": "Assets with separate rulings",
+  "zakat.excludedNotice": "These assets are not subject to the 2.5% monetary zakat and follow their own rulings",
+  "zakat.rule.livestock": "Livestock: fixed in-kind amounts (one sheep per forty head), not a percentage.",
+  "zakat.rule.crops": "Crops and fruit: 10% if rain-fed, 5% if irrigated at cost; the nisab is five awsuq.",
+  "zakat.rule.realestate": "Property held to live in or to rent: no zakat on the asset itself, only on rental income once it completes its own hawl.",
+  "zakat.hawlTitle": "Date wealth reached nisab (optional)",
+  "zakat.hawlUnknown": "No nisab date recorded — the amount is an estimate until the hawl completes.",
+  "zakat.hawlIncomplete": "The hawl is not complete — {days} days remaining.",
+  "zakat.hawlComplete": "The hawl is complete; zakat is due now.",
+  "zakat.estimate": "Estimate"
 };
 export default locale_id;

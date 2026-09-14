@@ -6,6 +6,7 @@ import { getApiKey } from '@/core/apiKeys';
 import { toast } from '../../../toast';
 import { checkMilestone } from '../../../core/loyalty';
 import { silentFail, parseNum, sanitizeNumericInput } from '../../../core/utils';
+import { calculateZakat } from '@/core/zakatEngine';
 import { ZakatNisabBanner } from './ZakatNisabBanner';
 import { ZakatAssetsEditor } from './ZakatAssetsEditor';
 import { ZakatHistoryTab } from './ZakatHistoryTab';
@@ -56,6 +57,23 @@ export function ZakatCalculator() {
     crops: '',
     realestate: ''
   });
+
+  /**
+   * Immediately-due debts, deducted from the zakatable base.
+   *
+   * Previously absent entirely, so a user with 100,000 cash and 90,000 of due
+   * debt was charged as if they held the full 100,000.
+   */
+  const [liabilities, setLiabilities] = useState('');
+
+  /**
+   * The date the wealth first reached nisab, for the hawl (lunar year).
+   *
+   * Optional: when it is blank the engine reports `hawl.status === 'unknown'`
+   * and the screen presents the figure as an estimate rather than as an
+   * obligation that has already fallen due.
+   */
+  const [nisabReachedDate, setNisabReachedDate] = useState('');
 
   const syncPrices = useCallback(async () => {
     setIsSyncing(true);
@@ -178,6 +196,12 @@ export function ZakatCalculator() {
     const savedAssets = (await DB.getSetting('zakatAssets')) as string | undefined;
     if (savedAssets) setAssets(JSON.parse(savedAssets));
 
+    const savedLiabilities = (await DB.getSetting('zakatLiabilities')) as string | undefined;
+    if (savedLiabilities) setLiabilities(savedLiabilities);
+
+    const savedNisabDate = (await DB.getSetting('zakatNisabReachedDate')) as string | undefined;
+    if (savedNisabDate) setNisabReachedDate(savedNisabDate);
+
     // إذا كانت هذه هي المرة الأولى لفتح الحاسبة ولم تكن هناك قيم محفوظة، نقوم بالمزامنة تلقائياً بالخلفية
     if (!savedGold || !savedSilver) {
       setTimeout(() => {
@@ -189,6 +213,17 @@ export function ZakatCalculator() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  const handleLiabilitiesChange = (value: string) => {
+    const sanitized = sanitizeNumericInput(value);
+    setLiabilities(sanitized);
+    DB.setSetting('zakatLiabilities', sanitized);
+  };
+
+  const handleNisabDateChange = (value: string) => {
+    setNisabReachedDate(value);
+    DB.setSetting('zakatNisabReachedDate', value);
+  };
 
   const handleAssetChange = (key: keyof typeof assets, value: string) => {
     const sanitized = sanitizeNumericInput(value);
@@ -305,14 +340,66 @@ export function ZakatCalculator() {
       }, 0)
     : (parseNum(assets.gold) || 0);
 
-  const totalAssets = Object.entries(assets).reduce((sum, [key, val]) => {
-    if (key === 'gold') return sum + goldValueToUse;
-    return sum + (parseNum(val as string) || 0);
-  }, 0);
-  
-  const nisab = nisabMethod === 'gold' ? 85 * currentGoldPrice : 595 * currentSilverPrice;
-  const isAboveNisab = totalAssets >= nisab;
-  const zakatAmount = isAboveNisab ? totalAssets * 0.025 : 0;
+  /**
+   * ── Canonical zakat calculation ────────────────────────────────────────
+   *
+   * Delegated to `core/zakatEngine.ts`. This screen previously re-implemented
+   * the sum inline and charged 2.5% on EVERY bucket, including livestock,
+   * crops and property. That is wrong across all four Sunni schools: crops are
+   * 5%/10% at harvest against a nisab of five awsuq, livestock is a fixed
+   * in-kind amount, and property held to live in or rent carries no zakat on
+   * the asset itself. A user with modest cash and a house was being told they
+   * owed thousands.
+   *
+   * Nothing here computes; the engine decides and this screen reports.
+   * ───────────────────────────────────────────────────────────────────────
+   */
+  const zakatResult = React.useMemo(
+    () =>
+      calculateZakat({
+        assets: {
+          cash: parseNum(assets.cash) || 0,
+          // The gold row may be a direct value or an itemised karat breakdown;
+          // either way it arrives here already converted to currency.
+          gold: goldValueToUse,
+          invest: parseNum(assets.invest) || 0,
+          trade: parseNum(assets.trade) || 0,
+          livestock: parseNum(assets.livestock) || 0,
+          crops: parseNum(assets.crops) || 0,
+          realestate: parseNum(assets.realestate) || 0,
+        },
+        liabilities: parseNum(liabilities) || 0,
+        goldPricePerGram: currentGoldPrice,
+        silverPricePerGram: currentSilverPrice,
+        nisabMethod,
+        nisabReachedDate: nisabReachedDate || null,
+      }),
+    [
+      assets,
+      goldValueToUse,
+      liabilities,
+      currentGoldPrice,
+      currentSilverPrice,
+      nisabMethod,
+      nisabReachedDate,
+    ]
+  );
+
+  const {
+    monetaryTotal,
+    excludedBreakdown,
+    excludedTotal,
+    netZakatableBase,
+    nisab,
+    isAboveNisab,
+    zakatAmount,
+    hawl,
+    isDueNow,
+  } = zakatResult;
+
+  // Kept for the "total wealth entered" readout, which is a different figure
+  // from the zakatable base and must not be confused with it.
+  const totalAssets = monetaryTotal + excludedTotal;
 
   // Gold equivalent and helper calculations
   const totalEqWeight = goldItems.reduce((sum, item) => {
@@ -377,6 +464,10 @@ export function ZakatCalculator() {
               isSyncing={isSyncing}
               onSyncPrices={syncPrices}
               onSave={saveCalculation}
+              hawl={hawl}
+              isDueNow={isDueNow}
+              nisabReachedDate={nisabReachedDate}
+              onNisabReachedDateChange={handleNisabDateChange}
             />
             <ZakatAssetsEditor
               assets={assets}
@@ -385,6 +476,10 @@ export function ZakatCalculator() {
               goldValue={goldValueToUse}
               totalEquivalentWeight={totalEqWeight}
               onOpenGoldModal={openGoldModal}
+              liabilities={liabilities}
+              onLiabilitiesChange={handleLiabilitiesChange}
+              netZakatableBase={netZakatableBase}
+              excludedBreakdown={excludedBreakdown}
             />
           </>
         )}

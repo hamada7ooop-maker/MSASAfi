@@ -3115,7 +3115,20 @@ export const locale_ar = {
   "security.pinMismatch": "الرمزان غير متطابقين",
   "security.confirmPin": "أعد إدخال الرمز للتأكيد",
   "security.enterNewPin": "أدخل رمزاً سرياً جديداً",
-  "security.encryptNow": "شفّر بياناتي"
+  "security.encryptNow": "شفّر بياناتي",
+  "zakat.liabilities": "الديون والخصوم المستحقة",
+  "zakat.liabilitiesHint": "تُخصم من وعاء الزكاة",
+  "zakat.netBase": "الوعاء الزكوي الصافي",
+  "zakat.excludedTitle": "أصول لها أحكام خاصة",
+  "zakat.excludedNotice": "هذه الأصول لا تجب فيها زكاة النقدين (٢٫٥٪) ولها أحكامها الخاصة",
+  "zakat.rule.livestock": "الأنعام: مقادير مقدّرة بالعين (شاة في كل أربعين) لا نسبة مئوية.",
+  "zakat.rule.crops": "الزروع والثمار: العُشر إن سُقيت بلا كلفة، ونصفه إن سُقيت بكلفة، ونصابها خمسة أوسق.",
+  "zakat.rule.realestate": "العقار المقتنى للسكنى أو الإيجار: لا زكاة في عينه، وإنما في غلّته إذا بلغت النصاب وحال عليها الحول.",
+  "zakat.hawlTitle": "تاريخ بلوغ النصاب (اختياري)",
+  "zakat.hawlUnknown": "لم يُحدَّد تاريخ بلوغ النصاب، والمبلغ تقديري حتى يتم الحول.",
+  "zakat.hawlIncomplete": "لم يتم الحول بعد — يتبقى {days} يوماً.",
+  "zakat.hawlComplete": "تمّ الحول، والزكاة مستحقة الآن.",
+  "zakat.estimate": "تقديري"
 };
 
 export default locale_ar;
