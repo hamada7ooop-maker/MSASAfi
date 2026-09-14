@@ -103,7 +103,10 @@ export function ClassicDashboard() {
     setHomeOrder(newOrder);
   }, [setHomeOrder]);
 
-  if (isLoading) {
+  // Directive 17 item 3: isLoading now genuinely means "first result not in
+  // yet" — but an early failure must still win over skeletons (Directive 16:
+  // a failed load shows ErrorState, not an eternal skeleton).
+  if (isLoading && !error) {
     return (
       <div className="p-4 space-y-6">
         <div className="h-40 bg-gradient-to-br from-blue-600/20 to-blue-400/10 rounded-[2rem] animate-pulse"></div>

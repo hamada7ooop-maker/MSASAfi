@@ -54,3 +54,32 @@ Directives 15 and 16 built an extensive, rigorous error-capture and telemetry in
 
 ## 📝 Auditor Report & Next Step Proposals
 *(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
+
+---
+
+## Auditor Report — Directive 17 (items 2 & 3): CI security gate + isLoading first-result semantics
+
+*(Note: the Directive 17 authorization above arrived while these two commits were being pushed — this report covers the work that was already in flight; the Crashlytics activation directive itself is executed in the commits that follow this merge.)*
+
+**Scope.** Items 2 and 3 of the (pre-authorization) proposals table — both unblocked, both done end-to-end.
+
+**Item 2 — dependency audit pass (verified before fixing).** Fresh `npm audit` AND `npm audit --omit=dev` both report **0 vulnerabilities**; the "10 vulnerabilities (1 critical, 6 high)" figure circulating in the proposals was carried over from the original phase-1 scan — the tracking table documents the earlier fix (`6f08582`, outside this branch) and `vite` had already been moved to devDependencies. The single genuinely-open leftover of the original H-1 recommendation: the `audit:security` script existed but was **not wired into `ci:check`** — an unused shield. It is now part of the CI chain, so any future dependency regression breaks CI immediately.
+
+**Item 3 — `isLoading` "first result" semantics.** `useHomeData.isLoading` compared live-query results to `undefined`, but they are seeded with `defaultResult` — the comparison never fired, isLoading was permanently false, and ClassicDashboard's skeletons never rendered (a flash of empty numbers instead). The `if (homeData.isLoading) return;` guard in useAdvisorData was equally dead — the first advisor analysis ran on seeded empty data.
+- `useLiveQuerySafe` now exposes `hasFirstResult` (false until the first successful emission; true forever after — a resubscription keeps the last result, so it keeps the flag).
+- `useHomeData.isLoading` aggregates the three primary queries' flags (same three the old line intended).
+- Three `&& !error` guards protect Directive 16's contract from "eternal skeletons" on an early failure (ClassicDashboard skeletons, AdvisorPage skeletons, and the now-live advisor guard whose compound `isAdvisorLoading` got the same guard).
+
+**The story worth remembering:** eslint's exhaustive-deps flagged `homeData.error` as a missing effect dependency. First instinct was to disable the rule ("guard-only read") — and that was **wrong**: a live diagnostic (persistent rejection, `calls=1`, effect stuck waiting forever) proved the guard reads error as a *control* input; when the decision input changes (error arrives), the effect must re-run or the advisor hangs forever waiting for a first result that will never come. `homeData.error` is now in the deps with a comment documenting why eslint was right. The mutation suite then validated the whole story: **6/6 killed** (`scripts/directive17-loading-mutations.cjs`) — including M6 (severing `error` from the deps), which only died once the "total failure" test rejected **all five** dep-feeding queries (rejecting just the three primary ones let the surviving queries' identity changes re-trigger the effect and mask the mutation).
+
+**Verification.**
+- **914/914 tests (100%) across 106 suites — zero regressions** (906 prior + 8 new; advisorPage's 9 and the whole Directive 16 suite included).
+- `tsc --noEmit` 0 · `npm run lint` 0 · `guardian.mjs validate` clean · zero new i18n keys · `npm run audit:security` clean.
+- **Mutation testing: 6/6 killed** by `tests/unit/firstResultLoading.test.tsx`.
+- The characterization file documents the deliberate behavior flip in place: the old state was pinned green *before* the change, then flipped with an explanatory comment — that document-in-test is what separates "intended change" from "regression".
+
+**Permanent memory updated:** `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.16).
+
+### Next Step Proposals
+
+1. **Directive 17 (authorized above): Crashlytics native activation** — executing next, in the commits following this merge.

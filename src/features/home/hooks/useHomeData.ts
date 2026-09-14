@@ -80,6 +80,7 @@ export function useHomeData(
   const {
     result: recentTransactions,
     error: recentTxnError,
+    hasFirstResult: recentTxnLoaded,
   } = useLiveQuerySafe(
     () => TransactionRepository.getRecent(5),
     [retryToken], [] as Transaction[]
@@ -88,6 +89,7 @@ export function useHomeData(
   const {
     result: allBudgets,
     error: budgetsError,
+    hasFirstResult: budgetsLoaded,
   } = useLiveQuerySafe(
     () => BudgetRepository.getAll(),
     [retryToken], [] as Budget[]
@@ -144,6 +146,7 @@ export function useHomeData(
   const {
     result: monthlyStats,
     error: statsError,
+    hasFirstResult: statsLoaded,
   } = useLiveQuerySafe(
     () => StatisticsService.getMonthlySummary(year, month),
     [year, month, retryToken],
@@ -419,7 +422,12 @@ export function useHomeData(
     categoryBreakdown: safeMonthlyStats.breakdown || {},
     totalBalance: totalBalance || 0,
     balance: totalBalance || 0, // Alias for Dashboard compatibility
-    isLoading: recentTransactions === undefined || allBudgets === undefined || monthlyStats === undefined,
+    // Directive 17 item 3: "first result" semantics. The seeded defaults are
+    // never undefined, so the old `=== undefined` comparisons never fired and
+    // this flag was permanently false — the dashboard never showed its
+    // skeletons and rendered a flash of empty numbers instead. Loading now
+    // genuinely means "the first real result has not arrived yet".
+    isLoading: !(recentTxnLoaded && budgetsLoaded && statsLoaded),
     error: liveError,
     retry,
     streak: streak || 0,

@@ -24,7 +24,12 @@ export function useAdvisorData() {
   const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
-    if (homeData.isLoading) return;
+    // Directive 17 item 3: homeData.isLoading now genuinely means "first
+    // result not in yet" — wait for real data before analysing. An early
+    // failure (error set, first result never arriving) must NOT wait here:
+    // the analysis runs on what is available and the error surfaces (an
+    // eternal "return" would trap the advisor page in skeletons forever).
+    if (homeData.isLoading && !homeData.error) return;
     let isMounted = true;
 
     (async () => {
@@ -102,8 +107,18 @@ export function useAdvisorData() {
     // belong here: without them the advisor kept serving insights computed
     // from a stale budget or goal list. Their identities are stable thanks to
     // the memoised fallbacks in useHomeData.
+    //
+    // `homeData.error` is a CONTROL input of the guard above, not just an
+    // observation: when an early failure arrives (error null → Error while
+    // isLoading is still true), the effect must re-run so the analysis can
+    // proceed on what is available — otherwise it would wait forever for a
+    // first result that will never come and the page would hang in
+    // skeletons. (This was caught live by the mutation-style test in
+    // firstResultLoading.test.tsx — and by eslint's exhaustive-deps, which
+    // was right.)
   }, [
     homeData.isLoading,
+    homeData.error,
     homeData.monthlyStats,
     homeData.balance,
     homeData.budgets,
@@ -123,7 +138,13 @@ export function useAdvisorData() {
     challenges,
     deepInsights,
     necessityStats,
-    isAdvisorLoading: isAdvisorLoading || homeData.isLoading,
+    // Directive 17 item 3: `homeData.isLoading` is now a live signal (true
+    // until the first result). A persistent early failure keeps it true
+    // forever — but that is not "loading", it is an error the page will
+    // display (the `&& !error` guard mirrors the skeleton guard in
+    // AdvisorPage). Without it, the page would show skeletons forever
+    // instead of the error state.
+    isAdvisorLoading: isAdvisorLoading || (homeData.isLoading && !homeData.error),
     // Advisor's own failure wins; otherwise surface the home data failure
     // that flows in through the spread above.
     error: advisorError || homeData.error,

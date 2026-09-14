@@ -9,6 +9,16 @@ export function toError(err: unknown): Error {
 export interface LiveQueryState<T> {
   result: T;
   error: Error | null;
+  /**
+   * Directive 17 item 3: has a successful emission ever arrived?
+   * `result` is seeded with `defaultResult` and is therefore never
+   * `undefined` — callers cannot tell "not loaded yet" from "loaded an
+   * empty/default value" by looking at `result` alone. This flag is the
+   * honest signal: false until the first `next`, true forever after
+   * (a resubscription keeps the last result, so it keeps this flag too;
+   * an error before any success leaves it false).
+   */
+  hasFirstResult: boolean;
 }
 
 /**
@@ -29,6 +39,8 @@ export interface LiveQueryState<T> {
  *   - `error` is `null` until a subscription fails, and is cleared again both
  *     by a successful emission and by a resubscription (a resubscription IS
  *     the retry — see the `retryToken` pattern in `useHomeData`).
+ *   - `hasFirstResult` flips to `true` on the first successful emission and
+ *     stays `true` (Directive 17 item 3).
  *
  * Signature mirrors `useLiveQuery(querier, deps, defaultResult)` so call sites
  * convert mechanically.
@@ -41,6 +53,7 @@ export function useLiveQuerySafe<T>(
   const [state, setState] = useState<LiveQueryState<T>>({
     result: defaultResult,
     error: null,
+    hasFirstResult: false,
   });
 
   // Keep the querier fresh across renders without resubscribing — same trick
@@ -54,8 +67,12 @@ export function useLiveQuerySafe<T>(
     setState(prev => (prev.error !== null ? { ...prev, error: null } : prev));
 
     const subscription = Dexie.liveQuery(() => querierRef.current()).subscribe({
-      next: value => setState({ result: value, error: null }),
-      error: err => setState(prev => ({ result: prev.result, error: toError(err) })),
+      next: value => setState({ result: value, error: null, hasFirstResult: true }),
+      error: err => setState(prev => ({
+        result: prev.result,
+        error: toError(err),
+        hasFirstResult: prev.hasFirstResult,
+      })),
     });
 
     // Dexie's subscribe returns a function in some versions and a

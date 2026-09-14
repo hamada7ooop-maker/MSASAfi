@@ -273,7 +273,9 @@ export function AdvisorPage() {
     checkMilestone('OPPORTUNITY');
   };
 
-  if (isAdvisorLoading) {
+  // Directive 17 item 3: skeletons only while the first result is genuinely
+  // pending — an early failure must show the error state instead (D16).
+  if (isAdvisorLoading && !error) {
     return (
       <div className="p-6 space-y-8 animate-pulse">
         <div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-[2.5rem]"></div>
