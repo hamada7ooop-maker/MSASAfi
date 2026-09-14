@@ -112,8 +112,7 @@ export function ReportBuilderModal() {
     >
       <div 
         className="bg-white dark:bg-[#1e2124] w-full max-w-xl max-h-[90vh] rounded-[2.5rem] flex flex-col shadow-2xl border border-white/10 relative overflow-hidden animate-in zoom-in slide-in-from-bottom-12 duration-500"
-        onClick={e => e.stopPropagation()}
-      >
+        onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="p-8 pb-4 flex items-center justify-between">
           <div>

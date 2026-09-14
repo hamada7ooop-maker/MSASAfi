@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useAppStore } from '../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useIsMounted } from '../../hooks/useIsMounted';
@@ -151,8 +152,7 @@ export function SearchOverlay() {
     >
       <div 
         className="flex-1 w-full max-w-4xl mx-auto bg-[#f8f9fa] dark:bg-[#121214] shadow-2xl flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Header Search Bar */}
         <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-white dark:bg-[#1c1f23] shadow-sm sticky top-0 z-10 flex items-center gap-3">
           <button 
@@ -212,7 +212,10 @@ export function SearchOverlay() {
                     navigate(r.page);
                   }}
                   className="bg-white dark:bg-[#1c1f23] p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-[#25282d] transition-all active:scale-[0.98] border border-slate-100 dark:border-slate-800 shadow-sm"
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => {
+                    setSearchOpen(false);
+                    navigate(r.page);
+                  })}>
                   <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${r.color}15` }}>
                     <span className="material-symbols-outlined text-2xl" style={{ color: r.color, fontVariationSettings: "'FILL' 1" }}>{r.icon}</span>
                   </div>

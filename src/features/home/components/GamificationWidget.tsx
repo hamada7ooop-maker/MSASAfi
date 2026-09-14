@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useHomeData } from '../hooks/useHomeData';
 import { FinancialScoreCard } from './FinancialScoreCard';
 import { InfoModal } from '../../../components/ui/InfoModal';
@@ -70,7 +71,7 @@ export function GamificationRankCard({ className = '' }: GamificationRankCardPro
       <div 
         className={`rounded-[32px] p-5 bg-gradient-to-br from-amber-500/5 via-orange-500/5 to-yellow-500/5 dark:from-amber-500/10 dark:to-orange-500/10 border border-amber-500/20 flex flex-col justify-between h-full relative overflow-hidden group cursor-pointer shadow-sm hover:shadow-md transition-all ${className}`}
         onClick={() => setIsInfoOpen(true)}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsInfoOpen(true))}>
         {/* Background Decor */}
         <div className="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity duration-500 transform group-hover:scale-110 group-hover:rotate-12 pointer-events-none">
           <span className="material-symbols-outlined text-[90px] text-amber-500">social_leaderboard</span>

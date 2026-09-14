@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useRules } from '../../hooks/useRules';
 import { useI18n } from '../../../../i18n';
 import { toast } from '../../../../toast';
@@ -98,7 +99,7 @@ export function AutoClassificationCard() {
       <div 
         onClick={() => setShowManager(true)}
         className="bg-white/40 dark:bg-white/[0.02] backdrop-blur-md rounded-[1.75rem] p-6 flex items-center gap-4 cursor-pointer active:scale-[0.99] border border-white/20 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(31,38,135,0.03)] hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-all duration-150 group"
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setShowManager(true))}>
         <div className="w-14 h-14 rounded-[1.5rem] bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
           <span className="material-symbols-outlined text-2xl">neurology</span>
         </div>

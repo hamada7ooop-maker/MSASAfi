@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useAssets } from '../hooks/useAssets';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
@@ -477,7 +478,7 @@ export function Assets() {
                 key={asset.id}
                 onClick={() => setViewingAsset(asset)}
                 className="bg-white dark:bg-[#1e2124] p-5 rounded-[2.5rem] shadow-sm border border-black/5 dark:border-white/5 hover:-translate-y-1 active:scale-98 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col justify-between space-y-4"
-              >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setViewingAsset(asset))}>
                 {/* رأس كارت الأصل */}
                 <div className="flex items-start justify-between">
                   {/* زر التعديل والحذف */}

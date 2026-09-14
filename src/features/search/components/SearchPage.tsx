@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useSearch } from '../hooks/useSearch';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
@@ -69,7 +70,7 @@ export function SearchPage() {
                       key={acc.id}
                       onClick={() => navigate('/accounts')} 
                       className="bg-white dark:bg-slate-800 p-4 rounded-3xl flex items-center justify-between border border-black/5 dark:border-white/5 shadow-sm active:scale-[0.98] cursor-pointer"
-                    >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => navigate('/accounts'))}>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center">
                           <span className="material-symbols-outlined text-xl">account_balance</span>

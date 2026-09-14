@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useHomeData } from '../hooks/useHomeData';
 import { InfoModal } from '../../../components/ui/InfoModal';
 
@@ -88,7 +89,7 @@ export function City3DWidget() {
       <div 
         className={`rounded-[32px] p-6 bg-gradient-to-br ${cityData.sky} shadow-inner flex flex-col justify-between h-full relative overflow-hidden group cursor-pointer`}
         onClick={() => setIsInfoOpen(true)}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsInfoOpen(true))}>
         
         {/* Sun/Moon */}
         <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/40 blur-sm mix-blend-overlay pointer-events-none"></div>

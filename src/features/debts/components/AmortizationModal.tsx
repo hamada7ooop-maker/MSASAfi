@@ -30,8 +30,7 @@ export function AmortizationModal({ isOpen, onClose, debt }: AmortizationModalPr
     >
       <div 
         className="w-full max-w-[600px] bg-gradient-to-b from-white/90 to-slate-50/90 dark:from-[#1c1f23]/95 dark:to-[#141618]/95 border border-white/20 dark:border-white/5 rounded-[32px] p-6 shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">

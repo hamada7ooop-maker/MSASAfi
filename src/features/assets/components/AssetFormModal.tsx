@@ -87,8 +87,7 @@ export function AssetFormModal({
       <div 
         ref={containerRef}
         className="bg-white dark:bg-[#1e2124] w-full max-w-lg rounded-[2.5rem] p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh] scrollbar-hide" 
-        onClick={e => e.stopPropagation()}
-      >
+        onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-2" />
         <h3 id="asset-form-title" className="text-xl font-black dark:text-white flex items-center justify-between">
           {asset?.id ? t('asset.edit') || 'تعديل أصل' : t('asset.new') || 'إضافة أصل جديد'}

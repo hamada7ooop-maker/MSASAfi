@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useAppStore } from '../../../store/appStore';
@@ -240,7 +241,7 @@ export function SharedWalletTab({
                   onClick={() => onEditMember(m)}
                   className="w-10 h-10 rounded-full bg-white/20 text-white ring-1 ring-white/30 flex items-center justify-center text-sm font-black transition-all hover:scale-110 cursor-pointer"
                   title={t('family.editMember')}
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => onEditMember(m))}>
                   {m.name[0]}
                 </div>
                 <p className="text-[9px] mt-1.5 opacity-90 font-bold max-w-[54px] truncate text-center">{m.name}</p>
@@ -327,7 +328,7 @@ export function SharedWalletTab({
               ? 'bg-[#002b59] text-white shadow-md' 
               : 'bg-white dark:bg-[#121214] text-slate-500 border border-slate-200 dark:border-slate-700'
           }`}
-        >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => handleToggleChip('me', t('family.me') || 'Me'))}>
           <span className="material-symbols-outlined text-[14px]">person</span> {t('family.me')}
         </div>
         {members.map(m => {
@@ -341,7 +342,7 @@ export function SharedWalletTab({
                   ? 'bg-[#002b59] text-white shadow-md' 
                   : 'bg-white dark:bg-[#121214] text-slate-500 border border-slate-200 dark:border-slate-700'
               }`}
-            >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => handleToggleChip(m.id, m.name))}>
               {m.name}
             </div>
           );
@@ -490,7 +491,7 @@ export function SharedWalletTab({
                 <div 
                   onClick={() => toggleSelection(tx.id!)}
                   className="w-10 flex items-center justify-center cursor-pointer shrink-0 animate-in fade-in slide-in-from-left-2"
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => toggleSelection(tx.id!))}>
                   <span className={`material-symbols-outlined text-2xl transition-colors ${isSelected ? 'text-[#d97706] font-variation-fill' : 'text-slate-300 dark:text-slate-600'}`}>
                     {isSelected ? 'check_circle' : 'radio_button_unchecked'}
                   </span>
@@ -502,7 +503,7 @@ export function SharedWalletTab({
                 className={`flex-1 bg-white dark:bg-[#1c1f23] rounded-2xl p-4 flex items-center justify-between transition-all ${
                   isSelected ? 'border border-[#d97706] ring-2 ring-[#d97706]/10' : 'border border-slate-100 dark:border-slate-800 shadow-sm'
                 }`}
-              >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => { if (isSelecting) toggleSelection(tx.id!); })}>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-xl flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-[#d97706] text-xl font-variation-fill">{tx.icon || 'group'}</span>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { parseNum } from '../../../core/utils';
@@ -70,7 +71,7 @@ export function ZakatHistoryTab({
                   <div 
                     onClick={() => onToggleExpand(isExpanded ? null : idx)}
                     className="p-5 flex items-center justify-between cursor-pointer active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
-                  >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => onToggleExpand(isExpanded ? null : idx))}>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-400 mb-1">{new Date(entry.date).toLocaleDateString()}</span>
                       <span className="font-black text-slate-800 dark:text-white text-lg">{fmt(entry.amount)}</span>

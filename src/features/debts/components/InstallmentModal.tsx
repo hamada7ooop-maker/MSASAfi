@@ -101,8 +101,7 @@ export function InstallmentModal({ isOpen, onClose, installmentToEdit, accounts,
     >
       <div 
         className="w-full max-w-[440px] bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-500"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
 
         <h3 className="text-xl font-black mb-6 text-slate-800 dark:text-white">

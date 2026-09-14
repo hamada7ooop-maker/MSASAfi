@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { createWorker, Worker } from 'tesseract.js';
 import { useI18n } from '../../../i18n/index';
 import { toast } from '../../../toast';
@@ -148,7 +149,7 @@ export function OCRScanner({ onScan, onClose }: OCRScannerProps) {
             <div 
               className="w-64 h-64 rounded-[3rem] border-4 border-dashed border-white/20 flex flex-col items-center justify-center gap-4 text-white/40 hover:border-emerald-500/50 hover:text-emerald-500/50 transition-all cursor-pointer group" 
               onClick={handleCapture}
-            >
+  role="button" tabIndex={0} onKeyDown={onActivate(handleCapture)}>
               <span className="material-symbols-outlined text-6xl group-hover:scale-110 transition-transform text-emerald-400/80">add_a_photo</span>
               <p className="font-black text-sm text-white/80">{t('ocr.tip') || 'اضغط لمسح الفاتورة'}</p>
             </div>

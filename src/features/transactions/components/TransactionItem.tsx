@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useCategories } from '../../categories/hooks/useCategories';
 import { useNavigate } from 'react-router-dom';
@@ -41,7 +42,7 @@ export const TransactionItem = React.memo(function TransactionItem({ transaction
         className={`flex items-center justify-center cursor-pointer shrink-0 transition-all duration-300 ${
           isSelecting || isSelected ? 'w-10 opacity-100' : 'w-0 opacity-0 overflow-hidden'
         }`}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => toggleSelection(transaction.id))}>
         <span className={`material-symbols-outlined text-2xl ${
           isSelected ? 'text-blue-600 font-bold' : 'text-slate-300 dark:text-slate-700'
         }`}>

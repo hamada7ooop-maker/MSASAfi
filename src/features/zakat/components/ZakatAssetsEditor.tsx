@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 
@@ -87,7 +88,7 @@ export function ZakatAssetsEditor({
                   key={item.id} 
                   onClick={() => isGoldRow && onOpenGoldModal()}
                   className={`bg-white dark:bg-[#1c1f23] rounded-3xl p-4 flex items-center justify-between border border-slate-100 dark:border-slate-800 shadow-sm focus-within:ring-2 focus-within:ring-[#002b59]/20 transition-all ${isGoldRow ? 'cursor-pointer hover:border-amber-400/50' : ''}`}
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => isGoldRow && onOpenGoldModal())}>
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${item.bg} ${item.color}`}>
                       <span className="material-symbols-outlined text-xl">{item.icon}</span>

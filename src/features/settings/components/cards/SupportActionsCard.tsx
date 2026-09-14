@@ -154,8 +154,7 @@ export function SupportActionsCard() {
         >
           <div
             className="bg-white/90 dark:bg-[#1c1f23]/90 backdrop-blur-xl w-full max-w-sm rounded-[2rem] p-7 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-white/20 dark:border-white/[0.05]"
-            onClick={(e) => e.stopPropagation()}
-          >
+            onClick={(e) => e.stopPropagation()}>
             {/* Icon */}
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 ${
               modal.type === 'wipe_all' ? 'bg-rose-500/10 text-rose-500 shadow-sm' :

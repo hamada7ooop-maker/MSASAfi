@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import type { Challenge } from '../../../types';
 
@@ -61,7 +62,8 @@ export function CustomChallengesTab({
 
                 return (
                   <div key={c.id} className="flex items-center mb-2">
-                    <div onClick={() => onToggleSelection(c.id)} className={`overflow-hidden transition-all duration-300 flex items-center justify-center cursor-pointer shrink-0 ${isSelected || isSelecting ? 'w-10 opacity-100' : 'w-0 opacity-0'}`}>
+                    <div onClick={() => onToggleSelection(c.id)} className={`overflow-hidden transition-all duration-300 flex items-center justify-center cursor-pointer shrink-0 ${isSelected || isSelecting ? 'w-10 opacity-100' : 'w-0 opacity-0'}`}
+  role="button" tabIndex={0} onKeyDown={onActivate(() => onToggleSelection(c.id))}>
                       <span className={`material-symbols-outlined text-2xl ${isSelected ? 'text-[#002b59] dark:text-blue-400 font-bold' : 'text-slate-200 dark:text-slate-700'}`}>
                         {isSelected ? 'check_circle' : 'radio_button_unchecked'}
                       </span>

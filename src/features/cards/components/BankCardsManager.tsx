@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../i18n/index';
 import { CardRepository } from '../../../core/db/repositories/cards';
@@ -308,7 +309,7 @@ export function BankCardsManager() {
                         transformOrigin: 'top center',
                         opacity: 1 - peekIdx * 0.08,
                       }}
-                    >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setActiveCardId(card.id))}>
                       {/* Subtle shimmer overlay */}
                       <div style={{
                         position: 'absolute', inset: 0,

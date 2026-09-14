@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useFormat } from '@core/hooks/useFormat';
 import { useCategory } from '@core/hooks/useCategory';
 import { useCategories } from '../../categories/hooks/useCategories';
@@ -48,7 +49,8 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
       
       <div className="space-y-5">
         {transactions.slice(0, 5).map((tx) => (
-          <div key={tx.id} className="flex items-center justify-between group cursor-pointer gap-2 min-w-0" onClick={() => navigate(`/transactions/add?edit=${tx.id}`)}>
+          <div key={tx.id} className="flex items-center justify-between group cursor-pointer gap-2 min-w-0" onClick={() => navigate(`/transactions/add?edit=${tx.id}`)}
+  role="button" tabIndex={0} onKeyDown={onActivate(() => navigate(`/transactions/add?edit=${tx.id}`))}>
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
               {(() => {
                 const catInfo = categories.find(c => c.name === tx.category);

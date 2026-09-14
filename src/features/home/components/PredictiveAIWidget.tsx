@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useHomeData } from '../hooks/useHomeData';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { InfoModal } from '../../../components/ui/InfoModal';
@@ -61,7 +62,7 @@ export function PredictiveAIWidget() {
       <div 
         className={`rounded-[32px] p-6 bg-gradient-to-br border flex flex-col justify-between h-full relative overflow-hidden group transition-all duration-500 cursor-pointer ${prediction.bg}`}
         onClick={() => setIsInfoOpen(true)}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsInfoOpen(true))}>
         
         {/* Background Decor */}
         <div className="absolute -left-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity duration-500 transform group-hover:scale-110 pointer-events-none">

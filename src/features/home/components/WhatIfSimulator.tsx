@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { InfoModal } from '@/components/ui/InfoModal';
@@ -28,7 +29,7 @@ export function WhatIfSimulator({ categoryBreakdown }: WhatIfSimulatorProps) {
       <div 
         className="flex items-center justify-between cursor-pointer group"
         onClick={() => setIsWhatIfModalOpen(true)}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsWhatIfModalOpen(true))}>
         <h3 className="font-black text-sm uppercase tracking-tighter flex items-center gap-2 group-hover:text-indigo-500 transition-colors">
           <span className="material-symbols-outlined text-indigo-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
           {t('home.whatIfTitle')}

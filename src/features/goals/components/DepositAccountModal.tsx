@@ -40,8 +40,7 @@ export function DepositAccountModal({ isOpen, onClose, accounts, onConfirm }: De
     >
       <div 
         className="w-full max-w-[440px] bg-white dark:bg-[#1a1d21] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
 
         <h3 className="text-lg font-black mb-4 text-slate-800 dark:text-white">

@@ -319,8 +319,7 @@ export function AssetDetailModal({
         id="asset-detail-print-container" 
         className="bg-white dark:bg-[#1e2124] w-full max-w-2xl rounded-[2.5rem] p-6 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300 overflow-y-auto max-h-[90vh] scrollbar-hide text-right" 
         dir="rtl" 
-        onClick={e => e.stopPropagation()}
-      >
+        onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-2 no-print" />
         
         {/* رأس النافذة مع أزرار الطباعة والتصدير */}

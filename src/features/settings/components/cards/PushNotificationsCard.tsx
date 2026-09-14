@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../../i18n/index';
 import { getTelegramCredentials, saveTelegramCredentials, testTelegramConnection } from '../../../../core/telegram';
 import { checkMilestone } from '../../../../core/loyalty';
@@ -163,7 +164,7 @@ export function PushNotificationsCard() {
           <div 
             onClick={() => setIsExpanded(!isExpanded)}
             className="flex items-center justify-between p-4 cursor-pointer hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-all"
-          >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsExpanded(!isExpanded))}>
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 shadow-sm relative">
                 <span className="material-symbols-outlined text-[20px]">send</span>

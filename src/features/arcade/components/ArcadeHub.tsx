@@ -1,4 +1,5 @@
 import { silentFail } from '../../../core/utils';
+import { onActivate } from '@/core/a11yKeyboard';
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useI18n } from '@/i18n/index';
 import { useNavigate } from 'react-router-dom';
@@ -540,7 +541,7 @@ export function ArcadeHub() {
             style={{ 
               boxShadow: `0 8px 16px -8px ${game.glowColor || 'rgba(0,0,0,0.1)'}, inset 0 0 10px rgba(255,255,255,0.01)`
             }}
-          >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setActiveGame(game.id))}>
             {/* Ambient Background Glow Spot */}
             <div 
               className="absolute -right-6 -top-6 w-16 h-16 rounded-full blur-[15px] opacity-10 group-hover:opacity-15 transition-opacity duration-700" 

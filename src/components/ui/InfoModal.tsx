@@ -44,8 +44,7 @@ export function InfoModal({
     >
       <div 
         className="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 max-w-sm w-full shadow-2xl relative" 
-        onClick={e => e.stopPropagation()}
-      >
+        onClick={e => e.stopPropagation()}>
         <div className="absolute top-0 right-0 p-4">
           <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose} 

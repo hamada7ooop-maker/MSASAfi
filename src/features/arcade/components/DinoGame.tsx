@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '@/i18n/index';
 import { useArcadeStore } from '../store/arcadeStore';
 import { useIsDark } from '@/hooks/useIsDark';
@@ -275,7 +276,7 @@ export function DinoGame({ highScore, onClose, onGameOver }: DinoGameProps) {
         }
       }}
       className="h-full w-full max-w-2xl mx-auto flex flex-col justify-between p-4 sm:p-6 select-none overflow-hidden text-slate-800 dark:text-white cursor-pointer"
-    >
+  role="button" tabIndex={0} onKeyDown={onActivate(jump)}>
       {/* Top bar controls */}
       <div className="relative z-10 flex items-center justify-between">
         <button aria-label={t('action.close') || 'Close'} 
@@ -303,7 +304,7 @@ export function DinoGame({ highScore, onClose, onGameOver }: DinoGameProps) {
       <div 
         onClick={jump}
         className="relative my-auto border border-slate-200 dark:border-white/10 rounded-3xl bg-slate-100/90 dark:bg-black/40 backdrop-blur-xl overflow-hidden cursor-pointer flex items-center justify-center shadow-lg w-full aspect-[3/1] max-h-[320px]"
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(jump)}>
         <canvas 
           ref={canvasRef} 
           width={600} 

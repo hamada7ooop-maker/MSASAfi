@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { db } from '@/core/db/core';
@@ -319,7 +320,7 @@ export function TravelBudget() {
               className={`fin-card overflow-hidden cursor-pointer transition-all duration-300 relative ${
                 selectedTrip?.id === trip.id ? 'ring-2 ring-blue-500 scale-[1.01]' : 'hover:scale-[1.005]'
               }`}
-            >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setSelectedTrip(selectedTrip?.id === trip.id ? null : trip))}>
               {/* Premium Top Color Strip */}
               <div className={`h-1.5 bg-gradient-to-r ${trip.color}`}></div>
 
@@ -394,8 +395,7 @@ export function TravelBudget() {
                 {selectedTrip?.id === trip.id && (
                   <div 
                     onClick={(e) => e.stopPropagation()} 
-                    className="pt-4 border-t border-slate-50 dark:border-white/5 space-y-4 animate-in slide-in-from-top-4 duration-300"
-                  >
+                    className="pt-4 border-t border-slate-50 dark:border-white/5 space-y-4 animate-in slide-in-from-top-4 duration-300">
                     {trip.description && (
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50 dark:bg-slate-800/20 p-3 rounded-2xl">
                         💡 {trip.description}

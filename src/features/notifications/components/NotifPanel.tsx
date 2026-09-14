@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -145,8 +146,7 @@ export function NotifPanel() {
     >
       <div
         className="w-full max-w-md bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl border border-outline-variant/30 overflow-hidden flex flex-col max-h-[75vh] animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-outline-variant/20 flex-shrink-0 bg-surface-container/50 dark:bg-slate-900/80 backdrop-blur-md">
           <div className="flex justify-between items-center mb-3">
@@ -233,7 +233,7 @@ export function NotifPanel() {
                   key={item.id}
                   onClick={() => handleNavigate(item.page)}
                   className="p-3.5 sm:p-4 flex items-start gap-3 hover:bg-surface-container/40 dark:hover:bg-slate-800/40 transition-all cursor-pointer group"
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => handleNavigate(item.page))}>
                   <div
                     className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 border ${styles.bgColor}`}
                   >

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -328,7 +329,7 @@ export function Glossary() {
                 key={term.id} 
                 onClick={() => handleCardClick(term.id)}
                 className={`glossary-card-container ${isFlipped ? 'flipped' : ''}`}
-              >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => handleCardClick(term.id))}>
                 <div className="glossary-card-inner">
                   
                   {/* FRONT SIDE */}

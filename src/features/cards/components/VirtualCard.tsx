@@ -1,4 +1,5 @@
 import React from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import type { CardStyleType } from '../data/cardConstants';
 
 // ─── Inline Card CSS ─────────────────────────────────────────────────────────
@@ -124,7 +125,8 @@ export function VirtualCard({
     : cardNumber.replace(/\d{4} ?\d{4} ?\d{4}/, '•••• •••• ••••');
 
   return (
-    <div className="card-3d-wrap" style={{ width: '100%', height }} onClick={onClick}>
+    <div className="card-3d-wrap" style={{ width: '100%', height }} onClick={onClick}
+  role="button" tabIndex={0} onKeyDown={onActivate(() => onClick?.())}>
       <div className={`card-3d-inner w-full h-full ${isFlipped ? 'flipped' : ''}`}>
 
         {/* ── FRONT ── */}

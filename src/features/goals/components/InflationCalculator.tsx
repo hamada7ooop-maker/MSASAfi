@@ -139,8 +139,7 @@ export function InflationCalculator({ isOpen, onClose }: InflationCalculatorProp
       {/* Backdrop */}
       <div 
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-md transition-all duration-300"
-      ></div>
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-md transition-all duration-300"></div>
 
       {/* Main Glass Modal Card */}
       <div className="relative w-full max-w-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2.25rem] border border-white/40 dark:border-white/5 shadow-2xl p-6 overflow-hidden max-h-[90vh] overflow-y-auto space-y-6 animate-in zoom-in-95 duration-300">

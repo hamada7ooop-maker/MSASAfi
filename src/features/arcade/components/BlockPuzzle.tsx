@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '@/i18n/index';
 import { useIsDark } from '@/hooks/useIsDark';
 import { toast } from '../../../toast';
@@ -424,7 +425,7 @@ export function BlockPuzzle({ highScore, onClose, onGameOver }: BlockPuzzleProps
                     ? 'border-emerald-500 shadow-md shadow-emerald-500/15 bg-emerald-50 dark:bg-emerald-500/10' 
                     : 'border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/25 hover:bg-slate-50 dark:hover:bg-white/5'
                 }`}
-              >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => { setSelectedShapeIdx(idx); })}>
                 {/* Miniature shape matrix */}
                 <div className="flex flex-col gap-0.5 scale-90">
                   {shape.matrix.map((row, rIdx) => (

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '@/i18n/index';
 import { useIsDark } from '@/hooks/useIsDark';
 import { useArcadeStore } from '../store/arcadeStore';
@@ -296,7 +297,7 @@ export function FlappyBird({ highScore, onClose, onGameOver }: FlappyBirdProps) 
         }
       }}
       className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white cursor-pointer animate-in fade-in duration-300"
-    >
+  role="button" tabIndex={0} onKeyDown={onActivate(jump)}>
       
       {/* Top Controls */}
       <div className="w-full flex items-center justify-between mb-2">

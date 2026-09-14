@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '@/i18n/index';
 import { useIsDark } from '@/hooks/useIsDark';
 import { toast } from '../../../toast';
@@ -324,7 +325,7 @@ export function GoldMiner({ highScore, onClose, onGameOver }: GoldMinerProps) {
     <div 
       onClick={shootClaw}
       className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300 cursor-pointer"
-    >
+  role="button" tabIndex={0} onKeyDown={onActivate(shootClaw)}>
       {/* Top Controls */}
       <div className="relative z-10 flex items-center justify-between">
         <button aria-label={t('action.close') || 'Close'} 

@@ -138,8 +138,7 @@ export function TripFormModal({ open, tripToEdit, onClose, onSaved }: TripFormMo
       <div className="fixed inset-0 z-[100000] flex items-end justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
         <div 
           className="w-full max-w-md bg-white dark:bg-[#181a1d] rounded-t-[3rem] rounded-b-[2rem] p-6 space-y-6 shadow-2xl border border-slate-100 dark:border-white/5 animate-in slide-in-from-bottom-24 duration-300 max-h-[90vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
+          onClick={(e) => e.stopPropagation()}>
           {/* Modal Header */}
           <div className="flex justify-between items-center">
             <div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { InfoModal } from '@/components/ui/InfoModal';
 
@@ -43,7 +44,7 @@ export const SavingsTree = React.memo(function SavingsTree({ monthlyStats, budge
       <div 
         onClick={() => setIsTreeModalOpen(true)}
         className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-[32px] p-6 border border-green-100 dark:border-green-800/30 flex items-center justify-between group cursor-pointer hover:shadow-lg transition-all"
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsTreeModalOpen(true))}>
         <div className="z-10">
           <h3 className="font-black text-green-800 dark:text-green-300 text-[10px] mb-1 uppercase tracking-widest opacity-60">
             {t('home.treeTitle')}

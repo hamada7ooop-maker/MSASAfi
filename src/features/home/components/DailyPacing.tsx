@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { getMonthName } from '@core/utils';
@@ -29,7 +30,7 @@ export const DailyPacing = React.memo(function DailyPacing({ monthlyStats, balan
       <div 
         className="bg-surface rounded-[32px] p-7 shadow-xl border border-outline-variant/30 cursor-pointer hover:shadow-lg transition-all group"
         onClick={() => setIsPacingModalOpen(true)}
-      >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsPacingModalOpen(true))}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-black text-sm uppercase tracking-tighter flex items-center gap-2 text-primary">
             <span className="material-symbols-outlined">speed</span>

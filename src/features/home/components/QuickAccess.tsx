@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../../store/appStore';
@@ -153,7 +154,7 @@ export function QuickAccess() {
                 <div 
                   onClick={(e) => { e.stopPropagation(); toggleVisibility(it.id); }}
                   className={`absolute top-0 right-0 ${qaColumns >= 5 ? 'w-5 h-5' : 'w-7 h-7'} flex items-center justify-center transition-all z-30 cursor-pointer hover:scale-125 rounded-full border border-white/30 bg-black/10 backdrop-blur-[2px] ${!isVisible ? 'grayscale opacity-40' : 'drop-shadow-lg'}`}
-                >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => { toggleVisibility(it.id); })}>
                   <span className={`${qaColumns >= 5 ? 'text-[12px]' : 'text-[16px]'} select-none leading-none`}>
                     {isVisible ? '👁️' : '🕶️'}
                   </span>

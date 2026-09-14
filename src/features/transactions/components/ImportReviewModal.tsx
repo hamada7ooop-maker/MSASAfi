@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { toast } from '../../../toast';
@@ -126,7 +127,7 @@ export function ImportReviewModal({ transactions, onConfirm, onClose }: ImportRe
               ? 'bg-white dark:bg-[#1c1f23] border-blue-500/30 shadow-sm scale-[1.02]' 
               : 'bg-slate-100 dark:bg-slate-800/50 border-transparent opacity-50'
             }`}
-          >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => toggleItem(it.id!))}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${selectedIds.has(it.id!) ? (it.type === 'expense' ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500') : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}>
               <span className="material-symbols-outlined text-xl">
                 {it.type === 'expense' ? 'south_west' : 'north_east'}

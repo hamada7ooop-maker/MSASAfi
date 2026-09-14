@@ -1,4 +1,5 @@
 import { useI18n } from '../../i18n/index';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useAppStore } from '../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +39,7 @@ export function Header() {
           <h1 
             onClick={() => navigate('/')}
             className="text-xl font-black text-primary dark:text-blue-200 tracking-tight cursor-pointer active:scale-95 transition-all"
-          >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => navigate('/'))}>
             {t('app.name')}
           </h1>
         </div>

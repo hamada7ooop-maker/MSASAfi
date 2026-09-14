@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useI18n } from '../../../i18n/index';
 import { CardRepository } from '../../../core/db/repositories/cards';
 import { OpenBankingService } from '../../../services/openBanking';
@@ -315,7 +316,7 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
           }}
           className="animate-in fade-in duration-300"
           onClick={() => onClose()}
-        >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => onClose())}>
           <div
             role="dialog"
             aria-modal="true"
@@ -352,7 +353,8 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
               {/* 3D Card Preview */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
                 <div style={{ width: '100%', maxWidth: 360, cursor: 'pointer' }}
-                  onClick={() => setIsFlipped(f => !f)}>
+                  onClick={() => setIsFlipped(f => !f)}
+  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsFlipped(f => !f))}>
                   <VirtualCard
                     cardNumber={cardNumber}
                     cardHolder={cardHolder}

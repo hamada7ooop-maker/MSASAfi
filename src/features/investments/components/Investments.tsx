@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { onActivate } from '@/core/a11yKeyboard';
 import { useInvestments } from '../hooks/useInvestments';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
@@ -405,7 +406,7 @@ export function Investments() {
                 key={inv.id} 
                 onClick={() => openEdit(inv)}
                 className={`group relative overflow-hidden bg-white dark:bg-[#1e2124] rounded-[2rem] p-5 border transition-all duration-300 cursor-pointer active:scale-[0.98] ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-lg' : 'border-slate-100 dark:border-white/5 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30'}`}
-              >
+  role="button" tabIndex={0} onKeyDown={onActivate(() => openEdit(inv))}>
                 <div className="flex items-center gap-4">
                   {/* Selection Overlay */}
                   {isSelectionMode && (
