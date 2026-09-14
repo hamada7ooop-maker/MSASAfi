@@ -84,15 +84,18 @@ export function GlobalActionModal() {
 
   return (
     <div 
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300"
-      onClick={() => setGlobalActionOpen(false)}
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-6 animate-in fade-in duration-300"
     >
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+        onClick={() => setGlobalActionOpen(false)}
+        aria-hidden="true"
+      />
       <div 
         role="dialog"
         aria-modal="true"
         aria-labelledby="global-action-title"
         className="bg-white dark:bg-[#1e2124] w-full max-w-lg rounded-[3rem] p-8 shadow-2xl border border-white/10 relative overflow-hidden animate-in zoom-in slide-in-from-bottom-12 duration-500"
-        onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex flex-col items-center mb-8">

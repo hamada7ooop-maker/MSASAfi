@@ -234,12 +234,11 @@ export function Settings() {
       {/* ─── Mockup Feature Modal ─────────────────────────────────────────── */}
       {mockupModal && (
         <div
-          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-          onClick={() => setMockupModal(null)}
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-300"
         >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMockupModal(null)} aria-hidden="true" />
           <div
-            className="bg-white dark:bg-[#1c1f23] w-full max-w-sm rounded-[2rem] p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
-            onClick={e => e.stopPropagation()}>
+            className="relative bg-white dark:bg-[#1c1f23] w-full max-w-sm rounded-[2rem] p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-5">
               <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>construction</span>
             </div>

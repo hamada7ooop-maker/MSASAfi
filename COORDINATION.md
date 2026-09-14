@@ -86,3 +86,34 @@ Currently, the 12 core data hooks (`useTransactions`, `useDebts`, `useGoals`, `u
 1. **(Recommended) Crashlytics native activation** — the 4 documented steps in `src/core/crashlytics.ts` (google-services.json, apply plugin, `VITE_CRASH_REPORTING=true`, test crash). Directives 15+16 built a complete, tested error surface — activation is the single step that makes every `silentFail` and every `error` state observable in production.
 2. **Dependency audit pass** — the original audit found 10 npm vulnerabilities (1 critical, 6 high) in `npm audit`; a targeted, tested bump pass is the right pre-23.2 hygiene step.
 3. **`isLoading` "first result" semantics** for `useLiveQuerySafe` (small, but changes dashboard skeletons — needs its own characterization round).
+
+---
+
+## Auditor Report — Directive 16 Authorized Bonus: Modal Backdrop Sibling Refactor (Directive 15 Option B)
+
+**Scope executed (per Directive 16's authorization: "modal sibling refactor remain optional bonus items if time permits").** Converted all modal propagation-guard panels from the nested click-eater pattern (overlay carries bg+blur+`onClick={close}`; dialog carries `onClick={e => e.stopPropagation()}`) to clean siblings (transparent-layout outer; `absolute inset-0` backdrop with the paint + close click + `aria-hidden="true"`; `relative` dialog with no propagation guard). Strictly behavior-preserving.
+
+**1. Characterization before the refactor.** `tests/unit/modalBackdropSibling.test.tsx` — 7 cases (BillModal, GoalModal, DebtModal, ChallengeModal, AssetFormModal, AddCardModal, InfoModal), each pinning: dialog-body click never calls `onClose`; backdrop-area click calls it exactly once. Locators are deliberately structure-agnostic (match both the nested and sibling shapes), so passing before AND after is the operational definition of "behavior-preserving". All 7 passed on the pre-refactor tree first.
+
+**2. The conversion — 42 edits across 26 files** via `scripts/modal-sibling-codemod.cjs` (a table of exact text anchors; every anchor must match exactly once or the script aborts without writing anything). Key preservation decisions:
+- Enter/exit animation classes (`animate-in fade-in`, `transition-opacity`) **stayed on the outer** — they animate the whole layer including children; moving them would change the visual timing.
+- **TripFormModal** has no backdrop-click close today → its backdrop sibling carries the paint with **no** onClick (preserving the absence of the feature, not just its presence).
+- **QuickAddModal**'s paint lives in the `.bottom-sheet-overlay` CSS class on the outer → sibling is a transparent click-catcher.
+- **AddCardModal** (inline-styles variant): background/backdropFilter moved to the sibling; keyboard activation (`role=button` + `onKeyDown`) stayed on the outer exactly as before.
+
+**3. Discovery beyond the original inventory:** `InfoModal` (`src/components/ui/InfoModal.tsx`, feeds the home widgets) carried the same pattern but was missing from the original 25-panel inventory — converted and covered by the 7th test case. The original inventory came from a manual grep pass; a fresh raw-grep sweep after conversion is what caught it.
+
+**4. Legitimate shields left untouched (deliberate):** row/button-group shields (Assets rows, NotifPanel:254, AutoClassificationCard, PushNotificationsCard, TravelBudget:401 expandable section), ImageCropper crop-handle drags, all 16 arcade game files — there, stopping propagation IS the feature.
+
+**5. Verification.**
+- **906/906 tests (100%) across 105 suites — zero regressions on the pre-bonus 899/104.**
+- `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean · zero i18n changes (no new keys).
+- **Mutation spot-check: KILLED** — deleting the backdrop `onClick` from BillModal fails its characterization test immediately (then restored; full file re-verified green).
+
+**6. Permanent memory updated:** `GEMINI.md` (new top entry) and `AUDIT_REPORT.md` (Section 12.15).
+
+### Next Step Proposals (unchanged — Directive 17 table)
+
+1. **(Recommended) Crashlytics native activation** — blocked only on owner-provided `google-services.json`; the error surface built in Directives 15+16 is complete and tested.
+2. **Dependency audit pass** — 10 npm vulnerabilities (1 critical, 6 high) as pre-23.2 hygiene.
+3. **`isLoading` "first result" semantics** for `useLiveQuerySafe` (changes dashboard skeletons — needs its own characterization round).

@@ -35,12 +35,11 @@ export function DepositAccountModal({ isOpen, onClose, accounts, onConfirm }: De
 
   return (
     <div 
-      className="fixed inset-0 z-[99999] flex items-end justify-center bg-black/50 backdrop-blur-sm transition-opacity animate-in fade-in"
-      onClick={onClose}
+      className="fixed inset-0 z-[99999] flex items-end justify-center transition-opacity animate-in fade-in"
     >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div 
-        className="w-full max-w-[440px] bg-white dark:bg-[#1a1d21] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300"
-        onClick={(e) => e.stopPropagation()}>
+        className="relative w-full max-w-[440px] bg-white dark:bg-[#1a1d21] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
 
         <h3 className="text-lg font-black mb-4 text-slate-800 dark:text-white">

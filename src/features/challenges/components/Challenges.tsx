@@ -335,8 +335,9 @@ export function Challenges() {
 
       {/* 52-Week Confirmation Modal */}
       {confirmWeekSave !== null && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setConfirmWeekSave(null)}>
-          <div className="bg-white dark:bg-[#1e2124] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setConfirmWeekSave(null)} aria-hidden="true" />
+          <div className="relative bg-white dark:bg-[#1e2124] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl space-y-6 animate-in zoom-in-95 duration-300">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto">
               <span className="material-symbols-outlined text-4xl">account_balance_wallet</span>
             </div>

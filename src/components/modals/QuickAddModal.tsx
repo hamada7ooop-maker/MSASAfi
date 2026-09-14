@@ -272,17 +272,16 @@ export function QuickAddModal() {
     <div 
       className="bottom-sheet-overlay z-[99990] animate-in fade-in duration-300"
       style={{ opacity: 1 }}
-      onClick={closeModal}
       role="presentation"
     >
+      <div className="absolute inset-0" onClick={closeModal} aria-hidden="true" />
       <div 
         ref={containerRef}
         id="quick-add-sheet" 
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-add-title"
-        className="bottom-sheet-content bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] animate-in slide-in-from-bottom-full duration-500"
-        onClick={(e) => e.stopPropagation()}
+        className="bottom-sheet-content relative bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] animate-in slide-in-from-bottom-full duration-500"
       >
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6" aria-hidden="true"></div>
 

@@ -138,15 +138,14 @@ export function NotifPanel() {
 
   return (
     <div
-      className="fixed inset-0 z-[9998] flex items-start justify-center p-3 sm:p-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] sm:pt-20 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
-      onClick={() => setNotifPanelOpen(false)}
+      className="fixed inset-0 z-[9998] flex items-start justify-center p-3 sm:p-4 pt-[calc(4.5rem+env(safe-area-inset-top,0px))] sm:pt-20 animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="notif-panel-title"
     >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setNotifPanelOpen(false)} aria-hidden="true" />
       <div
-        className="w-full max-w-md bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl border border-outline-variant/30 overflow-hidden flex flex-col max-h-[75vh] animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}>
+        className="relative w-full max-w-md bg-surface dark:bg-slate-900 rounded-3xl shadow-2xl border border-outline-variant/30 overflow-hidden flex flex-col max-h-[75vh] animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-outline-variant/20 flex-shrink-0 bg-surface-container/50 dark:bg-slate-900/80 backdrop-blur-md">
           <div className="flex justify-between items-center mb-3">

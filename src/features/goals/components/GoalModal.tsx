@@ -98,15 +98,14 @@ export function GoalModal({ isOpen, onClose, goalToEdit, accounts, onSave }: Goa
 
   return (
     <div 
-      className="fixed inset-0 z-[99990] flex items-end justify-center bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 animate-in fade-in"
-      onClick={onClose}
+      className="fixed inset-0 z-[99990] flex items-end justify-center transition-opacity duration-300 animate-in fade-in"
     >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} aria-hidden="true" />
       <div 
         role="dialog"
         aria-modal="true"
         aria-labelledby="goal-modal-title"
-        className="w-full max-w-[440px] bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-500"
-        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-[440px] bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] rounded-t-[32px] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-500"
       >
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6" aria-hidden="true"></div>
 

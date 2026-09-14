@@ -39,12 +39,11 @@ export function InfoModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200" 
-      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200" 
     >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
       <div 
-        className="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 max-w-sm w-full shadow-2xl relative" 
-        onClick={e => e.stopPropagation()}>
+        className="bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[32px] p-6 max-w-sm w-full shadow-2xl relative">
         <div className="absolute top-0 right-0 p-4">
           <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose} 

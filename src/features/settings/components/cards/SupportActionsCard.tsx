@@ -149,12 +149,11 @@ export function SupportActionsCard() {
       {/* ─── Confirmation Modal ──────────────────────────────────────────── */}
       {modal && (
         <div
-          className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
-          onClick={() => setModal(null)}
+          className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4 animate-in fade-in duration-300"
         >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setModal(null)} aria-hidden="true" />
           <div
-            className="bg-white/90 dark:bg-[#1c1f23]/90 backdrop-blur-xl w-full max-w-sm rounded-[2rem] p-7 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-white/20 dark:border-white/[0.05]"
-            onClick={(e) => e.stopPropagation()}>
+            className="relative bg-white/90 dark:bg-[#1c1f23]/90 backdrop-blur-xl w-full max-w-sm rounded-[2rem] p-7 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-white/20 dark:border-white/[0.05]">
             {/* Icon */}
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 ${
               modal.type === 'wipe_all' ? 'bg-rose-500/10 text-rose-500 shadow-sm' :

@@ -112,12 +112,15 @@ export function ReportBuilderModal() {
 
   return (
     <div 
-      className="fixed inset-0 z-[10001] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xl animate-in fade-in duration-300"
-      onClick={() => !isGenerating && setReportBuilderOpen(false)}
+      className="fixed inset-0 z-[10001] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300"
     >
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+        onClick={() => !isGenerating && setReportBuilderOpen(false)}
+        aria-hidden="true"
+      />
       <div 
-        className="bg-white dark:bg-[#1e2124] w-full max-w-xl max-h-[90vh] rounded-[2.5rem] flex flex-col shadow-2xl border border-white/10 relative overflow-hidden animate-in zoom-in slide-in-from-bottom-12 duration-500"
-        onClick={e => e.stopPropagation()}>
+        className="bg-white dark:bg-[#1e2124] w-full max-w-xl max-h-[90vh] rounded-[2.5rem] flex flex-col shadow-2xl border border-white/10 relative overflow-hidden animate-in zoom-in slide-in-from-bottom-12 duration-500">
         {/* Header */}
         <div className="p-8 pb-4 flex items-center justify-between">
           <div>

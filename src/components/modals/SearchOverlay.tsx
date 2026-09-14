@@ -147,12 +147,15 @@ export function SearchOverlay() {
       role="dialog"
       aria-modal="true"
       aria-label={t('search.placeholder') || 'Search'}
-      className="fixed inset-0 z-[99990] flex flex-col bg-[#f8f9fa] dark:bg-[#121214] transition-opacity duration-300 animate-in slide-in-from-bottom-full"
-      onClick={() => setSearchOpen(false)}
+      className="fixed inset-0 z-[99990] flex flex-col transition-opacity duration-300 animate-in slide-in-from-bottom-full"
     >
+      <div
+        className="absolute inset-0 bg-[#f8f9fa] dark:bg-[#121214]"
+        onClick={() => setSearchOpen(false)}
+        aria-hidden="true"
+      />
       <div 
-        className="flex-1 w-full max-w-4xl mx-auto bg-[#f8f9fa] dark:bg-[#121214] shadow-2xl flex flex-col"
-        onClick={(e) => e.stopPropagation()}>
+        className="relative flex-1 w-full max-w-4xl mx-auto bg-[#f8f9fa] dark:bg-[#121214] shadow-2xl flex flex-col">
         {/* Header Search Bar */}
         <div className="p-4 pt-[calc(1rem+env(safe-area-inset-top,0px))] bg-white dark:bg-[#1c1f23] shadow-sm sticky top-0 z-10 flex items-center gap-3">
           <button 

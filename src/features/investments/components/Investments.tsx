@@ -47,8 +47,9 @@ function InvestmentModal({
   const set = <K extends keyof Investment>(k: K, v: Investment[K]) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 backdrop-blur-md transition-all animate-in fade-in duration-300" onClick={onClose}>
-      <div className="bg-white dark:bg-[#1e2124] w-full max-w-lg rounded-t-[3rem] p-8 shadow-2xl space-y-6 animate-in slide-in-from-bottom-10 duration-500" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[200] flex items-end justify-center transition-all animate-in fade-in duration-300">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+      <div className="relative bg-white dark:bg-[#1e2124] w-full max-w-lg rounded-t-[3rem] p-8 shadow-2xl space-y-6 animate-in slide-in-from-bottom-10 duration-500">
         <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-2 opacity-50" />
         
         <div className="flex items-center justify-between">

@@ -193,17 +193,21 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
           style={{
             position: 'fixed', inset: 0, zIndex: 200,
             display: 'flex', alignItems: 'flex-end',
-            background: 'rgba(0,0,0,0.65)',
-            backdropFilter: 'blur(8px)',
           }}
           className="animate-in fade-in duration-300"
-          onClick={() => onClose()}
   role="button" tabIndex={0} onKeyDown={onActivate(() => onClose())}>
+          <div
+            className="absolute inset-0"
+            style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }}
+            onClick={() => onClose()}
+            aria-hidden="true"
+          />
           <div
             role="dialog"
             aria-modal="true"
             aria-labelledby="bank-card-modal-title"
             style={{
+              position: 'relative',
               width: '100%', maxWidth: 640,
               margin: '0 auto',
               borderRadius: '28px 28px 0 0',
@@ -212,7 +216,6 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
               borderBottom: 'none',
             }}
             className="bg-white dark:bg-[#1a1d21] animate-in slide-in-from-bottom-6 duration-400 shadow-2xl"
-            onClick={e => e.stopPropagation()}
           >
             {/* Drag handle */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 14 }}>
