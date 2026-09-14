@@ -124,3 +124,23 @@ Verification item 2 asked for build & signing integrity — the strongest versio
 1. **Directive 18 continues (no owner action needed) — ladder step 2:** `exportService.ts` (0.81% — its existing test file is nominal and covers almost nothing), `sabBanner.tsx` (38.46%), the `envelopeStore`/`familyStore`/`preferencesStore` trio (~40% each, pure logic), `statementParser.ts` (73.55% — name corrected from the earlier "paymentParser" record), `marketData.ts` (73%). Each file lifted raises the ratchet with it.
 2. **(Owner, unchanged, still the single blocking step for v23.2) Drop `google-services.json` into `android/app/`** and run `npm run release`, then confirm a test crash in Firebase Console. The readiness gate guards this step.
 3. **v23.2 release pass** — full ci:check chain (green as of this commit) + signed APK on the owner's machine.
+
+---
+
+## Auditor Report — v23.1.18 Owner Release Received & Merged; Directive 18 Step 1 Rebased On Top; Version Alignment Fixed
+
+**The owner's commit `e1a50f3` arrived mid-round (the initial push of step 1 was rejected by it) — received, analyzed, and integrated.** It contained three things: (1) the formal authorization of Directive 18 exactly as proposed, (2) the approval and local signing of **release v23.1.18** on the owner's machine (Windows + JDK 21): signed APK `Masarifi_V23.1.18_Signed_Release.apk`, 16,639,988 bytes, SHA256 `699CD016...443314A`, plus clean-source ZIP SHA256 `63F90215...C5DA8F4`, with all gates green at 924/924 × 108 and a fully green `ci:check`; and (3) the owner's own polish of the readiness gate (`fileURLToPath` + safe direct-run detection — cross-platform Windows/Linux/macOS compatibility; all 6 of its characterization tests pass over the owner's version).
+
+**Merge:** step 1 was rebased cleanly on top (one conflict in AUDIT_REPORT.md, resolved by renumbering the auditor's section to §12.22 — the owner took §12.21 for the release verification record).
+
+**Version gap found and fixed (the exact "silent mismatch" class this audit exists for):** the signed v23.1.18 APK was built with `APP_VERSION = '23.0.6'` — the constant shown on the Settings/About/Onboarding screens and stamped into every exported backup had drifted from package.json (23.1.18). Fixed by aligning the constant to the owner-approved version, and a new `tests/unit/versionAlignment.test.ts` now fails any future merge where the two drift apart again.
+
+**Authorization path corrections (recorded for precision):** the authorization names `src/core/voiceAssistant.ts` and `src/core/paymentParser.ts`; the actual paths are `src/services/voiceAssistant.ts` (already lifted to 100% statements in step 1) and `src/services/statementParser.ts` (73.55% — on the ladder).
+
+**Gates on the final merged state:** **1001/1001 tests × 111 suites** (924 + 76 Directive-18 + 1 version alignment) · coverage 62.23/57.69/46.68 above the raised ratchet 62.0/57.5/46.5 · full `ci:check` exit 0 (lint clean under the owner's improved eslint config) · guardian clean · 0 vulnerabilities · build clean.
+
+### Next Step Proposals
+
+1. **Directive 18 continues (authorized, no owner action needed) — ladder step 2:** the three modular stores (`envelopeStore`/`familyStore`/`preferencesStore`, ~40% each, pure logic), then `statementParser.ts` (73.55%), `marketData.ts` (73%), `sabBanner.tsx` (38.46%), and `exportService.ts` (0.81% — nominal test file only). Each lift raises the ratchet with it.
+2. **(Owner, unchanged) Crashlytics activation**: v23.1.18 shipped safely inert. Drop `google-services.json` into `android/app/`, run `npm run release`, confirm a test crash in Firebase Console — the (owner-polished) readiness gate guards the step.
+3. **(Owner) v23.1.19 pass** whenever step 2 lands, to include the coverage gains and the version-alignment fix in a signed build.
