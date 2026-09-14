@@ -15,7 +15,10 @@ import { sanitizeCrashPayload } from './crashSanitizer';
  *   1. `apply plugin: 'com.google.gms.google-services'` — absent from
  *      android/app/build.gradle (only the buildscript classpath is present).
  *   2. `google-services.json` — not in the repo, and gitignored.
- *   3. `initCrashlytics()` — defined but never called from anywhere.
+ *   3. `initCrashlytics()` — defined but never called at audit time.
+ *      → FIXED since: useAppInitialization now awaits it FIRST, before every
+ *      other initializer, and `tests/unit/crashlyticsWiring.test.tsx` pins
+ *      both the call and the ordering (Directive 17).
  *
  * The result was the worst of both worlds: code and comments asserting that
  * errors are reported, and a production build in which every error path leads
@@ -25,16 +28,26 @@ import { sanitizeCrashPayload } from './crashSanitizer';
  * ## Why it is still off
  *
  * Adding `apply plugin` without `google-services.json` breaks the Gradle build
- * outright. Since v23.0.9 ships signed from this branch, the plugin line is
- * deliberately NOT added yet. Everything else — initialization, the reporting
- * path, and redaction — is in place and gated behind `isCrashReportingEnabled`.
+ * outright. That file is a per-owner Firebase credential that cannot be
+ * committed to Git — which is why Directive 17's own authorization text names
+ * the dependency audit as the fallback path (executed in the same directive).
+ * Everything else — initialization, the reporting path, and redaction — is in
+ * place, gated behind `isCrashReportingEnabled`, and covered by tests:
  *
- * ## Enabling it later (in this order)
+ *   - `tests/unit/crashlytics.test.ts` — the gate, init, transport failure
+ *     swallowing, and payload redaction (module level).
+ *   - `tests/unit/crashlyticsWiring.test.tsx` — startup calls
+ *     `initCrashlytics` first, and a `silentFail` reaches the plugin through
+ *     the sanitizer without throwing (the "safe test trigger").
  *
- *   1. Add `android/app/google-services.json` from the Firebase console.
+ * ## Enabling it later (owner steps — in this order)
+ *
+ *   1. Add `android/app/google-services.json` from the Firebase console
+ *      (owner-only credential).
  *   2. Add `apply plugin: 'com.google.gms.google-services'` and
  *      `apply plugin: 'com.google.firebase.crashlytics'` to android/app/build.gradle.
- *   3. Set `VITE_CRASH_REPORTING=true` for the release build.
+ *   3. Set `VITE_CRASH_REPORTING=true` for the release build
+ *      (guards already verified by tests — see above).
  *   4. Run a release build and confirm a test crash arrives.
  *
  * Nothing in step 3 can leak data on its own: every payload still passes
