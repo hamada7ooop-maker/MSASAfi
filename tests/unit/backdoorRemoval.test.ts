@@ -28,39 +28,67 @@ import { timingSafeEqual } from '@/core/security/crypto';
  * acceptance check and is documented in .env.example.
  */
 
-const settingsSource = readFileSync(
-  resolve(__dirname, '../../src/features/settings/components/Settings.tsx'),
-  'utf-8'
-);
+/**
+ * The guarded code was extracted into DevUnlockModal.tsx during the L-1 split
+ * of Settings.tsx. Both files are scanned as one body of source so this suite
+ * keeps checking the protection wherever it lives: the page still holds the
+ * tap counter and the gated call site, the modal holds the credential read,
+ * the constant-time comparison and the audit writes. Concatenating them means
+ * moving the code again cannot silently drop the guard from coverage.
+ */
+const SOURCE_FILES = [
+  '../../src/features/settings/components/Settings.tsx',
+  '../../src/features/settings/components/DevUnlockModal.tsx',
+];
+
+const settingsSource = SOURCE_FILES.map((rel) =>
+  readFileSync(resolve(__dirname, rel), 'utf-8')
+).join('\n');
 
 describe('developer unlock backdoor is compiled out of production', () => {
   it('reads the master credentials only inside an import.meta.env.DEV guard', () => {
     // Every line touching the env secrets must sit in a function that bails
     // out when not in dev. We assert the guard exists in each such function.
-    const envLines = settingsSource
-      .split('\n')
-      .map((line, i) => ({ line, n: i + 1 }))
-      .filter(({ line }) => /VITE_MASTER_(HASH|SALT)/.test(line) && !line.trim().startsWith('//'));
+    // Checked per file: the sources are concatenated for the other
+    // assertions, but a "walk back to the enclosing function" scan must not
+    // cross the file boundary or it would accept a guard from the wrong file.
+    let checked = 0;
+    for (const rel of SOURCE_FILES) {
+      const src = readFileSync(resolve(__dirname, rel), 'utf-8');
+      const lines = src.split('\n');
+      const envLines = lines
+        .map((line, i) => ({ line, n: i + 1 }))
+        .filter(
+          ({ line }) =>
+            /VITE_MASTER_(HASH|SALT)/.test(line) && !line.trim().startsWith('//') && !line.trim().startsWith('*')
+        );
 
-    expect(envLines.length).toBeGreaterThan(0);
-
-    for (const { line, n } of envLines) {
-      // Walk back to the nearest enclosing handler and confirm it opens with
-      // the DEV guard.
-      const before = settingsSource.split('\n').slice(0, n).reverse();
-      const guardIdx = before.findIndex((l) => /if \(!import\.meta\.env\.DEV\) return/.test(l));
-      const fnIdx = before.findIndex((l) => /^\s*const \w+ = (async )?\(\) => \{/.test(l));
-      expect(
-        guardIdx !== -1 && (fnIdx === -1 || guardIdx < fnIdx),
-        `line ${n} (${line.trim()}) is not protected by an import.meta.env.DEV guard`
-      ).toBe(true);
+      for (const { line, n } of envLines) {
+        checked++;
+        const before = lines.slice(0, n).reverse();
+        const guardIdx = before.findIndex((l) => /if \(!import\.meta\.env\.DEV\) return/.test(l));
+        const fnIdx = before.findIndex((l) => /^\s*const \w+ = (async )?\(\) => \{/.test(l));
+        expect(
+          guardIdx !== -1 && (fnIdx === -1 || guardIdx < fnIdx),
+          `${rel} line ${n} (${line.trim()}) is not protected by an import.meta.env.DEV guard`
+        ).toBe(true);
+      }
     }
+    expect(checked).toBeGreaterThan(0);
   });
 
   it('renders the unlock modal only when import.meta.env.DEV is true', () => {
-    expect(settingsSource).toMatch(/\{import\.meta\.env\.DEV && showMasterModal && \(/);
+    // After the L-1 split the gate is layered: the page only mounts the
+    // component inside a DEV branch, AND the component itself refuses to
+    // render outside DEV. Either alone would be sufficient; requiring both
+    // means a future edit has to defeat two independent checks.
+    expect(settingsSource).toMatch(/\{import\.meta\.env\.DEV && \(/);
+    expect(settingsSource).toMatch(
+      /if \(!import\.meta\.env\.DEV \|\| !open\) return null;/
+    );
     // No unguarded render of the modal may remain.
     expect(settingsSource).not.toMatch(/\{showMasterModal && \(/);
+    expect(settingsSource).not.toMatch(/<DevUnlockModal[^>]*\/>\s*$/m);
   });
 
   it('compares the derived hash in constant time, never with ===', () => {

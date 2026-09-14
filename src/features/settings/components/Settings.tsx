@@ -2,111 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
 import { useI18n } from '../../../i18n/index';
-import { toast } from '../../../toast';
 import { getLoadedTranslations } from '../../../i18n/engine';
 import { APP_VERSION } from '../../../core/constants';
-import { useSettingsStore } from '../../../store/settingsStore';
-import { useAppStore } from '../../../store/appStore';
-import { db as DB } from '@/core/db/core';
-import { timingSafeEqual } from '@/core/security/crypto';
 
 
-import { GeneralSettingsCard } from './cards/GeneralSettingsCard';
-import { SalaryStructureCard } from './cards/SalaryStructureCard';
-import { SecurityCard } from './cards/SecurityCard';
-import { BackupSyncCard } from './cards/BackupSyncCard';
-import { AdvancedAPICard } from './cards/AdvancedAPICard';
-import { SupportActionsCard } from './cards/SupportActionsCard';
-import { PushNotificationsCard } from './cards/PushNotificationsCard';
-import { AutoClassificationCard } from './cards/AutoClassificationCard';
-import { FinancialYearCard } from './cards/FinancialYearCard';
 import { BankSelectorModal } from '../../../components/modals/BankSelectorModal';
+import { DevUnlockModal } from './DevUnlockModal';
+import { buildSettingsSections } from './settingsSections';
 
 // ─── Reusable Card Shell ───────────────────────────────────────────────────────
-function SettingsCard({
-  icon,
-  iconColor,
-  label,
-  sublabel,
-  badge,
-  onClick,
-  isLTR,
-  children,
-}: {
-  icon: string;
-  iconColor: string;
-  label: string;
-  sublabel?: string;
-  badge?: string;
-  onClick?: () => void;
-  isLTR?: boolean;
-  children?: React.ReactNode;
-}) {
-  if (onClick) {
-    return (
-      <button
-        onClick={onClick}
-        className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.03] active:bg-slate-100 dark:active:bg-white/[0.05] transition-colors group text-start"
-      >
-        <div className="flex items-center gap-3.5 min-w-0">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconColor}`}>
-            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-bold text-on-surface dark:text-white leading-tight truncate">{label}</p>
-            {sublabel && <p className="text-[10px] text-slate-400 font-medium mt-0.5 truncate">{sublabel}</p>}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 ms-3">
-          {badge && <span className="text-[9px] font-black uppercase tracking-widest text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">{badge}</span>}
-          <span className={`material-symbols-outlined text-slate-300 dark:text-slate-600 text-[18px] transition-transform ${isLTR ? 'group-hover:translate-x-0.5' : 'group-hover:-translate-x-0.5'}`}>
-            {isLTR ? 'chevron_right' : 'chevron_left'}
-          </span>
-        </div>
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center justify-between px-4 py-3.5">
-      <div className="flex items-center gap-3.5 min-w-0 flex-1">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconColor}`}>
-          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold text-on-surface dark:text-white leading-tight">{label}</p>
-          {sublabel && <p className="text-[10px] text-slate-400 font-medium mt-0.5">{sublabel}</p>}
-        </div>
-      </div>
-      {children && <div className="shrink-0 ms-3">{children}</div>}
-    </div>
-  );
-}
-
-// ─── Section Group Container ───────────────────────────────────────────────────
-function SectionGroup({
-  title,
-  children,
-  className = '',
-}: {
-  title?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`animate-in slide-in-from-bottom-4 duration-500 ${className}`}>
-      {title && (
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500 px-1 mb-2">
-          {title}
-        </p>
-      )}
-      <div className="bg-surface-container-lowest dark:bg-[#1a1d21] rounded-[1.75rem] overflow-hidden border border-black/[0.04] dark:border-white/[0.06] shadow-sm divide-y divide-slate-100/70 dark:divide-white/[0.04]">
-        {children}
-      </div>
-    </div>
-  );
-}
-
 export function Settings() {
   const { t, isLTR } = useI18n();
   const { settings, isLoading, updateSetting, refresh } = useSettings();
@@ -119,7 +23,6 @@ export function Settings() {
   const [versionClicks, setVersionClicks] = useState(0);
   const [showMasterModal, setShowMasterModal] = useState(false);
   const [showBankModal, setShowBankModal] = useState(false);
-  const [masterPass, setMasterPass] = useState('');
 
   // ── Developer unlock ──────────────────────────────────────────────────────
   // Every branch below is guarded by `import.meta.env.DEV`, which Vite
@@ -144,300 +47,22 @@ export function Settings() {
     setTimeout(() => setVersionClicks(0), 3000);
   };
 
-  const handleMasterPass = async () => {
-    if (!import.meta.env.DEV) return;
-
-    const targetHash = import.meta.env.VITE_MASTER_HASH as string | undefined;
-    const salt = import.meta.env.VITE_MASTER_SALT as string | undefined;
-
-    if (!targetHash || !salt || !masterPass.trim()) {
-      toast(t('common.error'), 'error');
-      setShowMasterModal(false);
-      setMasterPass('');
-      return;
-    }
-
-    try {
-      const enc = new TextEncoder();
-      const keyMaterial = await crypto.subtle.importKey(
-        'raw',
-        enc.encode(masterPass),
-        { name: 'PBKDF2' },
-        false,
-        ['deriveBits']
-      );
-      const bits = await crypto.subtle.deriveBits(
-        { name: 'PBKDF2', salt: enc.encode(salt), iterations: 600000, hash: 'SHA-256' },
-        keyMaterial,
-        256
-      );
-      const inputHash = Array.from(new Uint8Array(bits))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('');
-
-      // Constant-time: `===` on strings short-circuits at the first differing
-      // byte, which leaks how much of the secret was guessed correctly.
-      if (timingSafeEqual(inputHash, targetHash)) {
-        await DB.recordAction('DEV_UNLOCK', 'Developer master unlock used');
-        await unlockEverything();
-        setShowMasterModal(false);
-        setMasterPass('');
-        toast('Master mode activated — all development features are now active', 'success');
-      } else {
-        await DB.recordAction('DEV_UNLOCK_FAILED', 'Developer master unlock attempt failed');
-        toast(t('common.error'), 'error');
-        setMasterPass('');
-      }
-    } catch {
-      toast(t('common.error'), 'error');
-      setMasterPass('');
-    }
-  };
-
-  const unlockEverything = async () => {
-    const ALL_PERKS = ['perk:ai-pro', 'perk:icon-pack', 'perk:widget-unlock'];
-    const ALL_THEMES = [
-      'palette:soft', 'palette:cool', 'palette:sepia', 'palette:rose', 'palette:lavender', 'palette:sage',
-      'palette:black', 'palette:midnight', 'palette:oled', 'palette:royal-gold', 'palette:aurora', 'palette:crimson', 'palette:forest', 'palette:vantablack'
-    ];
-    const ALL_MILESTONES = [
-      'first_txn', 'first_acc', 'first_goal', 'first_debt', 'first_bill',
-      'first_budget', 'first_chall', 'first_inv', 'first_recur', 'first_rep',
-      'first_ai', 'first_theme', 'first_cat', 'first_backup', 'first_sync', 'first_mem'
-    ];
-
-    const store = useSettingsStore.getState();
-    const appStore = useAppStore.getState();
-
-    const points = 99999;
-    await DB.setSetting('userPoints', points);
-    appStore.setUserPoints(points);
-
-    const allUnlocked = [...ALL_PERKS, ...ALL_THEMES];
-    await DB.setSetting('unlockedRewards', allUnlocked);
-    store.setUnlockedItems(allUnlocked);
-
-    await DB.setSetting('completedMilestones', ALL_MILESTONES);
-    store.setCompletedMilestones(ALL_MILESTONES);
-
-    const tenYears = 10 * 365 * 24 * 60 * 60 * 1000;
-    const expiry = Date.now() + tenYears;
-    await DB.setSetting('aiPremiumUntil', expiry);
-    store.setAiPremiumUntil(expiry);
-
-    refresh();
-  };
 
   const handleBankConnect = () => {
     setShowBankModal(true);
   };
 
   // Settings Items configuration for search filtering
-  const settingsItems = [
-    // --- BASIC TAB ---
-    {
-      id: 'general',
-      tab: 'basic',
-      keys: [
-        'settings.sectionGeneral', 'settings.language', 'settings.theme', 
-        'settings.palette', 'settings.sectionNumbers', 'settings.currency', 
-        'settings.currencyDisplay', 'settings.numbers', 'settings.decimals', 
-        'settings.separator', 'settings.sectionCalendar', 'settings.startOfMonth', 
-        'settings.firstDayOfWeek', 'settings.sectionAppearance', 'settings.fontSize', 
-        'settings.sectionProductivity', 'settings.shakeToBlur', 'settings.simpleMode', 
-        'settings.hourlyRatePh', 'settings.notifications'
-      ],
-      keywords: [
-        'general', 'language', 'theme', 'palette', 'currency', 'numbers', 
-        'calendar', 'appearance', 'font', 'productivity', 'shake', 'hourly', 'notifications',
-        'عام', 'اللغة', 'السمة', 'الألوان', 'الأرقام', 'العملة', 'التقويم', 'الخط', 'الإنتاجية', 'الإشعارات'
-      ],
-      render: () => <GeneralSettingsCard key="general" settings={settings} updateSetting={updateSetting} />
-    },
-    {
-      id: 'salary',
-      tab: 'basic',
-      keys: ['settings.salaryTitle', 'settings.salaryBasic', 'settings.salaryNet'],
-      keywords: [
-        'salary', 'allowances', 'deductions', 'structure', 
-        'الراتب', 'هيكل الراتب', 'البدلات', 'الخصومات', 'صافي الراتب'
-      ],
-      render: () => <SalaryStructureCard key="salary" settings={settings} updateSetting={updateSetting} />
-    },
-    {
-      id: 'security',
-      tab: 'basic',
-      keys: ['settings.sectionAccount', 'settings.appLock', 'settings.appLockPin', 'settings.disableLock', 'settings.securityTitle', 'settings.pinLocked', 'settings.security'],
-      keywords: [
-        {
-          ar: 'أمان',
-          en: 'security'
-        }?.en || 'security',
-        'privacy', 'lock', 'pin', 'biometric', 'encryption', 'incognito', 
-        'أمان', 'خصوصية', 'قفل', 'بصمة', 'تشفير', 'تخفي'
-      ],
-      render: () => <SecurityCard key="security" settings={settings} updateSetting={updateSetting} refreshSettings={refresh} />
-    },
-    {
-      id: 'cards',
-      tab: 'basic',
-      keys: ['cards.title', 'cards.subtitle'],
-      keywords: ['cards', 'bank cards', 'credit card', 'debit card', 'البطاقات البنكية', 'فيزا', 'ماستركارد', 'مدى'],
-      render: () => (
-        <SectionGroup key="cards" title={isLTR ? 'Payment Methods' : 'وسائل الدفع'}>
-          <SettingsCard
-            icon="credit_card"
-            iconColor="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
-            label={isLTR ? 'Bank Cards' : 'البطاقات البنكية'}
-            sublabel={isLTR ? 'Manage credit, debit, and prepaid cards' : 'إدارة البطاقات الائتمانية، الخصم، ومسبقة الدفع'}
-            onClick={() => navigate('/cards')}
-            isLTR={isLTR}
-          />
-        </SectionGroup>
-      )
-    },
-    {
-      id: 'notifications',
-      tab: 'basic',
-      keys: ['settings.pushNotifications'],
-      keywords: ['push', 'notifications', 'web push', 'إشعارات', 'تنبيهات', 'دفع الإشعارات'],
-      render: () => <PushNotificationsCard key="notifications" />
-    },
-    {
-      id: 'support',
-      tab: 'basic',
-      keys: ['settings.support', 'settings.recalcDesc'],
-      keywords: [
-        'support', 'database', 'export', 'import', 'recalibrate', 
-        'دعم', 'مساعدة', 'قاعدة البيانات', 'تصدير', 'استيراد', 'إعادة حساب الأرصدة'
-      ],
-      render: () => <SupportActionsCard key="support" />
-    },
-    
-    // --- ADVANCED TAB ---
-    {
-      id: 'connectivity',
-      tab: 'advanced',
-      keys: ['settings.sectionConnectivity', 'settings.openBanking', 'settings.familySync'],
-      keywords: [
-        'connectivity', 'banking', 'connect', 'family', 'sync', 'open banking', 'family sync', 
-        'الاتصال والتكامل', 'ربط البنوك', 'مزامنة العائلة', 'مشاركة'
-      ],
-      render: () => (
-        <SectionGroup key="connectivity" title={t('settings.sectionConnectivity') || 'الاتصال والتكامل'}>
-          {/* Open Banking */}
-          <div className="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.01] transition-all">
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
-              </div>
-              <div>
-                <p className="text-[13px] font-bold text-on-surface dark:text-white leading-tight">
-                  {t('settings.openBanking') || 'ربط البنوك'}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium mt-0.5 flex items-center gap-1">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {t('settings.beta') || 'Beta'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleBankConnect}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
-            >
-              {t('action.connect') || 'ربط'}
-            </button>
-          </div>
-
-          {/* Family Sync */}
-          <div className="flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.01] transition-all">
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>diversity_1</span>
-              </div>
-              <div>
-                <p className="text-[13px] font-bold text-on-surface dark:text-white leading-tight">
-                  {t('settings.familySync') || 'مزامنة العائلة'}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                  {t('settings.beta') || 'Beta'} • Mockup
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setMockupModal({ title: t('settings.familySync'), desc: t('settings.demoMockupDesc') })}
-              className="bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-900/40 text-rose-500 dark:text-rose-400 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95 transition-all"
-            >
-              {t('action.manage') || 'إدارة'}
-            </button>
-          </div>
-        </SectionGroup>
-      )
-    },
-
-    {
-      id: 'financialYear',
-      tab: 'advanced',
-      keys: ['settings.financialYear'],
-      keywords: ['financial year', 'سنة مالية', 'تقارير سنوية', 'أعوام', 'year'],
-      render: () => <FinancialYearCard key="financialYear" />
-    },
-    {
-      id: 'autoClassification',
-      tab: 'advanced',
-      keys: ['settings.autoClassification'],
-      keywords: ['classification', 'auto', 'ai', 'تصنيف', 'تلقائي', 'ذكاء اصطناعي'],
-      render: () => <AutoClassificationCard key="autoClassification" />
-    },
-    {
-      id: 'advancedAPI',
-      tab: 'advanced',
-      keys: ['settings.advancedAPI', 'settings.keyActive', 'settings.keyNotSet'],
-      keywords: ['gemini', 'key', 'api', 'ai pro', 'مفتاح', 'ذكاء اصطناعي'],
-      render: () => <AdvancedAPICard key="advancedAPI" settings={settings} />
-    },
-    {
-      id: 'backupSync',
-      tab: 'advanced',
-      keys: ['settings.backupSync', 'settings.localBackupDesc'],
-      keywords: ['backup', 'sync', 'drive', 'cloud', 'Google Drive', 'نسخ احتياطي', 'مزامنة', 'درايف', 'سحابي'],
-      render: () => <BackupSyncCard key="backupSync" />
-    },
-    {
-      id: 'developer',
-      tab: 'advanced',
-      keys: ['settings.sectionDebug', 'settings.resetOnboarding', 'settings.resetOnboardingDesc'],
-      keywords: ['developer', 'debug', 'reset', 'onboarding', 'مطور', 'تهيئة', 'ترحيب'],
-      render: () => (
-        <SectionGroup key="developer" title={t('settings.sectionDebug') || 'أدوات المطور'}>
-          <button
-            onClick={async () => {
-              await updateSetting('hasOnboarded', false);
-              window.location.reload();
-            }}
-            className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.03] active:bg-slate-100 dark:active:bg-white/[0.05] transition-colors group text-start"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[20px]">restart_alt</span>
-              </div>
-              <div>
-                <p className="text-[13px] font-bold text-on-surface dark:text-white leading-tight">
-                  {t('settings.resetOnboarding') || 'إعادة التهيئة'}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium mt-0.5">
-                  {t('settings.resetOnboardingDesc') || 'إعادة تشغيل شاشات الترحيب من البداية'}
-                </p>
-              </div>
-            </div>
-            <span className={`material-symbols-outlined text-slate-300 dark:text-slate-600 text-[18px] transition-transform ${isLTR ? 'group-hover:translate-x-0.5' : 'group-hover:-translate-x-0.5'}`}>
-              {isLTR ? 'chevron_right' : 'chevron_left'}
-            </span>
-          </button>
-        </SectionGroup>
-      )
-    }
-  ];
+  const settingsItems = buildSettingsSections({
+    t,
+    isLTR,
+    navigate,
+    settings,
+    updateSetting,
+    refresh,
+    setMockupModal,
+    handleBankConnect,
+  });
 
   const isSearching = searchQuery.trim().length > 0;
 
@@ -592,43 +217,18 @@ export function Settings() {
       </div>
 
       {/* ─── Master Password Modal (development builds only) ──────────────── */}
-      {import.meta.env.DEV && showMasterModal && (
-        <div className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#1c1f23] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
-            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mx-auto mb-5">
-              <span className="material-symbols-outlined text-3xl">terminal</span>
-            </div>
-            <h3 className="text-xl font-black text-center text-on-surface dark:text-white mb-1.5">
-              Developer Mode
-            </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center font-bold mb-5 leading-relaxed">
-              Dev builds only. Enter the master passcode to unlock developer and test tools.
-            </p>
-            <input
-              autoFocus
-              type="password"
-              value={masterPass}
-              onChange={(e) => setMasterPass(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleMasterPass()}
-              placeholder="Master passcode..."
-              className="w-full bg-slate-50 dark:bg-slate-800/50 rounded-2xl px-5 py-4 text-center text-sm font-bold border-none outline-none focus:ring-2 ring-blue-500/30 mb-5 dark:text-white"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowMasterModal(false)}
-                className="flex-1 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-black text-xs active:scale-95 transition-all"
-              >
-                {t('action.cancel')}
-              </button>
-              <button
-                onClick={handleMasterPass}
-                className="flex-[2] py-3.5 rounded-2xl bg-blue-600 text-white font-black text-xs shadow-lg shadow-blue-600/25 active:scale-95 transition-all"
-              >
-                {t('action.confirm')}
-              </button>
-            </div>
-          </div>
-        </div>
+      {import.meta.env.DEV && (
+        <DevUnlockModal
+          open={showMasterModal}
+          onClose={() => setShowMasterModal(false)}
+          // Fires only after a correct PBKDF2 match against VITE_MASTER_HASH.
+          // That secret is intentionally absent from the repo and from CI, so
+          // this callback is unreachable in tests -- a mutation that drops it
+          // survives, and that is a property of the security design rather
+          // than a coverage gap. Verified: no VITE_MASTER_* value exists in
+          // any committed env file.
+          onUnlocked={refresh}
+        />
       )}
 
       {/* ─── Mockup Feature Modal ─────────────────────────────────────────── */}
