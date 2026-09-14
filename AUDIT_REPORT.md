@@ -1066,7 +1066,8 @@ minSdk 24، target 36، توقيع عبر متغيرات بيئة لا أسرا�
   - **رفع خرائط التعتيم**: تم تنفيذ مهمة `uploadCrashlyticsMappingFileRelease` بنجاح لفك تشفير تقارير الأخطاء المضللة عبر R8/ProGuard في Firebase Console.
   - **حزمة الأندرويد الموقعة رقمياً**: `Masarifi_V23.1.19_Signed_Release.apk` (16,643,084 بايت / 15.87 ميجابايت).
     - **بصمة SHA-256**: `943C13B0D5F038DD7E5C159AC2C734AEA3038C9011CD29F0516C9F9D41A6D2DE`
-  - **حزمة المصدر النظيفة المضغوطة**: `Masarifi_V23.1.19_Source_Clean.zip` (9,236,608 بايت / 8.81 ميجابايت).
-    - **بصمة SHA-256**: `7DA76CCF7204982275EDE48BA5586F3BAA093BC2DCD6C7C51E447B41E240F47D`
+  - **حزمة المصدر النظيفة المضغوطة**: `Masarifi_V23.1.19_Source_Clean.zip` (9,236,131 بايت / 8.81 ميجابايت).
+    - **بصمة SHA-256**: `89B59AB9A9CB7F84616D9E67ACE39AC87D853C7D8BAF9F2132C16AAC2D0A2BE5`
+    - **حماية بيانات الاعتماد**: تم استبعاد `google-services.json` تماماً من حزم المصدر النظيفة في `package-clean-source.mjs` لضمان عدم تسريب مفاتيح Firebase خارج بيئة المالك.
 
 

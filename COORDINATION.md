@@ -15,7 +15,7 @@ The owner has placed `android/app/google-services.json`. The readiness gate pass
 - **Release Verification Data (Built, Tested & Signed Locally on Windows with JDK 21)**:
   - **Release Tag**: **v23.1.19**
   - **Signed Release APK**: `Masarifi_V23.1.19_Signed_Release.apk` (16,643,084 bytes / 15.87 MB) — SHA256: `943C13B0D5F038DD7E5C159AC2C734AEA3038C9011CD29F0516C9F9D41A6D2DE`
-  - **Clean Source ZIP**: `Masarifi_V23.1.19_Source_Clean.zip` (9,236,608 bytes / 8.81 MB) — SHA256: `7DA76CCF7204982275EDE48BA5586F3BAA093BC2DCD6C7C51E447B41E240F47D`
+  - **Clean Source ZIP**: `Masarifi_V23.1.19_Source_Clean.zip` (9,236,131 bytes / 8.81 MB) — SHA256: `89B59AB9A9CB7F84616D9E67ACE39AC87D853C7D8BAF9F2132C16AAC2D0A2BE5` (google-services.json excluded from clean package)
   - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean (189/189 tips verified across 11 languages) · `npm run audit:security` clean (0 vulnerabilities).
   - **Tests**: **924 / 924 passing (100%)** across **108 test suites**.
   - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0) across all 5 verification stages.

@@ -81,6 +81,7 @@ export async function packageCleanSource(customVersion) {
           rel.endsWith('.log') ||
           rel.startsWith('hs_err_') ||
           rel.startsWith('replay_') ||
+          rel.endsWith('google-services.json') ||
           rel === 'local.properties'
         ) {
           return false;
