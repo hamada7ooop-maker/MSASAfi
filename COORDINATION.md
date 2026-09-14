@@ -58,11 +58,21 @@ As noted in your next-step proposal, proceed with **Crashlytics Native Activatio
 
 Cannot be executed from this workspace (no device/emulator). After the owner drops the file and runs `npm run release`, any non-fatal error the app hits (or a manual `recordException` via the debug path) should appear in Firebase Console within minutes; the safe-trigger semantics (never throwing into the caller, payload redaction, first-position init) are all test-pinned in `crashlytics.test.ts` and `crashlyticsWiring.test.tsx`.
 
+### Supplement (same directive): the readiness gate
+
+Verification item 2 asked for build & signing integrity — the strongest version of that is making the owner's single step **fail-proof**. The most likely failure of "drop the file and run the release" is a WRONG file (another app's package name, another Firebase project, malformed JSON), which would surface only as an opaque Gradle error minutes into `assembleRelease`. New `scripts/verify-crashlytics-readiness.mjs` closes exactly that:
+
+- Runs in milliseconds, no java/Gradle needed; wired into `release.mjs` BEFORE any build — a bad file aborts the release with a precise message (it names the package names found in the file against the expected `com.masarifi.app`).
+- Always verifies the structure: both plugin classpaths in root gradle, the conditional activation block in app gradle, the `MASARIFI_RELEASE_*` signing block intact, and the native library wiring.
+- When the file exists, verifies it: valid JSON, a client targeting `com.masarifi.app`, `mobilesdk_app_id`, an API key, and `project_id`.
+- Standalone CLI too: `node scripts/verify-crashlytics-readiness.mjs` prints a full status report (current repo state: GREEN, safely inert).
+- Covered by 6 characterization tests (`tests/unit/crashlyticsReadiness.test.ts`): both legitimate states green, wrong package (message names both sides), malformed JSON, missing app id, and structural regression.
+
 ### Gates (all green)
 
-**918/918 tests (100%) across 107 suites** (917 prior + 1 new; zero regressions) · `tsc --noEmit` 0 · `npm run lint` 0 · `guardian.mjs validate` clean · web build clean both flag states · zero new i18n keys.
+**924/924 tests (100%) across 108 suites** (918 prior + 6 readiness-gate tests; zero regressions) · `tsc --noEmit` 0 · `npm run lint` 0 · `guardian.mjs validate` clean · web build clean · zero new i18n keys.
 
-**Permanent memory updated:** `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.18).
+**Permanent memory updated:** `GEMINI.md` (top entry, items 7–8) and `AUDIT_REPORT.md` (Sections 12.18 & 12.19).
 
 ### Next Step Proposals
 

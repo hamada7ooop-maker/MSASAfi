@@ -126,11 +126,21 @@ try {
     // and the native plugins activate (android/app/build.gradle applies them
     // only when the file exists). Without the file, reporting stays safely
     // off — the app's runtime gate (isCrashReportingEnabled) is a no-op and
-    // nothing crashes.
-    const googleServicesFile = path.join('android', 'app', 'google-services.json');
-    if (fs.existsSync(googleServicesFile)) {
+    // nothing crashes. A malformed/mismatched file aborts the release HERE,
+    // in milliseconds, with a precise message — instead of as an opaque
+    // Gradle failure minutes into assembleRelease.
+    const { verifyCrashlyticsReadiness } = await import('./verify-crashlytics-readiness.mjs');
+    const readiness = verifyCrashlyticsReadiness(process.cwd());
+    if (readiness.activated) {
+        for (const c of readiness.checks) {
+            if (!c.pass) console.error(`❌  ${c.name}${c.detail ? ` — ${c.detail}` : ''}`);
+        }
+        if (!readiness.ok) {
+            console.error("🚨 Release ABORTED: google-services.json is present but invalid (see ❌ above). Fix it or remove it, then re-run.");
+            process.exit(1);
+        }
         process.env.VITE_CRASH_REPORTING = 'true';
-        console.log("🔥 google-services.json detected — building with VITE_CRASH_REPORTING=true (Crashlytics ACTIVE).");
+        console.log("🔥 google-services.json verified — building with VITE_CRASH_REPORTING=true (Crashlytics ACTIVE).");
     } else {
         delete process.env.VITE_CRASH_REPORTING;
         console.warn("⚠️  android/app/google-services.json NOT found — building WITHOUT crash reporting.");
