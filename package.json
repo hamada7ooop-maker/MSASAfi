@@ -1,7 +1,7 @@
 {
     "name": "masarifi-app",
     "private": true,
-    "version": "23.1.18",
+    "version": "23.1.19",
     "description": "مصاريفي - المدير المالي الشخصي الذكي",
     "type": "module",
     "scripts": {
