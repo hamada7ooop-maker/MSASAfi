@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGoals } from '../hooks/useGoals';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useI18n } from '../../../i18n/index';
@@ -26,12 +27,14 @@ export function Goals() {
       setPendingAction: s.setPendingAction
     }))
   );
-  const { 
-    goals, 
-    activeGoals, 
-    accounts, 
-    suggestedAuto, 
+  const {
+    goals,
+    activeGoals,
+    accounts,
+    suggestedAuto,
     isLoading,
+    error,
+    retry,
     addGoal,
     updateGoal,
     deleteGoal,
@@ -137,6 +140,9 @@ export function Goals() {
       setPendingDeposit(null);
     }
   };
+
+  // Directive 16: a failed load is not "no goals yet" — say so, and offer a way back.
+  if (error) return <ErrorState onRetry={retry} />;
 
   return (
     <div className="p-5 space-y-6 pb-32 animate-in fade-in duration-700">

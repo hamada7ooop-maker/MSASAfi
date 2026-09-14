@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db as DB } from '@/core/db/core';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 import type { Debt, Account } from '../../../types';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -19,6 +20,8 @@ export function useDebts() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaying, setIsPaying] = useState(false);
+  // Directive 16: distinguish "no debts" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchDebts = useCallback(async () => {
     try {
@@ -30,9 +33,11 @@ export function useDebts() {
       if (isMounted.current) {
         setDebts(fetchedDebts);
         setAccounts(fetchedAccounts);
+        setError(null);
       }
     } catch (err) {
       silentFail('[useDebts] Error fetching data')(err);
+      if (isMounted.current) setError(toError(err));
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
@@ -89,6 +94,8 @@ export function useDebts() {
     accounts,
     isLoading,
     isPaying,
+    error,
+    retry: fetchDebts,
     addDebt,
     updateDebt,
     deleteDebt,

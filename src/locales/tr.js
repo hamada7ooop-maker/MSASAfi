@@ -1043,6 +1043,7 @@ export const locale_tr = {
   "common.previous": "Önceki",
   "common.print": "Yazdır",
   "common.process": "İşle",
+  "common.loadFailed": "Veriler yüklenemedi",
   "common.retry": "Yeniden dene",
   "common.saved": "Başarıyla Kaydedildi",
   "common.selectAccount": "Lütfen bir hesap seçin",

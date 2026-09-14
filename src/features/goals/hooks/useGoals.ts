@@ -7,6 +7,7 @@ import { useIsMounted } from '../../../hooks/useIsMounted';
 import { toast } from '../../../toast';
 import { useI18n } from '../../../i18n/index';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 
 export function useGoals() {
   const { t } = useI18n();
@@ -22,6 +23,8 @@ export function useGoals() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [suggestedAuto, setSuggestedAuto] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: distinguish "no goals" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchGoals = useCallback(async () => {
     try {
@@ -39,9 +42,11 @@ export function useGoals() {
         setGoals(fetchedGoals);
         setAccounts(fetchedAccounts);
         setSuggestedAuto(surplus);
+        setError(null);
       }
     } catch (err) {
       silentFail('[useGoals] Error fetching data')(err);
+      if (isMounted.current) setError(toError(err));
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
@@ -157,6 +162,8 @@ export function useGoals() {
     accounts,
     suggestedAuto,
     isLoading,
+    error,
+    retry: fetchGoals,
     addGoal,
     updateGoal,
     deleteGoal,

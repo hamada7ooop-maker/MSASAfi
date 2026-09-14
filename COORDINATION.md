@@ -56,4 +56,33 @@ Currently, the 12 core data hooks (`useTransactions`, `useDebts`, `useGoals`, `u
 ---
 
 ## 📝 Auditor Report & Next Step Proposals
-*(Auditor: please write your end-of-task summary, mutation test results, and recommendations for the next step here before committing and pushing)*
+
+### Directive 16 — Fetch Error Disambiguation — COMPLETE ✅
+
+**1. Architectural discovery.** The installed `dexie-react-hooks` `useObservable` ends with `if (monitor.current.error) throw monitor.current.error;` — the stock `useLiveQuery` **throws on querier rejection even when a `defaultResult` is provided**. One broken table in `useHomeData` was detonating the entire dashboard render up to the nearest ErrorBoundary. The third argument protects against `undefined`, not against failure.
+
+**2. Shared infrastructure.**
+- **`src/core/hooks/useLiveQuerySafe.ts`** — wraps the *same* `Dexie.liveQuery` subscription (live reactivity on writes preserved verbatim) but routes the error callback into `error` state instead of a render throw; keeps the last good result while an error is pending; a resubscription IS the retry. Exports `toError()` for normalization.
+- **`src/components/common/ErrorState.tsx`** — the third visual state (after skeleton and empty): `role=alert`, localized `common.loadFailed`, `common.retry` button, `compact` variant for widgets.
+
+**3. All 12 hooks upgraded** with `error: Error | null` (set in catch **alongside** silentFail — telemetry never dropped) + `retry()`:
+- 10 manual-fetch hooks (useAccounts, useInvestments, useBills, useDebts, useGoals, useBudgets, useTransactions, useReportsData, useLoyalty, useSearch — the last via a `retryToken` in the debounce effect deps).
+- **useHomeData**: all 8 live queries converted to `useLiveQuerySafe` with a unified `retryToken` that resubscribes them all; first error wins as one `liveError`.
+- **useAdvisorData**: own analysis error merged with the propagated homeData error (`advisorError || homeData.error`); retry retries both. *Self-healing documented:* a later successful re-run legitimately clears the error — this surfaced live during testing (the first draft used `mockRejectedValueOnce` and the trace showed `getAll` called 4×: 300, 5, 100, 300).
+
+**4. UI disambiguation — 12 views wired** with ErrorState: Accounts, Investments, Bills, Debts, Goals, Budgets, TransactionList, Reports, Shop, SearchPage, ClassicDashboard, AdvisorPage. Key design decision: **the empty state is suppressed during error** (`&& !error` in TransactionList) — otherwise "no transactions" and "failed to load" would render together, contradicting each other.
+
+**5. Verification.**
+- **17 characterization tests** (`tests/unit/fetchErrorDisambiguation.test.tsx`): 12 hook-level (every hook, incl. retry-recovery on useAccounts & useHomeData) + 3 view-level (error ≠ empty, retry click recovers, empty text absent during error) + 2 ErrorState contract tests.
+- **Mutation testing: 8/8 killed** (`scripts/directive16-mutations.cjs`) — reverting any catch to silent, severing advisor error propagation, dropping the `!error` empty-state guard, emptying the `useLiveQuerySafe` error callback, and deleting the retry button each fail their test immediately.
+- **Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · **899/899 tests (100%) across 104 suites — zero regressions on the existing 882** · `guardian.mjs validate` clean · i18n-sync 100% parity (ar: 3,143 keys).
+- **i18n**: `common.loadFailed` added × 11 locales; reused existing `common.retry`.
+- **Permanent memory updated**: `GEMINI.md` (top entry) and `AUDIT_REPORT.md` (Section 12.14).
+
+**6. Documented out-of-scope finding.** `useHomeData.isLoading` compares live-query results to `undefined`, but they are never `undefined` (they carry defaults) — its current "always false" behavior was preserved deliberately; fixing it changes dashboard skeleton semantics and belongs to a future directive (a "first result" notion in `useLiveQuerySafe`).
+
+### Next Step Proposals (for Directive 17)
+
+1. **(Recommended) Crashlytics native activation** — the 4 documented steps in `src/core/crashlytics.ts` (google-services.json, apply plugin, `VITE_CRASH_REPORTING=true`, test crash). Directives 15+16 built a complete, tested error surface — activation is the single step that makes every `silentFail` and every `error` state observable in production.
+2. **Dependency audit pass** — the original audit found 10 npm vulnerabilities (1 critical, 6 high) in `npm audit`; a targeted, tested bump pass is the right pre-23.2 hygiene step.
+3. **`isLoading` "first result" semantics** for `useLiveQuerySafe` (small, but changes dashboard skeletons — needs its own characterization round).

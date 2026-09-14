@@ -4,19 +4,24 @@ import type { Investment } from '../../../types';
 import { toast } from '../../../toast';
 import { useI18n } from '../../../i18n/index';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 
 export function useInvestments() {
   const { t } = useI18n();
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: distinguish "no investments" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchInvestments = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await DB.getInvestments();
       setInvestments(data || []);
+      setError(null);
     } catch (err) {
       silentFail('[useInvestments] Fetch error')(err);
+      setError(toError(err));
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +66,8 @@ export function useInvestments() {
     totalProfit,
     totalProfitPercent,
     isLoading,
+    error,
+    retry: fetchInvestments,
     addInvestment,
     updateInvestment,
     deleteInvestment,

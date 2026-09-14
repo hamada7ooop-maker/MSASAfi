@@ -1,5 +1,6 @@
 import React from 'react';
 import { useReportsData } from '../hooks/useReportsData';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -22,7 +23,9 @@ export function Reports() {
     topExpenses, 
     weeklyStats, 
     categoryBreakdown,
-    isLoading 
+    isLoading,
+    error,
+    retry 
   } = useReportsData();
   
   const { t } = useI18n();
@@ -43,6 +46,10 @@ export function Reports() {
       </div>
     );
   }
+
+  // Directive 16: all-zero stats are valid ("no activity") — but only when the
+  // aggregation actually ran. On failure, say so instead of showing zeros.
+  if (error) return <ErrorState onRetry={retry} />;
 
   return (
     <div className="p-5 space-y-6 pb-32 animate-in fade-in duration-700">

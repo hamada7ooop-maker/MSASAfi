@@ -5,6 +5,7 @@ import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 
 export function useLoyalty() {
   const { t } = useI18n();
@@ -12,8 +13,11 @@ export function useLoyalty() {
   const streak = useAppStore(s => s.loginStreak);
   const shields = useSettingsStore(s => s.streakShields);
   const unlocked = useSettingsStore(s => s.unlockedItems);
-  
+
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: the loyalty store hydration has the same empty-vs-failed
+  // ambiguity — a failed read leaves zeroed points that look like "0 earned".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchLoyalty = useCallback(async () => {
     try {
@@ -24,7 +28,7 @@ export function useLoyalty() {
         DB.getSetting('streakShields'),
         DB.getSetting('unlockedRewards')
       ]);
-      
+
       const appState = useAppStore.getState();
       const settingsState = useSettingsStore.getState();
 
@@ -32,9 +36,11 @@ export function useLoyalty() {
       appState.setLoginStreak(Number(str) || 0);
       settingsState.setStreakShields(Number(sh) || 0);
       settingsState.setUnlockedItems(Array.isArray(u) ? u : []);
+      setError(null);
 
     } catch (err) {
       silentFail('[useLoyalty] Error fetching loyalty data')(err);
+      setError(toError(err));
     } finally {
       setIsLoading(false);
     }
@@ -90,6 +96,8 @@ export function useLoyalty() {
     shields,
     unlocked,
     isLoading,
+    error,
+    retry: fetchLoyalty,
     spendPoints,
     refresh: fetchLoyalty
   };

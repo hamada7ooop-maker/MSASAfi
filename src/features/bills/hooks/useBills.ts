@@ -5,6 +5,7 @@ import type { Bill, Subscription } from '../../../types';
 import { toast } from '../../../toast';
 import { useI18n } from '../../../i18n/index';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 
 export function useBills() {
   const { t } = useI18n();
@@ -12,6 +13,8 @@ export function useBills() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: distinguish "no bills" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -23,9 +26,11 @@ export function useBills() {
       if (isMounted.current) {
         setBills(billsData || []);
         setSubscriptions(subsData || []);
+        setError(null);
       }
     } catch (err) {
       silentFail('[useBills] Fetch error')(err);
+      if (isMounted.current) setError(toError(err));
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
@@ -116,6 +121,8 @@ export function useBills() {
   return {
     bills, subscriptions, upcoming, overdue, paid, totalUnpaid,
     isLoading,
+    error,
+    retry: fetchData,
     addBill, updateBill, deleteBill, markPaid, markUnpaid,
     addSubscription, updateSubscription, deleteSubscription, paySubscription,
     bulkDelete,

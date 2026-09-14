@@ -1043,6 +1043,7 @@ export const locale_ur = {
   "common.previous": "پچھلا",
   "common.print": "پرنٹ کریں",
   "common.process": "پراسیس کریں",
+  "common.loadFailed": "ڈیٹا لوڈ کرنے میں ناکامی",
   "common.retry": "دوبارہ کوشش کریں",
   "common.saved": "کامیابی سے محفوظ ہو گیا",
   "common.selectAccount": "براہ کرم ایک اکاؤنٹ منتخب کریں",

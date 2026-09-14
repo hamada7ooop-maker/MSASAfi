@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { onActivate } from '@/core/a11yKeyboard';
 import { useBills } from '../hooks/useBills';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useFormat } from '../../../core/hooks/useFormat';
@@ -18,9 +19,9 @@ export function Bills() {
   const { t } = useI18n();
   const { fmt } = useFormat();
   const isMounted = useIsMounted();
-  const { 
-    bills, subscriptions, upcoming, overdue, totalUnpaid, 
-    isLoading, addBill, updateBill, deleteBill, markPaid, markUnpaid,
+  const {
+    bills, subscriptions, upcoming, overdue, totalUnpaid,
+    isLoading, error, retry, addBill, updateBill, deleteBill, markPaid, markUnpaid,
     addSubscription, updateSubscription, deleteSubscription, paySubscription,
     bulkDelete
   } = useBills();
@@ -84,6 +85,9 @@ export function Bills() {
       {t('misc.loading')}
     </div>
   );
+
+  // Directive 16: a failed load is not "no bills" — say so, and offer a way back.
+  if (error) return <ErrorState onRetry={retry} />;
 
   const isSelecting = selectedIds.size > 0;
   

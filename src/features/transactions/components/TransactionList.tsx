@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTransactions } from '../hooks/useTransactions';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -38,6 +39,8 @@ export function TransactionList() {
   const { 
     transactions, 
     isLoading, 
+    error,
+    retry,
     hasMore, 
     loadMore, 
     refresh,
@@ -532,12 +535,16 @@ export function TransactionList() {
               </div>
             )}
 
-            {transactions.length === 0 && !isLoading && (
+            {transactions.length === 0 && !isLoading && !error && (
               <div className="py-20 text-center space-y-4">
                 <span className="material-symbols-outlined text-6xl text-slate-200">receipt_long</span>
                 <p className="text-slate-400 font-bold">{t('txn.noTxns')}</p>
               </div>
             )}
+
+            {/* Directive 16: a failed load must not read as "no transactions
+                yet" — the empty block above is suppressed while error is set. */}
+            {error && !isLoading && <ErrorState onRetry={retry} />}
 
             {/* Infinite scroll sentinel and loader */}
             {(hasMore || isLoading) && (

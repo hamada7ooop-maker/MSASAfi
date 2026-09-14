@@ -1051,6 +1051,7 @@ export const locale_ar = {
   "common.previous": "السابق",
   "common.print": "طباعة",
   "common.process": "معالجة",
+  "common.loadFailed": "فشل تحميل البيانات",
   "common.retry": "إعادة المحاولة",
   "common.saved": "تم الحفظ بنجاح",
   "common.selectAccount": "يرجى اختيار حساب",

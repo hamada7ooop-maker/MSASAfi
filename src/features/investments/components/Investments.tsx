@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { onActivate } from '@/core/a11yKeyboard';
 import { useInvestments } from '../hooks/useInvestments';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useAppStore } from '../../../store/appStore';
@@ -258,7 +259,7 @@ function InvestmentModal({
 export function Investments() {
   const { t } = useI18n();
   const { fmt } = useFormat();
-  const { investments, totalCost, totalValue, totalProfit, totalProfitPercent, isLoading, addInvestment, updateInvestment, deleteInvestment, deleteInvestments } = useInvestments();
+  const { investments, totalCost, totalValue, totalProfit, totalProfitPercent, isLoading, error, retry, addInvestment, updateInvestment, deleteInvestment, deleteInvestments } = useInvestments();
   
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<Investment | undefined>();
@@ -296,6 +297,9 @@ export function Investments() {
       {t('misc.loading') || 'Loading Intelligence...'}
     </div>
   );
+
+  // Directive 16: a failed load is not an empty portfolio — say so, and offer a way back.
+  if (error) return <ErrorState onRetry={retry} />;
   
   const handleSave = async (data: Partial<Investment>) => {
     if (editing?.id) await updateInvestment(editing.id, data);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAccounts } from '../hooks/useAccounts';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import type { Account } from '../../../types';
@@ -306,7 +307,7 @@ function AccountCard({ account, fmt, total, onEdit, onDelete, onArchive, confirm
 export function Accounts() {
   const { t } = useI18n();
   const { fmt } = useFormat();
-  const { active, archived, totalBalance, isLoading, addAccount, updateAccount, deleteAccount, transferBetween } = useAccounts();
+  const { active, archived, totalBalance, isLoading, error, retry, addAccount, updateAccount, deleteAccount, transferBetween } = useAccounts();
   const [showModal, setShowModal] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [editing, setEditing] = useState<Account | undefined>();
@@ -318,6 +319,9 @@ export function Accounts() {
       {t('misc.loading')}
     </div>
   );
+
+  // Directive 16: a failed load is not an empty list — say so, and offer a way back.
+  if (error) return <ErrorState onRetry={retry} />;
 
   const openEdit = (a: Account) => { setEditing(a); setShowModal(true); };
   const openAdd  = () => { setEditing(undefined); setShowModal(true); };

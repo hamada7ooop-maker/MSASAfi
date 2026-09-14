@@ -1,5 +1,6 @@
 import React from 'react';
 import { useHomeData } from '../hooks/useHomeData';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { BalanceCard } from './BalanceCard';
 import { IncomeExpenseCards } from './IncomeExpenseCards';
 import { AIPulse } from './AIPulse';
@@ -41,6 +42,8 @@ export function ClassicDashboard() {
     monthlyStats, 
     recentTransactions, 
     isLoading,
+    error,
+    retry,
     financialScore,
     sustainability,
     prediction,
@@ -113,6 +116,11 @@ export function ClassicDashboard() {
       </div>
     );
   }
+
+  // Directive 16: a failed live query used to throw straight through this
+  // component into an ErrorBoundary, killing every widget on the board.
+  // useHomeData now captures it — show one honest error state with a retry.
+  if (error) return <ErrorState onRetry={retry} />;
 
   const renderSection = (id: string) => {
     switch (id) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { onActivate } from '@/core/a11yKeyboard';
 import { useSearch } from '../hooks/useSearch';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { TransactionItem } from '../../transactions/components/TransactionItem';
@@ -11,7 +12,7 @@ export function SearchPage() {
   const { fmt } = useFormat();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const { results, isLoading } = useSearch(query);
+  const { results, isLoading, error, retry } = useSearch(query);
 
   const hasResults = results.transactions.length > 0 || results.accounts.length > 0 || results.categories.length > 0;
 
@@ -53,6 +54,10 @@ export function SearchPage() {
             <span className="material-symbols-outlined text-6xl">manage_search</span>
             <p className="text-sm font-black uppercase tracking-widest">{t('search.start') || 'Type to search'}</p>
           </div>
+        ) : error && !isLoading ? (
+          /* Directive 16: a failed search is not "no results" — the user
+             would otherwise conclude the thing they know exists is gone. */
+          <ErrorState onRetry={retry} />
         ) : !hasResults && !isLoading ? (
           <div className="py-20 text-center space-y-4">
             <span className="material-symbols-outlined text-6xl text-slate-200">sentiment_dissatisfied</span>

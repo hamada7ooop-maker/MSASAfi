@@ -5,19 +5,25 @@ import type { Account } from '../../../types';
 import { toast } from '../../../toast';
 import { useI18n } from '../../../i18n/index';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 
 export function useAccounts() {
   const { t } = useI18n();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: an empty list is ambiguous between "no accounts" and
+  // "the query failed". Exposed so the view can render error ≠ empty.
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchAccounts = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await AccountRepository.getAll();
       setAccounts(data || []);
+      setError(null);
     } catch (err) {
       silentFail('[useAccounts] Fetch error')(err);
+      setError(toError(err));
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +101,8 @@ export function useAccounts() {
   return {
     accounts, active, archived, totalBalance,
     isLoading,
+    error,
+    retry: fetchAccounts,
     addAccount, updateAccount, deleteAccount, transferBetween,
     refresh: fetchAccounts,
   };

@@ -1110,6 +1110,7 @@ export const locale_it = {
   "common.previous": "Precedente",
   "common.print": "Stampa",
   "common.process": "Elabora",
+  "common.loadFailed": "Impossibile caricare i dati",
   "common.retry": "Riprova",
   "common.saved": "Salvato con Successo",
   "common.selectAccount": "Seleziona un conto",

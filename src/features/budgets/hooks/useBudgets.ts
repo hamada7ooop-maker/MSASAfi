@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { db as DB } from '@/core/db/core';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 import type { Budget, Category } from '../../../types';
 
 export function useBudgets() {
@@ -9,6 +10,8 @@ export function useBudgets() {
   const [categoryBreakdown, setCategoryBreakdown] = useState<Record<string, number>>({});
   const [prevMonthBreakdown, setPrevMonthBreakdown] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  // Directive 16: distinguish "no budgets" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchBudgets = useCallback(async () => {
     try {
@@ -38,8 +41,10 @@ export function useBudgets() {
       setCategories(fetchedCats.filter(c => c.type === 'expense' || c.type === 'both'));
       setCategoryBreakdown(breakdown as Record<string, number>);
       setPrevMonthBreakdown(prevBreakdown as Record<string, number>);
+      setError(null);
     } catch (err) {
       silentFail('[useBudgets] Error fetching data')(err);
+      setError(toError(err));
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +100,8 @@ export function useBudgets() {
     totalBudget,
     totalSpent,
     isLoading,
+    error,
+    retry: fetchBudgets,
     getSpentForBudget,
     getRolloverForBudget,
     getEffectiveLimit,

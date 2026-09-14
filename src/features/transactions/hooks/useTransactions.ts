@@ -4,6 +4,7 @@ import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useIsMounted } from '../../../hooks/useIsMounted';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 import type { Transaction } from '../../../types';
 
 const TXN_PER_PAGE = 30;
@@ -25,6 +26,8 @@ export function useTransactions() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  // Directive 16: distinguish "no transactions yet" from "query failed".
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchTransactions = useCallback(async () => {
     try {
@@ -73,11 +76,13 @@ export function useTransactions() {
         setTransactions(results);
         setTotalCount(totalFiltered);
         setHasMore(totalFiltered > results.length);
+        setError(null);
         setIsLoading(false);
       }
     } catch (err) {
       silentFail('[useTransactions] Fetch error')(err);
       if (isMounted.current) {
+        setError(toError(err));
         setIsLoading(false);
       }
     }
@@ -139,6 +144,8 @@ export function useTransactions() {
   return {
     transactions,
     isLoading,
+    error,
+    retry: refresh,
     hasMore,
     totalCount,
     loadMore,

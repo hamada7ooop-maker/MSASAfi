@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useBudgets } from '../hooks/useBudgets';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -62,6 +63,8 @@ export function Budgets() {
     totalBudget, 
     totalSpent, 
     isLoading, 
+    error,
+    retry,
     getSpentForBudget,
     getRolloverForBudget,
     getEffectiveLimit,
@@ -180,6 +183,9 @@ export function Budgets() {
       setIsGenerating(false);
     }
   };
+
+  // Directive 16: a failed load is not "no budgets" — say so, and offer a way back.
+  if (error) return <ErrorState onRetry={retry} />;
 
   return (
     <div className="p-5 space-y-6 pb-32 animate-in fade-in duration-700">

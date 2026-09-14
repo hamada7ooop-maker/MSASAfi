@@ -1,5 +1,25 @@
 # Masarifi Project Status (v23.0.6)
 
+- **التوجيه 16 — إزالة غموض أخطاء الجلب: تمييز «قائمة فارغة» عن «فشل التحميل» عبر خطافات البيانات الاثني عشر (Directive 16: Fetch Error Disambiguation)**:
+  - **1. المشكلة السلوكية المُصلَحة (The Ambiguity)**:
+    - كل خطافات البيانات الـ12 كانت تلتقط فشل الاستعلام وتُرجع مصفوفة فارغة/حالة افتراضية، فتستحيل الواجهة على التمييز بين مستخدم جديد بلا معاملات وقاعدة بيانات معطوبة: شاشة الديون تعرض «لا توجد ديون» بينما قد يكون المستخدم مديناً فعلاً، وشاشة التقارير تعرض أصفاراً تبدو «لا نشاط هذا الشهر».
+    - **اكتشاف جوهري في `useHomeData`**: مكتبة `useLiveQuery` من dexie-react-hooks **ترمي الاستثناء أثناء الرندر** عند فشل الاستعلام حتى مع تمرير `defaultResult` — أي أن فشل جدول واحد كان يفجّر لوحة التحكم بأكملها حتى أقرب ErrorBoundary بدل حالة خطأ رشيقة.
+  - **2. البنية التحتية المشتركة (Shared Infrastructure)**:
+    - خطاف جديد [`useLiveQuerySafe`](file:///home/user/MSASAfi/src/core/hooks/useLiveQuerySafe.ts): يغلف نفس اشتراك `Dexie.liveQuery` (التفاعلية الحية مع الكتابات محفوظة حرفياً) لكنه يوجّه خطأ الاشتراك إلى حالة `error` بدل الرمي، ويحتفظ بآخر قيمة صالحة أثناء الخطأ (البيانات القديمة أفضل من وميض فراغ)، وإعادة الاشتراك هي إعادة المحاولة. يصدّر أيضاً `toError()` لتوحيد التطبيع.
+    - مكوّن مشترك [`ErrorState`](file:///home/user/MSASAfi/src/components/common/ErrorState.tsx): الحالة البصرية الثالثة (بعد الهيكل العظمي والفراغ) — `role=alert` + أيقونة + رسالة `common.loadFailed` + زر «إعادة المحاولة» `common.retry`، بمظهر مطابق لهوية التطبيق ونسخة `compact` للأدوات الفرعية.
+  - **3. ترقية الخطافات الاثني عشر (All 12 Hooks)**:
+    - **10 خطافات جلب يدوي** (`useAccounts`, `useInvestments`, `useBills`, `useDebts`, `useGoals`, `useBudgets`, `useTransactions`, `useReportsData`, `useLoyalty`, `useSearch`): حالة `error: Error | null` تُضبط عند الفشل (مع بقاء silentFail للتتبع) وتُصفّر عند النجاح، و`retry()` معاد تصديره؛ `useSearch` عبر `retryToken` في تبعيات التأثير، و`useSettings`-style التفاؤل محفوظ.
+    - **`useHomeData`**: تحويل الاستعلامات الحية الثمانية إلى `useLiveQuerySafe` مع `retryToken` موحّد يعيد اشتراكها جميعاً، وتجميع أول خطأ في `liveError` واحد — لوحة التحكم تعرض حالة خطأ واحدة بدل انفجار ثماني أدوات.
+    - **`useAdvisorData`**: خطأ تحليله الخاص مدموج مع خطأ homeData المُمرَّر عبر السبريد (`advisorError || homeData.error`) وretry يعيد الاثنين معاً؛ سلوك الشفاء الذاتي موثّق (إعادة تشغيل ناجحة تُصفر الخطأ مشروعة).
+  - **4. توصيل الواجهات (UI Disambiguation)**:
+    - 12 شاشة موصولة بـ`ErrorState`: Accounts, Investments, Bills, Debts (فشل الديون لا يُقرأ «لا ديون عليك»), Goals, Budgets, TransactionList (مع كبت حالة «لا توجد معاملات» عند الخطأ: `&& !error`), Reports (الأصفار ليست «لا نشاط»), Shop, SearchPage (فشل البحث ليس «لا نتائج»), ClassicDashboard, AdvisorPage.
+  - **5. التوطين والاختبارات (i18n & Verification)**:
+    - مفتاح جديد `common.loadFailed` في **11 لغة** (تغطية 100%، العربية 3,143 مفتاحاً) وإعادة استخدام `common.retry` الموجود.
+    - **17 اختبار توصيف** في [`fetchErrorDisambiguation.test.tsx`](file:///home/user/MSASAfi/tests/unit/fetchErrorDisambiguation.test.tsx): 12 على مستوى الخطافات (كل خطاف + استرداد retry في useAccounts/useHomeData) + 3 على مستوى الواجهات (خطأ ≠ فراغ + الاسترداد بالنقر على إعادة المحاولة) + 2 لعقد مكوّن ErrorState.
+    - **اختبار الطفرات: 8/8 قُتلت** عبر [`directive16-mutations.cjs`](file:///home/user/MSASAfi/scripts/directive16-mutations.cjs) — إعادة كل catch إلى الصمت، قطع نشر الخطأ في advisor، إسقاط حارس `!error` من حالة الفراغ، وحذف زر إعادة المحاولة: كلها كُشفت فوراً.
+  - **6. بوابات الجودة المعتمدة (Quality Gates)**: **899/899 اختباراً بنسبة 100% عبر 104 أجنحة** (صفر انحدار في الـ882 السابقة) · `tsc --noEmit` صفر أخطاء · `eslint` صفر تحذيرات · `guardian.mjs validate` نظيف عبر 11 لغة · i18n-sync بتكافؤ 100%.
+  - **7. ملاحظة موثقة خارج النطاق**: `isLoading` في `useHomeData` يقارن بـ`undefined` بينما نتائج `useLiveQuery` لا تكون undefined أبداً (لها defaultResult) — أي أن سلوكه الحالي «false دائماً» محفوظ كما هو عمداً ولم يُغير في هذا التوجيه؛ إصلاحه الحقيقي يحتاج دلالة «أول نتيجة» في `useLiveQuerySafe` وهو مرشح لتوجيه لاحق.
+
 - **التوجيه 15 — الخيار A: تدقيق الإخفاقات الصامتة والاستثناءات المبتلعة وتصعيد الإخفاقات الحرجة إلى المستخدم (Directive 15: silentFail & Swallowed Exception Audit)**:
   - **1. المنهجية والمسح الشامل (Full-Surface Scan)**:
     - بناء ماسح برمجي مخصص [`scripts/directive15-scan.cjs`](file:///home/user/MSASAfi/scripts/directive15-scan.cjs) (قائم على مطابقة الأقواس مع تجريس التعليقات والنصوص) رصد **167 كتلة catch** و**261 موقع silentFail** عبر الكود المصدري، وصنّفها آلياً إلى: `SILENT_FAIL` (83) · `OTHER` (41) · `COMMENT_ONLY` (24) · `DOT_CATCH` (6) · `CRASHLYTICS` (5) · `LOGS_DEV` (5) · `PROPAGATES` (3).

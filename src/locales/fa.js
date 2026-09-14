@@ -1043,6 +1043,7 @@ export const locale_fa = {
   "common.previous": "قبلی",
   "common.print": "چاپ",
   "common.process": "فرآیند",
+  "common.loadFailed": "بارگذاری داده‌ها ناموفق بود",
   "common.retry": "تلاش دوباره",
   "common.saved": "با موفقیت ذخیره شد",
   "common.selectAccount": "لطفاً یک حساب انتخاب کنید",

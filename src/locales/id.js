@@ -1043,6 +1043,7 @@ export const locale_id = {
   "common.previous": "Sebelumnya",
   "common.print": "Cetak",
   "common.process": "Proses",
+  "common.loadFailed": "Gagal memuat data",
   "common.retry": "Coba lagi",
   "common.saved": "Berhasil Disimpan",
   "common.selectAccount": "Silakan pilih akun",

@@ -1043,6 +1043,7 @@ export const locale_en = {
   "common.previous": "Previous",
   "common.print": "Print",
   "common.process": "Process",
+  "common.loadFailed": "Failed to load data",
   "common.retry": "Retry",
   "common.saved": "Saved Successfully",
   "common.selectAccount": "Please select an account",

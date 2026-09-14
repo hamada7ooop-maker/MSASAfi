@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { TransactionRepository } from '../../../core/db/repositories/transactions';
 import { db as DB } from '@/core/db/core';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 import type { Transaction, Account, Category } from '../../../types';
 
 export function useSearch(query: string) {
@@ -15,6 +16,11 @@ export function useSearch(query: string) {
     categories: []
   });
   const [isLoading, setIsLoading] = useState(false);
+  // Directive 16: a failed search must read as "search failed", not as the
+  // "no results" state — they demand different user actions.
+  const [error, setError] = useState<Error | null>(null);
+  // Bumped by retry() to re-run the search effect for the same query.
+  const [retryToken, setRetryToken] = useState(0);
   const isMounted = useRef(true);
 
   useEffect(() => {
@@ -28,6 +34,7 @@ export function useSearch(query: string) {
     const q = query.toLowerCase().trim();
     if (!q) {
       setResults({ transactions: [], accounts: [], categories: [] });
+      setError(null);
       setIsLoading(false);
       return;
     }
@@ -55,7 +62,7 @@ export function useSearch(query: string) {
         // Search Categories
         const allCats = await DB.getCategories();
         const filteredCats = allCats.filter((c: Category) => 
-          (c.name || '').toLowerCase().includes(q) || 
+          (c.name || '').toLowerCase().includes(q) ||
           (c.nameEn || '').toLowerCase().includes(q)
         );
 
@@ -65,9 +72,13 @@ export function useSearch(query: string) {
             accounts: filteredAccs,
             categories: filteredCats
           });
+          setError(null);
         }
       } catch (err) {
         silentFail('[Search] Error in useSearch')(err);
+        if (isMounted.current) {
+          setError(toError(err));
+        }
       } finally {
         if (isMounted.current) {
           setIsLoading(false);
@@ -76,7 +87,10 @@ export function useSearch(query: string) {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, retryToken]);
 
-  return { results, isLoading };
+  /** Re-runs the search for the current query (Directive 16 retry). */
+  const retry = useCallback(() => setRetryToken(t => t + 1), []);
+
+  return { results, isLoading, error, retry };
 }

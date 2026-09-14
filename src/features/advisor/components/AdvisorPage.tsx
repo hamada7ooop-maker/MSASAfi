@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAdvisorData } from '../hooks/useAdvisorData';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useNavigate } from 'react-router-dom';
 import { checkMilestone } from '../../../core/loyalty';
@@ -90,7 +91,9 @@ export function AdvisorPage() {
     recommendations, 
     deepInsights, 
     isAdvisorLoading,
-    necessityStats
+    necessityStats,
+    error,
+    retry
   } = useAdvisorData();
 
   const [isExporting, setIsExporting] = React.useState(false);
@@ -282,6 +285,10 @@ export function AdvisorPage() {
       </div>
     );
   }
+
+  // Directive 16: an advisor page with no insights because the analysis fetch
+  // failed is not the same as one with nothing to say — say which it is.
+  if (error) return <ErrorState onRetry={retry} />;
 
   return (
     <>

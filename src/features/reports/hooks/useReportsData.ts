@@ -4,6 +4,7 @@ import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useIsMounted } from '../../../hooks/useIsMounted';
 import { silentFail } from '../../../core/utils';
+import { toError } from '../../../core/hooks/useLiveQuerySafe';
 import type { Transaction } from '../../../types';
 
 export interface MonthTrendStats {
@@ -43,6 +44,9 @@ export function useReportsData() {
     categoryBreakdown: {},
     isLoading: true,
   });
+  // Directive 16: distinguish "no activity this period" (all zeros, valid)
+  // from "the aggregation query failed" (all zeros, meaningless).
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -102,10 +106,12 @@ export function useReportsData() {
           categoryBreakdown: breakdown,
           isLoading: false,
         });
+        setError(null);
       }
     } catch (error) {
       silentFail('[useReportsData] Error fetching reports')(error);
       if (isMounted.current) {
+        setError(toError(error));
         setData(prev => ({ ...prev, isLoading: false }));
       }
     }
@@ -117,5 +123,5 @@ export function useReportsData() {
 
   // `refresh` is now a stable reference, so consumers can safely place it in
   // their own dependency arrays.
-  return { ...data, refresh: fetchData };
+  return { ...data, error, retry: fetchData, refresh: fetchData };
 }

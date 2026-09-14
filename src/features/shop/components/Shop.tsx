@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLoyalty } from '../hooks/useLoyalty';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useI18n } from '../../../i18n/index';
 import { useSettingsStore } from '../../../store/settingsStore';
 import { useAppStore } from '../../../store/appStore';
@@ -58,7 +59,7 @@ const UTIL_ITEMS = [
 
 export function Shop() {
   const { t } = useI18n();
-  const { points, streak: _streak, shields, unlocked, isLoading, spendPoints } = useLoyalty();
+  const { points, streak: _streak, shields, unlocked, isLoading, error, retry, spendPoints } = useLoyalty();
   const { setDarkPalette, setLightPalette, setTheme } = useSettingsStore(
     useShallow((s) => ({
       setDarkPalette: s.setDarkPalette,
@@ -143,6 +144,9 @@ export function Shop() {
       {t('misc.loading')}
     </div>
   );
+
+  // Directive 16: zero points after a failed read are not "0 earned" — say so.
+  if (error) return <ErrorState onRetry={retry} />;
 
   const renderCard = (item: ThemeItem) => {
     const isUnlocked = unlocked.includes(item.id);

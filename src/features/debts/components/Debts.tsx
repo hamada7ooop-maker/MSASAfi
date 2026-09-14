@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useDebts } from '../hooks/useDebts';
 import { useInstallments } from '../hooks/useInstallments';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { useAppStore } from '../../../store/appStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useI18n } from '../../../i18n/index';
@@ -28,13 +29,15 @@ export function Debts() {
     }))
   );
   
-  const { 
+  const {
     debts,
     owedDebts,
     lentDebts,
     accounts,
     isLoading: isDebtsLoading,
     isPaying,
+    error: debtsError,
+    retry: retryDebts,
     addDebt,
     updateDebt,
     deleteDebt,
@@ -177,6 +180,10 @@ export function Debts() {
     await payInstallment(id, accountId);
     toast(t('debt.paymentRecorded') || 'Installment Payment Recorded', 'success');
   };
+
+  // Directive 16: a failed load is not "you owe nobody" — that misreading is
+  // expensive in a debts screen. Say the load failed, and offer a way back.
+  if (debtsError) return <ErrorState onRetry={retryDebts} />;
 
   return (
     <div className="w-full max-w-full min-w-0 p-3.5 sm:p-5 space-y-6 pb-32 animate-in fade-in duration-700 overflow-x-hidden">

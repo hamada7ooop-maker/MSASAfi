@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useLiveQuerySafe } from '../../../core/hooks/useLiveQuerySafe';
 import { useIsMounted } from '../../../hooks/useIsMounted';
 import { TransactionRepository } from '../../../core/db/repositories/transactions';
 import { BudgetRepository } from '../../../core/db/repositories/budgets';
@@ -62,22 +62,41 @@ const marketCache: {
 };
 
 export function useHomeData(
-  year: number = new Date().getFullYear(), 
+  year: number = new Date().getFullYear(),
   month: number = new Date().getMonth()
 ) {
   const isMounted = useIsMounted();
+  // ── Directive 16: error-capturing live queries ────────────────────────────
+  // The stock useLiveQuery THROWS when a querier rejects, detonating the whole
+  // render up to the nearest ErrorBoundary. useLiveQuerySafe routes the same
+  // Dexie.liveQuery subscription's error callback into state, so this hook can
+  // expose `error` and `retry` instead of crashing the dashboard.
+  // `retryToken` is appended to every query's deps: bumping it resubscribes
+  // all of them — a resubscription IS the retry.
+  const [retryToken, setRetryToken] = useState(0);
+  const retry = useCallback(() => setRetryToken(t => t + 1), []);
+
   // ── Database Queries via Repositories ─────────────────────────────────────
-  const recentTransactions = useLiveQuery(
+  const {
+    result: recentTransactions,
+    error: recentTxnError,
+  } = useLiveQuerySafe(
     () => TransactionRepository.getRecent(5),
-    [], [] as Transaction[]
+    [retryToken], [] as Transaction[]
   );
 
-  const allBudgets = useLiveQuery(
+  const {
+    result: allBudgets,
+    error: budgetsError,
+  } = useLiveQuerySafe(
     () => BudgetRepository.getAll(),
-    [], [] as Budget[]
+    [retryToken], [] as Budget[]
   );
 
-  const upcomingBills = useLiveQuery(
+  const {
+    result: upcomingBills,
+    error: billsError,
+  } = useLiveQuerySafe(
     async () => {
       const [unpaidBills, rawSubs] = await Promise.all([
         BillRepository.getUpcoming(30),
@@ -99,35 +118,50 @@ export function useHomeData(
         .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
         .slice(0, 10);
     },
-    [], [] as Array<Bill & { isSubscription?: boolean }>
+    [retryToken], [] as Array<Bill & { isSubscription?: boolean }>
   );
 
-  const allGoals = useLiveQuery(
+  const {
+    result: allGoals,
+    error: goalsError,
+  } = useLiveQuerySafe(
     () => GoalRepository.getAll(),
-    [], [] as Goal[]
+    [retryToken], [] as Goal[]
   );
 
-  const owedDebts = useLiveQuery(async () => {
+  const {
+    result: owedDebts,
+    error: debtsError,
+  } = useLiveQuerySafe(async () => {
     const all = await DebtRepository.getOwed();
     return all
       .map(d => ({ ...d, remaining: (Number(d.total) || 0) - (Number(d.paid) || 0) }))
       .filter(d => d.remaining > 0)
       .sort((a, b) => a.remaining - b.remaining);
-  }, [], [] as Array<Debt & { remaining: number }>);
+  }, [retryToken], [] as Array<Debt & { remaining: number }>);
 
   // Monthly stats via StatisticsService
-  const monthlyStats = useLiveQuery(
+  const {
+    result: monthlyStats,
+    error: statsError,
+  } = useLiveQuerySafe(
     () => StatisticsService.getMonthlySummary(year, month),
-    [year, month], 
+    [year, month, retryToken],
     { income: 0, expense: 0, count: 0, breakdown: {}, net: 0, weekly: { income: 0, expense: 0, net: 0 } }
   );
 
-  const totalBalance = useLiveQuery(
+  const {
+    result: totalBalance,
+    error: balanceError,
+  } = useLiveQuerySafe(
     () => AccountRepository.getTotalBalance(),
-    [], 0
+    [retryToken], 0
   );
 
-  const streak = useLiveQuery(async () => {
+  const {
+    result: streak,
+    error: streakError,
+  } = useLiveQuerySafe(async () => {
     const now = new Date();
     const txns = await TransactionRepository.getAll(100);
     const activeDays = new Set(txns.map(t => new Date(t.date || t.createdAt!).toISOString().slice(0, 10)));
@@ -139,7 +173,13 @@ export function useHomeData(
       else break;
     }
     return currentStreak;
-  }, [], 0);
+  }, [retryToken], 0);
+
+  // First failed live query wins; the dashboard renders one error state for
+  // the whole board (one broken table should not show eight panels).
+  const liveError =
+    recentTxnError || budgetsError || billsError || goalsError ||
+    debtsError || statsError || balanceError || streakError || null;
 
   // ── Derived / heavy computations (run once per fresh data) ───────────────
   const [extras, setExtras] = useState<{
@@ -380,6 +420,8 @@ export function useHomeData(
     totalBalance: totalBalance || 0,
     balance: totalBalance || 0, // Alias for Dashboard compatibility
     isLoading: recentTransactions === undefined || allBudgets === undefined || monthlyStats === undefined,
+    error: liveError,
+    retry,
     streak: streak || 0,
     sustainability: extras.sustainability,
     recommendations: extras.recommendations,

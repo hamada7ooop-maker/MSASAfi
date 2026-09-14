@@ -1043,6 +1043,7 @@ export const locale_ms = {
   "common.previous": "Sebelum",
   "common.print": "Cetak",
   "common.process": "Proses",
+  "common.loadFailed": "Gagal memuatkan data",
   "common.retry": "Cuba lagi",
   "common.saved": "Berjaya disimpan",
   "common.selectAccount": "Sila pilih akaun",
