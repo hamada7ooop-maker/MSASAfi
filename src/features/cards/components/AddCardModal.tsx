@@ -6,15 +6,14 @@ import { OpenBankingService } from '../../../services/openBanking';
 import { toast } from '../../../toast';
 import type { BankCard } from '../../../types';
 import { checkMilestone } from '../../../core/loyalty';
-import { silentFail, normalizeArabicDigits, sanitizeNameInput } from '../../../core/utils';
-import {
-  LOCAL_TEXTS,
-  COUNTRY_NAMES,
-  CARD_STYLES,
-  LOCAL_BINS,
-  BLANK_FORM,
-} from '../data/cardConstants';
-import { VirtualCard, getCardNetwork } from './VirtualCard';
+import { silentFail } from '../../../core/utils';
+import { CARD_STYLES, BLANK_FORM } from '../data/cardConstants';
+import { makeCardText } from '../cardText';
+import { formatCardNumber, formatExpiry, formatCvv } from '../cardInputFormat';
+import { CardVisualPreview } from './CardVisualPreview';
+import { CardStylePicker } from './CardStylePicker';
+import { CardFormFields } from './CardFormFields';
+import { useBinDetection } from './useBinDetection';
 
 export interface AddCardModalProps {
   /** Closed when null-ish; the parent controls visibility. */
@@ -46,20 +45,17 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
   const { cardNumber, cardHolder, expiry, cvv, countryId, bankId, styleName } = formState;
 
   const [isFlipped, setIsFlipped] = useState(false);
-  const [, setDetecting] = useState(false);
-  const [detectionStatus, setDetectionStatus] = useState<'idle' | 'detecting' | 'success' | 'failed'>('idle');
-  const lastQueriedBin = useRef<string>('');
 
   const obService = useRef(new OpenBankingService());
+
+  const { detectionStatus, setDetectionStatus, detectCardDetails, lastQueriedBin } =
+    useBinDetection({
+      obService,
+      applyDetected: (patch) => setFormState(prev => ({ ...prev, ...patch })),
+    });
   const countriesList = obService.current.countries;
 
-  const getTxt = (key: string): string => {
-    const dict = LOCAL_TEXTS[language] || LOCAL_TEXTS['en'];
-    return dict[key] || LOCAL_TEXTS['en'][key] || key;
-  };
-
-  const getCountryName = (cId: string): string =>
-    COUNTRY_NAMES[cId]?.[language] || COUNTRY_NAMES[cId]?.['en'] || cId;
+  const { getTxt, getCountryName } = makeCardText(language);
 
   const currentProviders = obService.current.getProvidersByCountry(countryId);
   const activeStyle = CARD_STYLES.find(s => s.id === styleName) || CARD_STYLES[0];
@@ -90,7 +86,7 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
     }
     setIsFlipped(false);
     setDetectionStatus('idle');
-  }, [open, editingCard]);
+  }, [open, editingCard, setDetectionStatus, lastQueriedBin]);
 
   useEffect(() => {
     if (!open) return;
@@ -107,140 +103,20 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, onClose]);
 
-  const mapCountryCode = (code: string): string => {
-    const c = code?.toLowerCase();
-    if (c === 'sa') return 'saudi';
-    if (c === 'ae') return 'uae';
-    if (c === 'kw') return 'kuwait';
-    if (c === 'bh') return 'bahrain';
-    if (c === 'qa') return 'qatar';
-    if (c === 'om') return 'oman';
-    if (c === 'eg') return 'egypt';
-    if (c === 'jo') return 'jordan';
-    if (c === 'ma') return 'morocco';
-    if (c === 'tr') return 'turkey';
-    if (c === 'gb') return 'uk';
-    if (c === 'us') return 'usa';
-    if (c === 'ca') return 'canada';
-    if (c === 'de') return 'germany';
-    if (c === 'fr') return 'france';
-    if (c === 'in') return 'india';
-    if (c === 'sg') return 'singapore';
-    return 'saudi';
-  };
-
-  const mapBankName = (bankName: string, countryId: string): string => {
-    const nameLower = bankName?.toLowerCase() || '';
-    const providers = obService.current.getProvidersByCountry(countryId);
-    const found = providers.find(p => 
-      nameLower.includes(p.id.toLowerCase()) || 
-      nameLower.includes(p.name.toLowerCase()) || 
-      p.name.toLowerCase().includes(nameLower)
-    );
-    return found ? found.id : (providers.length > 0 ? providers[0].id : '');
-  };
-
-  const mapBankToStyle = (bankId: string): string => {
-    if (['rajhi', 'anb', 'bsfr', 'enbd', 'fab', 'cib', 'chase', 'boa'].includes(bankId)) return 'sapphire';
-    if (['snb', 'riyad', 'aljazira', 'bisb', 'housing_bank', 'nbe', 'bnp', 'lloyds'].includes(bankId)) return 'emerald';
-    if (['alinma', 'dukhan'].includes(bankId)) return 'gold';
-    if (['sab', 'adcb', 'rakbank', 'gulfbank', 'bbk', 'muscat', 'bm', 'hsbc_uk', 'akbank', 'santander'].includes(bankId)) return 'crimson';
-    if (['monzo', 'itau', 'icici', 'ing'].includes(bankId)) return 'glass';
-    return 'slate';
-  };
-
-  const detectCardDetails = async (rawNumber: string) => {
-    const cleaned = rawNumber.replace(/\D/g, '');
-    if (cleaned.length < 6) {
-      setDetectionStatus('idle');
-      return;
-    }
-
-    const bin = cleaned.substring(0, 6);
-    if (bin === lastQueriedBin.current) return;
-    lastQueriedBin.current = bin;
-
-    // 1. Local BIN Match
-    const localMatch = LOCAL_BINS[bin];
-    if (localMatch) {
-      setDetectionStatus('success');
-      setFormState(prev => ({
-        ...prev,
-        countryId: localMatch.countryId,
-        bankId: localMatch.bankId,
-        styleName: localMatch.styleName
-      }));
-      return;
-    }
-
-    // 2. Fetch from Binlist API
-    setDetecting(true);
-    setDetectionStatus('detecting');
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-    try {
-      const response = await fetch(`https://lookup.binlist.net/${bin}`, {
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error('BIN lookup failed');
-      }
-
-      const data = await response.json();
-      const apiCountryCode = data.country?.alpha2 || '';
-      const apiBankName = data.bank?.name || '';
-
-      const mappedCountry = mapCountryCode(apiCountryCode);
-      const mappedBank = mapBankName(apiBankName, mappedCountry);
-      const mappedStyle = mapBankToStyle(mappedBank);
-
-      setDetectionStatus('success');
-      setFormState(prev => ({
-        ...prev,
-        countryId: mappedCountry,
-        bankId: mappedBank,
-        styleName: mappedStyle
-      }));
-    } catch (err) {
-      silentFail('Auto-detect card details failed')(err);
-      setDetectionStatus('failed');
-    } finally {
-      setDetecting(false);
-    }
-  };
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
   const handleCardNumberChange = (val: string) => {
-    const normalized = normalizeArabicDigits(val);
-    const cleaned = normalized.replace(/\D/g, '').substring(0, 16);
-    const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
+    const { formatted, cleaned } = formatCardNumber(val);
     setFormState(prev => ({ ...prev, cardNumber: formatted }));
     detectCardDetails(cleaned);
   };
 
-  const handleExpiryChange = (val: string) => {
-    const normalized = normalizeArabicDigits(val);
-    const cleaned = normalized.replace(/\D/g, '').substring(0, 4);
-    if (cleaned.length >= 2) {
-      const month = cleaned.substring(0, 2);
-      const year = cleaned.substring(2, 4);
-      const mVal = parseInt(month, 10);
-      const corrected = mVal > 12 ? '12' : mVal === 0 && month.length === 2 ? '01' : month;
-      setFormState(prev => ({ ...prev, expiry: `${corrected}/${year}` }));
-    } else {
-      setFormState(prev => ({ ...prev, expiry: cleaned }));
-    }
-  };
+  const handleExpiryChange = (val: string) =>
+    setFormState(prev => ({ ...prev, expiry: formatExpiry(val) }));
 
-  const handleCvvChange = (val: string) => {
-    const normalized = normalizeArabicDigits(val);
-    setFormState(prev => ({ ...prev, cvv: normalized.replace(/\D/g, '').substring(0, 3) }));
-  };
+  const handleCvvChange = (val: string) =>
+    setFormState(prev => ({ ...prev, cvv: formatCvv(val) }));
 
   // ── Open Add Modal ────────────────────────────────────────────────────────
 
@@ -351,251 +227,50 @@ export function AddCardModal({ open, editingCard, onClose, onSaved }: AddCardMod
               </div>
 
               {/* 3D Card Preview */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-                <div style={{ width: '100%', maxWidth: 360, cursor: 'pointer' }}
-                  onClick={() => setIsFlipped(f => !f)}
-  role="button" tabIndex={0} onKeyDown={onActivate(() => setIsFlipped(f => !f))}>
-                  <VirtualCard
-                    cardNumber={cardNumber}
-                    cardHolder={cardHolder}
-                    expiry={expiry}
-                    cvv={cvv}
-                    bankName={currentProviders.find(p => p.id === bankId)
-                      ? (language === 'ar' ? (currentProviders.find(p => p.id === bankId)?.nameAr || currentProviders.find(p => p.id === bankId)?.name || '') : (currentProviders.find(p => p.id === bankId)?.name || ''))
-                      : getTxt('bankDefault')}
-                    bankLogo={currentProviders.find(p => p.id === bankId)?.logo || 'B'}
-                    countryName={getCountryName(countryId)}
-                    countryFlag={countriesList.find(c => c.id === countryId)?.flag || '🌐'}
-                    style={activeStyle}
-                    isFlipped={isFlipped}
-                    isRevealed
-                    expiryLabel={getTxt('expiryShort')}
-                    holderLabel={getTxt('cardHolder')}
-                  />
-                </div>
-              </div>
-              <p style={{ textAlign: 'center', fontSize: 10, fontWeight: 700, marginBottom: 20, opacity: 0.45, textTransform: 'uppercase', letterSpacing: '0.08em' }} className="text-slate-500">
-                {getTxt('tapToExpand')} · {getTxt('cvv')}
-              </p>
-
+              <CardVisualPreview
+                cardNumber={cardNumber}
+                cardHolder={cardHolder}
+                expiry={expiry}
+                cvv={cvv}
+                bankName={currentProviders.find(p => p.id === bankId)?.name || getTxt('bankDefault')}
+                bankLogo={currentProviders.find(p => p.id === bankId)?.logo || 'B'}
+                countryName={getCountryName(countryId)}
+                countryFlag={countriesList.find(c => c.id === countryId)?.flag || '🌐'}
+                activeStyle={activeStyle}
+                isFlipped={isFlipped}
+                onToggleFlip={() => setIsFlipped(f => !f)}
+                getTxt={getTxt}
+              />
               {/* Form fields */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-                {/* Country */}
-                <div>
-                  <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                    {getTxt('selectCountry')}
-                  </label>
-                  <select
-                    value={countryId}
-                    onChange={e => setFormState(prev => ({ ...prev, countryId: e.target.value }))}
-                    style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 13, fontWeight: 700, outline: 'none' }}
-                    className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    {countriesList.map(country => (
-                      <option key={country.id} value={country.id}>
-                        {country.flag} {getCountryName(country.id)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Bank */}
-                <div>
-                  <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                    {getTxt('selectBank')}
-                  </label>
-                  <select
-                    value={bankId}
-                    onChange={e => setFormState(prev => ({ ...prev, bankId: e.target.value }))}
-                    disabled={currentProviders.length === 0}
-                    style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 13, fontWeight: 700, outline: 'none' }}
-                    className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    {currentProviders.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {language === 'ar' ? (p.nameAr || p.name) : p.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Card Number */}
-                <div>
-                  <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                    {getTxt('cardNumber')}
-                  </label>
-                  <input
-                    type="text" inputMode="numeric"
-                    dir="ltr"
-                    value={cardNumber}
-                    onChange={e => handleCardNumberChange(e.target.value)}
-                    onCompositionEnd={e => handleCardNumberChange(e.currentTarget.value)}
-                    onFocus={() => setIsFlipped(false)}
-                    placeholder="0000 0000 0000 0000"
-                    style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 15, fontWeight: 800, fontFamily: 'monospace', letterSpacing: '0.12em', outline: 'none', boxSizing: 'border-box' }}
-                    className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                  />
-
-                  {/* Auto-detect feedback */}
-                  {detectionStatus === 'detecting' && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 6,
-                      padding: '8px 12px',
-                      borderRadius: 12,
-                      background: 'rgba(59,130,246,0.06)',
-                      border: '1px solid rgba(59,130,246,0.1)',
-                    }} className="animate-pulse">
-                      <div style={{
-                        width: 14, height: 14,
-                        border: '2px solid rgba(59,130,246,0.2)',
-                        borderTopColor: '#3b82f6',
-                        borderRadius: '50%',
-                        animation: 'spin 0.6s linear infinite'
-                      }} />
-                      <span style={{ fontSize: 11, fontWeight: 700 }} className="text-blue-600 dark:text-blue-400">
-                        {getTxt('autoDetecting')}
-                      </span>
-                    </div>
-                  )}
-
-                  {detectionStatus === 'success' && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: 6,
-                      padding: '8px 14px',
-                      borderRadius: 14,
-                      background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(4,120,87,0.05) 100%)',
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(16,185,129,0.2)',
-                      boxShadow: '0 4px 12px rgba(16,185,129,0.05)',
-                    }} className="animate-in fade-in slide-in-from-top-1 duration-300">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400" style={{ fontSize: 16 }}>
-                          verified_user
-                        </span>
-                        <span style={{ fontSize: 11, fontWeight: 800 }} className="text-emerald-700 dark:text-emerald-400">
-                          {getTxt('autoDetected')}
-                        </span>
-                      </div>
-                      {cardNumber.replace(/\D/g, '').length >= 6 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <span style={{ fontSize: 9, fontWeight: 800, opacity: 0.6 }} className="text-slate-500 dark:text-slate-400">
-                            {getTxt('detectedBrand')}
-                          </span>
-                          <span style={{
-                            fontSize: 10,
-                            fontWeight: 900,
-                            padding: '2px 8px',
-                            borderRadius: 8,
-                            background: 'rgba(255,255,255,0.4)',
-                            color: '#047857',
-                          }} className="dark:bg-emerald-950/40 dark:text-emerald-400 shadow-sm border border-emerald-500/10">
-                            {(() => {
-                              const net = getCardNetwork(cardNumber);
-                              return getTxt(net === 'visa' ? 'cardTypeVisa' : net === 'mastercard' ? 'cardTypeMastercard' : net === 'mada' ? 'cardTypeMada' : 'cardChip');
-                            })()}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Card Holder */}
-                <div>
-                  <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                    {getTxt('cardHolder')}
-                  </label>
-                  <input
-                    type="text"
-                    dir="auto"
-                    value={cardHolder}
-                    onChange={e => setFormState(prev => ({ ...prev, cardHolder: sanitizeNameInput(e.target.value).toUpperCase() }))}
-                    onCompositionEnd={e => setFormState(prev => ({ ...prev, cardHolder: sanitizeNameInput(e.currentTarget.value).toUpperCase() }))}
-                    onBlur={e => setFormState(prev => ({ ...prev, cardHolder: sanitizeNameInput(e.target.value).toUpperCase() }))}
-                    onFocus={() => setIsFlipped(false)}
-                    placeholder="EX. MOHAMMED AL-RASHID"
-                    style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 14, fontWeight: 800, textTransform: 'uppercase', outline: 'none', boxSizing: 'border-box' }}
-                    className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                  />
-                </div>
-
-                {/* Expiry + CVV */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                      {getTxt('expiryDate')}
-                    </label>
-                    <input
-                      type="text" inputMode="numeric"
-                      dir="ltr"
-                      value={expiry}
-                      onChange={e => handleExpiryChange(e.target.value)}
-                      onCompositionEnd={e => handleExpiryChange(e.currentTarget.value)}
-                      onFocus={() => setIsFlipped(false)}
-                      placeholder="MM/YY"
-                      style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 15, fontWeight: 800, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box' }}
-                      className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                    />
-                  </div>
-                  <div>
-                    <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 6 }} className="text-slate-400">
-                      {getTxt('cvv')} {editingCard && <span style={{ fontWeight: 600, opacity: 0.6 }}>(اختياري)</span>}
-                    </label>
-                    <input
-                      type="password" inputMode="numeric"
-                      dir="ltr"
-                      value={cvv}
-                      onChange={e => handleCvvChange(e.target.value)}
-                      onCompositionEnd={e => handleCvvChange(e.currentTarget.value)}
-                      onFocus={() => setIsFlipped(true)}
-                      onBlur={() => setIsFlipped(false)}
-                      placeholder="•••"
-                      style={{ width: '100%', padding: '13px 16px', borderRadius: 16, fontSize: 18, fontWeight: 900, letterSpacing: '0.2em', outline: 'none', boxSizing: 'border-box' }}
-                      className="bg-slate-50 dark:bg-[#25282c] border border-black/[0.04] dark:border-white/[0.06] dark:text-white focus:ring-2 focus:ring-blue-500/20"
-                    />
-                  </div>
-                </div>
-
-                {/* Style Picker */}
-                <div>
-                  <label style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', display: 'block', marginBottom: 8 }} className="text-slate-400">
-                    {getTxt('selectStyle')}
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-                    {CARD_STYLES.map(style => (
-                      <button
-                        key={style.id}
-                        type="button"
-                        onClick={() => setFormState(prev => ({ ...prev, styleName: style.id }))}
-                        style={{
-                          padding: '0 8px',
-                          height: 44,
-                          borderRadius: 14,
-                          border: `2px solid ${styleName === style.id ? '#2563eb' : 'transparent'}`,
-                          cursor: 'pointer', transition: 'all 0.2s',
-                          position: 'relative', overflow: 'hidden',
-                          background: style.bg,
-                          boxShadow: styleName === style.id ? `0 4px 16px ${style.glowColor}` : 'none',
-                        }}
-                      >
-                        <span style={{
-                          fontSize: 10, fontWeight: 900, color: 'white',
-                          textShadow: '0 1px 4px rgba(0,0,0,0.6)',
-                          letterSpacing: '0.02em',
-                        }}>
-                          {getTxt(style.nameKey)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <CardFormFields
+                cardNumber={cardNumber}
+                cardHolder={cardHolder}
+                expiry={expiry}
+                cvv={cvv}
+                countryId={countryId}
+                bankId={bankId}
+                onCardNumberChange={handleCardNumberChange}
+                onExpiryChange={handleExpiryChange}
+                onCvvChange={handleCvvChange}
+                onHolderChange={(v) => setFormState(prev => ({ ...prev, cardHolder: v }))}
+                onCountryChange={(v) => setFormState(prev => ({ ...prev, countryId: v }))}
+                onBankChange={(v) => setFormState(prev => ({ ...prev, bankId: v }))}
+                onFocusCvv={setIsFlipped}
+                detectionStatus={detectionStatus}
+                isEditing={!!editingCard}
+                countriesList={countriesList}
+                currentProviders={currentProviders}
+                getCountryName={getCountryName}
+                getTxt={getTxt}
+                language={language}
+              />
+                <CardStylePicker
+                  styleName={styleName}
+                  onSelect={(id) => setFormState(prev => ({ ...prev, styleName: id }))}
+                  getTxt={getTxt}
+                />
               </div>
 
               {/* Action buttons */}
