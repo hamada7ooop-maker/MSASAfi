@@ -1,4 +1,5 @@
 import { useSettingsStore } from './settingsStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { AppSettings, LanguageCode } from '@/types';
 
 export interface AppPreferencesState {
@@ -64,10 +65,15 @@ function getAppPreferencesSlice(store = useSettingsStore.getState()): AppPrefere
 export function useAppPreferencesStore(): AppPreferencesState;
 export function useAppPreferencesStore<T>(selector: (state: AppPreferencesState) => T): T;
 export function useAppPreferencesStore<T>(selector?: (state: AppPreferencesState) => T) {
-  return useSettingsStore((store) => {
+  // useShallow keeps the snapshot referentially stable — without it the
+  // no-selector overload returns a fresh object every render and trips
+  // useSyncExternalStore into an infinite re-render loop.
+  return useSettingsStore(
+    useShallow((store) => {
     const slice = getAppPreferencesSlice(store);
     return selector ? selector(slice) : slice;
-  });
+  })
+  );
 }
 
 useAppPreferencesStore.getState = getAppPreferencesSlice;

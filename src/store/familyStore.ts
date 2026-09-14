@@ -1,4 +1,5 @@
 import { useSettingsStore } from './settingsStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { ChildAccount } from '@/types';
 
 export interface FamilyAccountsState {
@@ -26,10 +27,15 @@ function getFamilySlice(store = useSettingsStore.getState()): FamilyAccountsStat
 export function useFamilyStore(): FamilyAccountsState;
 export function useFamilyStore<T>(selector: (state: FamilyAccountsState) => T): T;
 export function useFamilyStore<T>(selector?: (state: FamilyAccountsState) => T) {
-  return useSettingsStore((store) => {
+  // useShallow keeps the snapshot referentially stable — without it the
+  // no-selector overload returns a fresh object every render and trips
+  // useSyncExternalStore into an infinite re-render loop.
+  return useSettingsStore(
+    useShallow((store) => {
     const slice = getFamilySlice(store);
     return selector ? selector(slice) : slice;
-  });
+  })
+  );
 }
 
 useFamilyStore.getState = getFamilySlice;

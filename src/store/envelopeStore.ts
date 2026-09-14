@@ -1,4 +1,5 @@
 import { useSettingsStore } from './settingsStore';
+import { useShallow } from 'zustand/react/shallow';
 import type { DigitalEnvelope } from '@/types';
 
 export interface EnvelopeState {
@@ -22,10 +23,15 @@ function getEnvelopeSlice(store = useSettingsStore.getState()): EnvelopeState {
 export function useEnvelopeStore(): EnvelopeState;
 export function useEnvelopeStore<T>(selector: (state: EnvelopeState) => T): T;
 export function useEnvelopeStore<T>(selector?: (state: EnvelopeState) => T) {
-  return useSettingsStore((store) => {
+  // useShallow keeps the snapshot referentially stable — without it the
+  // no-selector overload returns a fresh object every render and trips
+  // useSyncExternalStore into an infinite re-render loop.
+  return useSettingsStore(
+    useShallow((store) => {
     const slice = getEnvelopeSlice(store);
     return selector ? selector(slice) : slice;
-  });
+  })
+  );
 }
 
 useEnvelopeStore.getState = getEnvelopeSlice;
