@@ -1,4 +1,4 @@
-export const APP_VERSION = '23.1.18';
+export const APP_VERSION = '23.1.19';
 export const MAX_TRANSACTIONS = 10000;
 export const MAX_IMAGE_SIZE_KB = 500;
 export const PIN_LENGTH = 4;
