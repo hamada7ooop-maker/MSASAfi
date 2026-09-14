@@ -278,11 +278,11 @@ export function DinoGame({ highScore, onClose, onGameOver }: DinoGameProps) {
     >
       {/* Top bar controls */}
       <div className="relative z-10 flex items-center justify-between">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-lg sm:text-xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">

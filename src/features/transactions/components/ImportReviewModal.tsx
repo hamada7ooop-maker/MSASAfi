@@ -68,8 +68,8 @@ export function ImportReviewModal({ transactions, onConfirm, onClose }: ImportRe
     <div className="fixed inset-0 z-[200] flex flex-col bg-slate-50 dark:bg-[#0f1113] animate-in slide-in-from-bottom duration-500">
       {/* Header */}
       <div className="p-6 flex items-center justify-between bg-white dark:bg-[#1c1f23] border-b border-black/5 dark:border-white/5 sticky top-0 z-10">
-        <button onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
-          <span className="material-symbols-outlined">close</span>
+        <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
         <div className="flex flex-col items-center">
           <h2 className="text-sm font-black text-[#002b59] dark:text-blue-100">

@@ -160,12 +160,12 @@ export function ChatScreen() {
         
         <div className="flex items-center gap-2">
           {messages.length > 0 && (
-            <button onClick={clear} className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center active:scale-90 transition-transform">
-              <span className="material-symbols-outlined text-lg">delete</span>
+            <button aria-label={t('action.delete') || 'Delete'} onClick={clear} className="w-8 h-8 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center active:scale-90 transition-transform">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">delete</span>
             </button>
           )}
-          <button onClick={() => setShowSetup(!showSetup)} className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-transform shadow-sm">
-            <span className="material-symbols-outlined text-lg">settings</span>
+          <button aria-label={t('nav.settings') || 'Settings'} onClick={() => setShowSetup(!showSetup)} className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-transform shadow-sm">
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">settings</span>
           </button>
         </div>
       </div>
@@ -216,8 +216,8 @@ export function ChatScreen() {
         {/* Carousel */}
         {!showSetup && hasKeys && (
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            <button onClick={refreshRandomQs} className="flex-shrink-0 w-8 h-8 bg-slate-100 dark:bg-[#25282d] hover:bg-slate-200 text-[#002b59] dark:text-blue-300 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 active:rotate-180 transition-all shadow-sm">
-              <span className="material-symbols-outlined text-[16px]">refresh</span>
+            <button aria-label={t('action.refresh') || 'Refresh'} onClick={refreshRandomQs} className="flex-shrink-0 w-8 h-8 bg-slate-100 dark:bg-[#25282d] hover:bg-slate-200 text-[#002b59] dark:text-blue-300 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 active:rotate-180 transition-all shadow-sm">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">refresh</span>
             </button>
             
             {pinnedQs.map((q) => (
@@ -229,8 +229,8 @@ export function ChatScreen() {
                 >
                   {q}
                 </button>
-                <button onClick={() => handleUnpin(q)} className="px-2 py-1.5 border-l border-[#002b59]/20 dark:border-blue-800/40 active:scale-90 flex items-center justify-center text-red-500 opacity-70 hover:opacity-100 transition-colors">
-                  <span className="material-symbols-outlined text-[14px]">keep_off</span>
+                <button aria-label={t('action.unpin') || 'Unpin'} onClick={() => handleUnpin(q)} className="px-2 py-1.5 border-l border-[#002b59]/20 dark:border-blue-800/40 active:scale-90 flex items-center justify-center text-red-500 opacity-70 hover:opacity-100 transition-colors">
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">keep_off</span>
                 </button>
               </div>
             ))}
@@ -244,25 +244,25 @@ export function ChatScreen() {
                 >
                   {q}
                 </button>
-                <button onClick={() => handlePin(q)} className="px-2 py-1.5 border-l border-slate-200 dark:border-slate-700 active:scale-90 flex items-center justify-center text-slate-400 hover:text-[#002b59] dark:hover:text-blue-400 transition-colors">
-                  <span className="material-symbols-outlined text-[14px]">keep</span>
+                <button aria-label={t('action.pin') || 'Pin'} onClick={() => handlePin(q)} className="px-2 py-1.5 border-l border-slate-200 dark:border-slate-700 active:scale-90 flex items-center justify-center text-slate-400 hover:text-[#002b59] dark:hover:text-blue-400 transition-colors">
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">keep</span>
                 </button>
               </div>
             ))}
 
-            <button onClick={handleAddCustomPin} className="flex-shrink-0 w-8 h-8 bg-white dark:bg-[#1c1f23] text-slate-400 rounded-xl flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-600 active:scale-95 transition-all shadow-sm">
-              <span className="material-symbols-outlined text-[16px]">add</span>
+            <button aria-label={t('action.add') || 'Add'} onClick={handleAddCustomPin} className="flex-shrink-0 w-8 h-8 bg-white dark:bg-[#1c1f23] text-slate-400 rounded-xl flex items-center justify-center border border-dashed border-slate-300 dark:border-slate-600 active:scale-95 transition-all shadow-sm">
+              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">add</span>
             </button>
           </div>
         )}
 
         {/* Input Bar */}
         <div className="flex gap-2 w-full p-1 bg-slate-100 dark:bg-[#25282d] rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner focus-within:ring-2 focus-within:ring-[#002b59]/20 transition-all">
-          <button 
+          <button aria-label={t('action.voiceInput') || 'Voice input'} 
             onClick={handleVoiceAssistant}
             className={`w-10 h-10 flex items-center justify-center rounded-xl shadow-sm active:scale-90 transition-all ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-white dark:bg-[#1c1f23] text-slate-500'}`}
           >
-            <span className="material-symbols-outlined text-[18px]">mic</span>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">mic</span>
           </button>
           
           <input 
@@ -282,12 +282,12 @@ export function ChatScreen() {
             dir="auto"
           />
           
-          <button 
+          <button aria-label={t('action.send') || 'Send'} 
             onClick={handleSend}
             disabled={!input.trim() || isLoading || (!hasKeys && !showSetup)}
             className="w-10 h-10 bg-[#002b59] hover:bg-blue-800 active:bg-blue-900 text-white flex items-center justify-center rounded-xl shadow-md active:scale-90 transition-all disabled:opacity-50 disabled:bg-slate-400"
           >
-            <span className="material-symbols-outlined text-[18px] ml-0.5">send</span>
+            <span className="material-symbols-outlined text-[18px] ml-0.5" aria-hidden="true">send</span>
           </button>
         </div>
       </div>

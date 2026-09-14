@@ -149,14 +149,14 @@ export function TransactionSplitSection({
               />
             </div>
 
-            <button
+            <button aria-label={t('action.delete') || 'Delete'}
               type="button"
               onClick={() => {
                 setSplits(splits.filter((_, i) => i !== idx));
               }}
               className="w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 flex items-center justify-center active:scale-90 transition-all mt-3"
             >
-              <span className="material-symbols-outlined text-sm">delete</span>
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
             </button>
           </div>
         ))}

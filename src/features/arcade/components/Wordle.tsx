@@ -238,7 +238,7 @@ export function Wordle({ highScore, onClose, onGameOver }: WordleProps) {
             className="w-10 h-10 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
             title={isRTL ? 'إغلاق' : 'Close'}
           >
-            <span className="material-symbols-outlined text-xl">close</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
           </button>
           {isPlaying && (
             <button
@@ -250,7 +250,7 @@ export function Wordle({ highScore, onClose, onGameOver }: WordleProps) {
               className="w-10 h-10 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
               title={isRTL ? 'تغيير الصعوبة' : 'Change Difficulty'}
             >
-              <span className="material-symbols-outlined text-xl">tune</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">tune</span>
             </button>
           )}
         </div>
@@ -432,7 +432,7 @@ export function Wordle({ highScore, onClose, onGameOver }: WordleProps) {
               }
 
               return (
-                <button
+                <button aria-label={t('action.backspace') || 'Backspace'}
                   key={cIdx}
                   data-key={char}
                   onClick={(e) => {
@@ -446,7 +446,7 @@ export function Wordle({ highScore, onClose, onGameOver }: WordleProps) {
                   }`}
                 >
                   {char === 'BACKSPACE' ? (
-                    <span className="material-symbols-outlined text-sm">backspace</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">backspace</span>
                   ) : char === 'ENTER' ? (
                     isRTL ? 'تأكيد' : 'ENTER'
                   ) : (

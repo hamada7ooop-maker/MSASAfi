@@ -451,11 +451,11 @@ export function QuickAddModal() {
         {/* Action Buttons */}
         <div className="flex gap-3">
           {editingTransactionId ? (
-            <button 
+            <button aria-label={t('action.delete') || 'Delete'} 
               onClick={handleDelete}
               className="flex-1 py-4 rounded-2xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 font-black flex flex-col items-center justify-center gap-1 active:scale-95 transition-all border border-rose-100 dark:border-rose-900/50"
             >
-              <span className="material-symbols-outlined">delete</span>
+              <span className="material-symbols-outlined" aria-hidden="true">delete</span>
               <span className="text-sm">{t('action.delete') || 'حذف'}</span>
             </button>
           ) : (
@@ -471,11 +471,11 @@ export function QuickAddModal() {
             </button>
           )}
 
-          <button 
+          <button aria-label={t('action.confirm') || 'Confirm'} 
             onClick={handleSave}
             className="flex-[2] py-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black flex flex-col items-center justify-center gap-1 shadow-lg shadow-blue-500/40 active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">check_circle</span>
             <span className="text-sm">{editingTransactionId ? (t('action.save') || 'حفظ') : t('action.save')}</span>
           </button>
         </div>

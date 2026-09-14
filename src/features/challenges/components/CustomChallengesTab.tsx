@@ -97,25 +97,25 @@ export function CustomChallengesTab({
                             {isCompleted ? '👑' : (c.icon || '⭐')}
                           </div>
 
-                          <button onClick={() => onEdit(c)} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-500 flex items-center justify-center hover:bg-blue-500/10 transition-all active:scale-90">
-                            <span className="material-symbols-outlined text-base">edit</span>
+                          <button aria-label={t('action.edit') || 'Edit'} onClick={() => onEdit(c)} className="w-9 h-9 rounded-full bg-surface-container-low dark:bg-slate-800 text-blue-500 flex items-center justify-center hover:bg-blue-500/10 transition-all active:scale-90">
+                            <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
                           </button>
                           
                           {confirmDeleteId === c.id ? (
                             <div className="flex gap-1 animate-in fade-in slide-in-from-right-2 duration-300">
-                              <button onClick={async () => {
+                              <button aria-label={t('action.confirm') || 'Confirm'} onClick={async () => {
                                 await onDelete(c.id);
                                 onRequestDelete(null);
                               }} className="w-9 h-9 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all">
-                                <span className="material-symbols-outlined text-base">check</span>
+                                <span className="material-symbols-outlined text-base" aria-hidden="true">check</span>
                               </button>
-                              <button onClick={() => onRequestDelete(null)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-all">
-                                <span className="material-symbols-outlined text-base">close</span>
+                              <button aria-label={t('action.close') || 'Close'} onClick={() => onRequestDelete(null)} className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-all">
+                                <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
                               </button>
                             </div>
                           ) : (
-                            <button onClick={() => onRequestDelete(c.id)} className="w-9 h-9 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500/20 transition-all active:scale-90">
-                              <span className="material-symbols-outlined text-base">delete</span>
+                            <button aria-label={t('action.delete') || 'Delete'} onClick={() => onRequestDelete(c.id)} className="w-9 h-9 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500/20 transition-all active:scale-90">
+                              <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
                             </button>
                           )}
                         </div>

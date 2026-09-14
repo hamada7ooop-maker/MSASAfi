@@ -3122,6 +3122,22 @@ export const locale_ur = {
   "zakat.hawlComplete": "The hawl is complete; zakat is due now.",
   "zakat.estimate": "Estimate",
   "bill.markUnpaid": "Mark as unpaid",
-  "bill.workHoursToggle": "Toggle work-hours estimate"
+  "bill.workHoursToggle": "Toggle work-hours estimate",
+  "action.refresh": "Refresh",
+  "action.copy": "Copy",
+  "action.info": "More information",
+  "action.hint": "Hint",
+  "action.boost": "Boost",
+  "action.backspace": "Backspace",
+  "action.next": "Next",
+  "action.scrollDown": "Scroll down",
+  "action.send": "Send",
+  "action.swap": "Swap",
+  "action.lock": "Lock",
+  "action.unlock": "Unlock",
+  "action.crop": "Crop",
+  "action.rotate": "Rotate",
+  "action.deleteAll": "Delete all",
+  "action.voiceInput": "Voice input"
 };
 export default locale_ur;

@@ -237,19 +237,19 @@ export function Challenges() {
             {isSelecting ? (
               <div className="flex items-center gap-2 bg-surface-container-low dark:bg-slate-800 p-1 rounded-2xl border border-black/5 dark:border-white/5">
                 <button onClick={selectAll} className="w-9 h-9 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('txn.all')}>
-                  <span className="material-symbols-outlined text-xl">done_all</span>
+                  <span className="material-symbols-outlined text-xl" aria-hidden="true">done_all</span>
                 </button>
                 <button onClick={handleBulkDelete} className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('action.delete')}>
-                  <span className="material-symbols-outlined text-xl">delete</span>
+                  <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
                 </button>
                 <button onClick={clearSelection} className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-all" title={t('action.cancel')}>
-                  <span className="material-symbols-outlined text-xl">close</span>
+                  <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
                 </button>
               </div>
             ) : (
-              <button onClick={() => { setEditingChal(undefined); setShowModal(true); }}
+              <button aria-label={t('action.add') || 'Add'} onClick={() => { setEditingChal(undefined); setShowModal(true); }}
                 className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 active:scale-95 transition-all">
-                <span className="material-symbols-outlined text-xl">add</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
               </button>
             )}
           </div>

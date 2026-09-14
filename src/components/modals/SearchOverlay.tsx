@@ -160,7 +160,7 @@ export function SearchOverlay() {
             aria-label={t('action.close') || 'Close'}
             className="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all shrink-0"
           >
-            <span className="material-symbols-outlined">{isLTR ? 'arrow_back' : 'arrow_forward'}</span>
+            <span className="material-symbols-outlined" aria-hidden="true">{isLTR ? 'arrow_back' : 'arrow_forward'}</span>
           </button>
           <div className="flex-1 bg-slate-100 dark:bg-slate-800/50 rounded-2xl px-4 py-3 flex items-center gap-2 border border-transparent focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
             <span className="material-symbols-outlined text-[#002b59] dark:text-blue-400">search</span>
@@ -180,7 +180,7 @@ export function SearchOverlay() {
                 aria-label={t('action.clear') || 'Clear'}
                 className="w-6 h-6 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 active:scale-90"
               >
-                <span className="material-symbols-outlined text-[14px]">close</span>
+                <span className="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
               </button>
             )}
           </div>

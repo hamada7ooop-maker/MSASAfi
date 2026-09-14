@@ -90,11 +90,11 @@ export function RecycleBinModal({ onClose, onRefreshList }: RecycleBinModalProps
               </p>
             </div>
           </div>
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose} 
             className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -173,14 +173,14 @@ export function RecycleBinModal({ onClose, onRefreshList }: RecycleBinModalProps
                         className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center active:scale-95 transition-all"
                         title={t('common.cancel')}
                       >
-                        <span className="material-symbols-outlined text-sm">close</span>
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                       </button>
                       <button
                         onClick={() => handleHardDelete(tx.id)}
                         className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center active:scale-95 transition-all"
                         title={t('trash.confirmHardDelete') || 'تأكيد الحذف النهائي'}
                       >
-                        <span className="material-symbols-outlined text-sm">check</span>
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">check</span>
                       </button>
                     </div>
                   ) : (
@@ -190,14 +190,14 @@ export function RecycleBinModal({ onClose, onRefreshList }: RecycleBinModalProps
                         className="w-9 h-9 rounded-2xl bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white flex items-center justify-center active:scale-90 transition-all"
                         title={t('trash.restore') || 'استعادة المعاملة'}
                       >
-                        <span className="material-symbols-outlined text-lg">restore</span>
+                        <span className="material-symbols-outlined text-lg" aria-hidden="true">restore</span>
                       </button>
                       <button
                         onClick={() => setDeletingId(tx.id)}
                         className="w-9 h-9 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center active:scale-90 transition-all"
                         title={t('trash.deletePermanently') || 'حذف نهائي'}
                       >
-                        <span className="material-symbols-outlined text-lg">delete_forever</span>
+                        <span className="material-symbols-outlined text-lg" aria-hidden="true">delete_forever</span>
                       </button>
                     </>
                   )}

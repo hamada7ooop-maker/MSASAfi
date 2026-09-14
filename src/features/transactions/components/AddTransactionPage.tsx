@@ -175,8 +175,8 @@ export function AddTransactionPage() {
       {/* Header */}
       <div className="bg-white dark:bg-[#1c1f23] p-6 pt-12 rounded-b-[3rem] shadow-sm mb-6">
         <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-            <span className="material-symbols-outlined">arrow_back</span>
+          <button aria-label={t('action.back') || 'Back'} onClick={() => navigate(-1)} className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
           <h2 className="text-xl font-black text-[#002b59] dark:text-blue-100">
             {editId ? (t('txn.editTitle') || 'Edit Transaction') : (t('txn.addTitle') || 'New Transaction')}
@@ -225,7 +225,7 @@ export function AddTransactionPage() {
                 className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 flex items-center justify-center active:scale-90 transition-all shadow-[0_0_10px_rgba(59,130,246,0.1)] cursor-pointer"
                 title={t('common.calculator') || 'الآلة الحاسبة'}
               >
-                <span className="material-symbols-outlined text-xl">calculate</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">calculate</span>
               </button>
 
               {/* حقل الإدخال المركزي للمبلغ */}
@@ -257,7 +257,7 @@ export function AddTransactionPage() {
                 }`}
                 title={t('txn.scan') || 'Scan Receipt'}
               >
-                <span className="material-symbols-outlined text-xl">
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">
                   {isTurboUnlocked ? 'document_scanner' : 'lock'}
                 </span>
               </button>
@@ -279,7 +279,7 @@ export function AddTransactionPage() {
                 className="w-10 h-10 rounded-full bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 flex items-center justify-center active:scale-90 transition-all cursor-pointer"
                 title={t('voice.inputBtn')}
               >
-                <span className="material-symbols-outlined text-lg">mic</span>
+                <span className="material-symbols-outlined text-lg" aria-hidden="true">mic</span>
               </button>
 
               {/* حقل الإدخال الشفاف */}
@@ -309,7 +309,7 @@ export function AddTransactionPage() {
                 className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 flex items-center justify-center active:scale-90 transition-all cursor-pointer"
                 title={t('txn.pasteSms') || 'Paste SMS'}
               >
-                <span className="material-symbols-outlined text-lg">sms</span>
+                <span className="material-symbols-outlined text-lg" aria-hidden="true">sms</span>
               </button>
 
             </div>
@@ -390,6 +390,7 @@ export function AddTransactionPage() {
               const isActive = selectedAccountId === a.id;
               return (
                 <button
+                  aria-label={`${t('txn.account') || 'Account'}: ${a.name}`}
                   key={a.id}
                   type="button"
                   onClick={() => setSelectedAccountId(a.id)}
@@ -399,7 +400,7 @@ export function AddTransactionPage() {
                       : 'bg-slate-50/50 dark:bg-slate-800/30 border-slate-100 dark:border-slate-800/40 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-lg">
+                  <span className="material-symbols-outlined text-lg" aria-hidden="true">
                     {a.type === 'credit' ? 'credit_card' : a.type === 'savings' ? 'account_balance_wallet' : 'wallet'}
                   </span>
                   <div className="text-right rtl:text-right">
@@ -863,12 +864,12 @@ export function AddTransactionPage() {
                     className="w-full h-40 object-cover rounded-2xl shadow-lg" 
                     alt="Attachment preview" 
                   />
-                  <button 
+                  <button aria-label={t('action.close') || 'Close'} 
                     type="button"
                     onClick={() => setAttachment(undefined)}
                     className="absolute top-2 right-2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-sm">close</span>
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               )}

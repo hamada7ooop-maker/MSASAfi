@@ -296,7 +296,7 @@ export function TravelBudget() {
           className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95"
           title={t('action.add')}
         >
-          <span className="material-symbols-outlined text-xl">add</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
         </button>
       </div>
 
@@ -506,7 +506,7 @@ export function TravelBudget() {
                         className="w-10 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 flex items-center justify-center active:scale-95 transition-all"
                         title={t('action.delete')}
                       >
-                        <span className="material-symbols-outlined text-sm">delete</span>
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                       </button>
                     </div>
 
@@ -557,11 +557,11 @@ export function TravelBudget() {
             <p className="text-sm text-slate-500 max-w-xs mx-auto mb-6">
               {t('travel.noTripsSub') || 'خطط لرحلاتك القادمة وتحكم بنفقات السفر بعملات متعددة بكل سهولة!'}
             </p>
-            <button
+            <button aria-label={t('action.add') || 'Add'}
               onClick={handleAddNew}
               className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 active:scale-95 transition-all inline-flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-base">add</span>
+              <span className="material-symbols-outlined text-base" aria-hidden="true">add</span>
               {t('travel.createTrip') || 'إضافة رحلتك الأولى'}
             </button>
           </div>

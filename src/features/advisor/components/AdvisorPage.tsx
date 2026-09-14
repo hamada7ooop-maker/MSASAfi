@@ -403,10 +403,11 @@ export function AdvisorPage() {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-4">
           <button 
+            aria-label={t('action.back') || 'Back'}
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-2xl bg-surface-container-low flex items-center justify-center text-slate-500 active:scale-90 transition-all no-print"
           >
-            <span className="material-symbols-outlined">{isRTL ? 'arrow_forward' : 'arrow_back'}</span>
+            <span className="material-symbols-outlined" aria-hidden="true">{isRTL ? 'arrow_forward' : 'arrow_back'}</span>
           </button>
           <h2 className="text-3xl text-premium-header text-[var(--color-primary)] dark:text-blue-100">
             {t('ai.advisor.title')}
@@ -420,7 +421,7 @@ export function AdvisorPage() {
             className="no-print w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all"
             title={t('common.print') || 'طباعة'}
           >
-            <span className="material-symbols-outlined text-lg">print</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">print</span>
           </button>
           <button
             id="advisor-pdf-btn"
@@ -430,8 +431,8 @@ export function AdvisorPage() {
             title={t('report.exportPdf') || 'تصدير PDF'}
           >
             {isExporting
-              ? <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-              : <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+              ? <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">progress_activity</span>
+              : <span className="material-symbols-outlined text-lg" aria-hidden="true">picture_as_pdf</span>
             }
           </button>
           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">

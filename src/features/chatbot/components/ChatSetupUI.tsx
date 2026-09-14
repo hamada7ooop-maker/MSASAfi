@@ -121,8 +121,8 @@ export function ChatSetupUI({ onComplete, onCancel, isInitialSetup = false }: Ch
 
         <div className="space-y-4">
           {/* Free AI */}
-          <button onClick={handlePuterSave} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-2xl flex items-center gap-3 active:scale-95 transition-all shadow-md relative overflow-hidden">
-            <span className="material-symbols-outlined relative z-10 text-xl">bolt</span>
+          <button aria-label={t('action.boost') || 'Boost'} onClick={handlePuterSave} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-2xl flex items-center gap-3 active:scale-95 transition-all shadow-md relative overflow-hidden">
+            <span className="material-symbols-outlined relative z-10 text-xl" aria-hidden="true">bolt</span>
             <div className="text-start relative z-10">
               <h4 className="text-xs font-black">{t('chat.setup.freeBtn') || 'Use Free AI'}</h4>
               <p className="text-[9px] text-white/80 font-medium">{t('chat.setup.freeDesc') || 'No key required'}</p>
@@ -184,8 +184,8 @@ export function ChatSetupUI({ onComplete, onCancel, isInitialSetup = false }: Ch
 
           {anyKeySet && (
             <div className="pt-2">
-              <button onClick={handleRemoveAll} className="w-full text-red-500 text-[10px] font-bold py-2 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors flex items-center justify-center gap-1">
-                <span className="material-symbols-outlined text-sm">delete_sweep</span> {t('chat.setup.deleteAll') || 'Remove all API keys'}
+              <button aria-label={t('action.deleteAll') || 'Delete all'} onClick={handleRemoveAll} className="w-full text-red-500 text-[10px] font-bold py-2 bg-red-50 dark:bg-red-900/20 rounded-xl transition-colors flex items-center justify-center gap-1">
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">delete_sweep</span> {t('chat.setup.deleteAll') || 'Remove all API keys'}
               </button>
             </div>
           )}

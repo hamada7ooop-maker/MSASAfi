@@ -88,11 +88,11 @@ export function BulkActionsBar({ onActionComplete }: BulkActionsBarProps) {
             {t('action.cancel')}
           </button>
           
-          <button 
+          <button aria-label={t('action.delete') || 'Delete'} 
             onClick={handleDelete}
             className="px-5 py-2.5 rounded-[1.25rem] bg-rose-500 hover:bg-rose-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95 shadow-xl shadow-rose-500/20 border border-rose-400/20"
           >
-            <span className="material-symbols-outlined text-sm">delete</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
             {t('action.delete')}
           </button>
         </div>

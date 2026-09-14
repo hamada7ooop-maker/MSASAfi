@@ -109,10 +109,10 @@ export function City3DWidget() {
                 <p className="text-xs text-white/90 font-medium">{cityData.textStatus}</p>
               </div>
             </div>
-            <button 
+            <button aria-label="More information" 
               className="w-8 h-8 rounded-full bg-white/10 group-hover:bg-white/20 flex items-center justify-center text-white/70 group-hover:text-white transition-colors pointer-events-auto"
             >
-              <span className="material-symbols-outlined text-sm">info</span>
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
             </button>
           </div>
 

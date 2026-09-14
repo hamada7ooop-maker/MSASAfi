@@ -510,7 +510,7 @@ export function AdvancedAnalytics() {
               className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border border-black/5 dark:border-white/5 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
               title={t('analytics.print') || 'طباعة التحليل 🖨️'}
             >
-              <span className="material-symbols-outlined text-lg">print</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">print</span>
             </button>
             <button
               id="analytics-pdf-btn"
@@ -518,7 +518,7 @@ export function AdvancedAnalytics() {
               className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border border-black/5 dark:border-white/5 flex items-center justify-center transition-all hover:scale-105 active:scale-95"
               title={t('analytics.exportPdf') || 'تصدير PDF 📄'}
             >
-              <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">picture_as_pdf</span>
             </button>
           </div>
         </div>

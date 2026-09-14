@@ -331,7 +331,7 @@ export function InstallmentsCard({ installments, accounts, onPay, onEdit, onDele
                       aria-label={t('action.edit') || 'تعديل'}
                       title={t('action.edit') || 'تعديل'}
                     >
-                      <span className="material-symbols-outlined text-xs">edit</span>
+                      <span className="material-symbols-outlined text-xs" aria-hidden="true">edit</span>
                     </button>
                     <button 
                       onClick={() => onDelete(inst.id)}
@@ -339,7 +339,7 @@ export function InstallmentsCard({ installments, accounts, onPay, onEdit, onDele
                       aria-label={t('action.delete') || 'حذف'}
                       title={t('action.delete') || 'حذف'}
                     >
-                      <span className="material-symbols-outlined text-xs">delete</span>
+                      <span className="material-symbols-outlined text-xs" aria-hidden="true">delete</span>
                     </button>
                   </div>
 

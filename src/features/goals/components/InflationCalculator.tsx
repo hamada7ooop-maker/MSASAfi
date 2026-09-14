@@ -159,11 +159,11 @@ export function InflationCalculator({ isOpen, onClose }: InflationCalculatorProp
               {t('goal.inflation.subtitle') || 'قياس القيمة الشرائية المستقبلية لأهدافك'}
             </p>
           </div>
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-300 hover:scale-105 active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined text-base">close</span>
+            <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
           </button>
         </div>
 

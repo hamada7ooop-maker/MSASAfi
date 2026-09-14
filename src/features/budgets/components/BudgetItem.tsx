@@ -71,14 +71,14 @@ export function BudgetItem({ budget, spent, rollover = 0, limit, onEdit, onDelet
             onClick={() => onEdit(budget)}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-700 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-600 transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
           </button>
           <button 
             aria-label="Delete budget"
             onClick={() => onDelete(budget.id)}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-700 text-slate-400 hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-900/30 transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>
           </button>
         </div>
       </div>

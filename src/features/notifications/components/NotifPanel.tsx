@@ -175,7 +175,7 @@ export function NotifPanel() {
                 className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface-container hover:bg-surface-container-high text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all active:scale-90"
                 aria-label="إغلاق"
               >
-                <span className="material-symbols-outlined text-lg">close</span>
+                <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
               </button>
             </div>
           </div>
@@ -217,11 +217,11 @@ export function NotifPanel() {
               <p className="text-xs font-bold text-slate-600 dark:text-slate-300 mb-2">
                 {t('common.error') || 'حدث خطأ أثناء تحميل الإشعارات'}
               </p>
-              <button
+              <button aria-label={t('action.refresh') || 'Refresh'}
                 onClick={loadNotifications}
                 className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-xs">refresh</span>
+                <span className="material-symbols-outlined text-xs" aria-hidden="true">refresh</span>
                 {t('common.retry') || 'إعادة المحاولة'}
               </button>
             </div>
@@ -259,7 +259,7 @@ export function NotifPanel() {
                         className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container hover:bg-surface-container-high text-slate-400 hover:text-amber-500 transition-all active:scale-90"
                         title={t('notif.snooze') || 'غفوة'}
                       >
-                        <span className="material-symbols-outlined text-sm">snooze</span>
+                        <span className="material-symbols-outlined text-sm" aria-hidden="true">snooze</span>
                       </button>
                     )}
                     <button
@@ -267,7 +267,7 @@ export function NotifPanel() {
                       className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-container hover:bg-surface-container-high text-slate-400 hover:text-rose-500 transition-all active:scale-90"
                       title={t('notif.dismiss') || 'تجاهل'}
                     >
-                      <span className="material-symbols-outlined text-sm">close</span>
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                     </button>
                   </div>
                 </div>

@@ -90,7 +90,7 @@ export function FinancialScoreCard({ scoreOverride, className = '' }: FinancialS
               className="w-8 h-8 rounded-full bg-slate-50/50 dark:bg-[#25282d]/50 group-hover:bg-slate-100 dark:group-hover:bg-[#25282d] flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors pointer-events-auto shrink-0 border border-black/5 dark:border-white/5"
               title="معلومات المؤشر"
             >
-              <span className="material-symbols-outlined text-sm">info</span>
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
             </button>
           </div>
 

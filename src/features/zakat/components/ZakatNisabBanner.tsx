@@ -116,11 +116,11 @@ export function ZakatNisabBanner({
               </p>
             )}
             {isAboveNisab && (
-               <button 
+               <button aria-label={t('action.save') || 'Save'} 
                 onClick={onSave}
                 className="mt-6 z-10 px-6 py-2.5 rounded-full bg-emerald-500 text-white font-black text-xs shadow-lg active:scale-95 transition-all flex items-center gap-2"
                >
-                 <span className="material-symbols-outlined text-sm">save</span>
+                 <span className="material-symbols-outlined text-sm" aria-hidden="true">save</span>
                  {t('zakat.save')}
                </button>
             )}
@@ -184,8 +184,8 @@ export function ZakatNisabBanner({
                   />
                   <small className="text-[10px] font-bold text-amber-600 dark:text-amber-400">{baseCurrency}</small>
                 </div>
-                 <button onClick={() => onSyncPrices()} disabled={isSyncing} className="w-8 h-8 rounded-full bg-white dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm active:rotate-180 transition-all duration-500 shrink-0 disabled:opacity-50">
-                  <span className={`material-symbols-outlined text-sm ${isSyncing ? 'animate-spin' : ''}`}>sync</span>
+                 <button aria-label={t('action.refresh') || 'Refresh'} onClick={() => onSyncPrices()} disabled={isSyncing} className="w-8 h-8 rounded-full bg-white dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shadow-sm active:rotate-180 transition-all duration-500 shrink-0 disabled:opacity-50">
+                  <span className={`material-symbols-outlined text-sm ${isSyncing ? 'animate-spin' : ''}`} aria-hidden="true">sync</span>
                 </button>
               </div>
             </div>
@@ -210,6 +210,7 @@ export function ZakatNisabBanner({
                   <small className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{baseCurrency}</small>
                 </div>
                  <button onClick={() => isPro ? onSyncPrices() : toast(t('shop.perk.zakatPro') + ' Required', 'error')} disabled={isSyncing} className={`w-8 h-8 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-600 shadow-sm ${!isPro ? 'opacity-30' : 'active:rotate-180 transition-all duration-500'} shrink-0 disabled:opacity-50`}>
+                   aria-label={t('action.info') || 'More information'}
                   <span className={`material-symbols-outlined text-sm ${isSyncing ? 'animate-spin' : ''}`}>{isPro ? 'sync' : 'lock'}</span>
                 </button>
               </div>

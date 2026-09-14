@@ -117,13 +117,14 @@ export function FloatingActionButton() {
            style={{ pointerEvents: isOpen ? 'auto' : 'none' }}>
         {actions.map((action, idx) => (
           <button
+            aria-label={action.label}
             key={action.id}
             onClick={() => handleAction(action.id)}
             type="button"
             className={`group relative flex items-center justify-center w-12 h-12 rounded-2xl shadow-lg text-white transition-all hover:scale-110 active:scale-95 ${action.color} backdrop-blur-md border border-white/20`}
             style={{ transitionDelay: `${idx * 50}ms`, pointerEvents: 'auto' }}
           >
-            <span className="material-symbols-outlined text-2xl !text-white">{action.icon}</span>
+            <span className="material-symbols-outlined text-2xl !text-white" aria-hidden="true">{action.icon}</span>
             <span className={`absolute ${isRTL ? 'right-14' : 'left-14'} px-3 py-1.5 bg-slate-800 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none border border-white/10`}>
               {action.label}
             </span>
@@ -139,10 +140,12 @@ export function FloatingActionButton() {
         onPointerUp={handlePointerUp}
         className={`relative flex items-center justify-center w-16 h-16 rounded-[22px] shadow-2xl transition-all duration-500 hover:scale-105 active:scale-90 ${isOpen ? 'bg-slate-800 rotate-45' : 'bg-[var(--color-primary)]'} text-white border-2 border-white/20 overflow-hidden group`}
         style={{ pointerEvents: 'auto', touchAction: 'none' }}
+        aria-label={isOpen ? (t('action.close') || 'Close') : (t('action.add') || 'Add')}
+        aria-expanded={isOpen}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
         
-        <span className={`material-symbols-outlined text-4xl transition-transform duration-500 pointer-events-none !text-white ${isOpen ? 'rotate-90' : 'rotate-0'}`}>
+        <span className={`material-symbols-outlined text-4xl transition-transform duration-500 pointer-events-none !text-white ${isOpen ? 'rotate-90' : 'rotate-0'}`} aria-hidden="true">
           {isOpen ? 'close' : 'add'}
         </span>
 

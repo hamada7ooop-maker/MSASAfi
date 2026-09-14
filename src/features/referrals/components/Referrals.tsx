@@ -67,19 +67,19 @@ export function Referrals() {
           
           <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] p-6 mb-8 flex items-center justify-between">
             <span className="text-3xl font-black text-white tracking-widest font-mono">{referralCode}</span>
-            <button 
+            <button aria-label={t('action.copy') || 'Copy'} 
               onClick={handleCopy}
               className="w-12 h-12 bg-white text-[#002b59] rounded-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-xl"
             >
-              <span className="material-symbols-outlined text-xl">content_copy</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">content_copy</span>
             </button>
           </div>
           
-          <button 
+          <button aria-label={t('action.share') || 'Share'} 
             onClick={handleShare}
             className="w-full bg-amber-400 hover:bg-amber-300 text-[#002b59] py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-400/30 transition-all active:scale-95"
           >
-            <span className="material-symbols-outlined">share</span>
+            <span className="material-symbols-outlined" aria-hidden="true">share</span>
             {t('settings.referralShareBtn')}
           </button>
         </div>

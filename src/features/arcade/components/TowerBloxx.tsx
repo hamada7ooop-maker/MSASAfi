@@ -283,11 +283,11 @@ export function TowerBloxx({ highScore, onClose, onGameOver }: TowerBloxxProps) 
     >
       {/* Top Controls */}
       <div className="relative z-10 flex items-center justify-between">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-xl font-black tracking-tighter text-indigo-500 dark:text-indigo-400">
@@ -391,12 +391,12 @@ export function TowerBloxx({ highScore, onClose, onGameOver }: TowerBloxxProps) 
 
       {/* On-Screen Touch Action Button & Instruction */}
       <div className="flex flex-col items-center gap-2 relative z-10 my-2">
-        <button
+        <button aria-label={t('action.scrollDown') || 'Scroll down'}
           onClick={(e) => { e.stopPropagation(); dropBlock(); }}
           disabled={!isPlaying || gameOver}
           className="w-full max-w-[280px] py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-black text-sm uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-lg">arrow_downward</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_downward</span>
           <span>{isRTL ? 'اسقط الكتلة الآن' : 'Drop Block Now'}</span>
         </button>
         <span className="text-[10px] font-bold text-slate-400 dark:text-white/40">

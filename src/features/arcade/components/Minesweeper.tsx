@@ -19,7 +19,7 @@ interface Cell {
 }
 
 export function Minesweeper({ highScore: _highScore, onClose, onGameOver }: MinesweeperProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [rows] = useState(8);
   const [cols] = useState(8);
   const [mineCount] = useState(10);
@@ -192,11 +192,11 @@ export function Minesweeper({ highScore: _highScore, onClose, onGameOver }: Mine
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300">
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -225,7 +225,7 @@ export function Minesweeper({ highScore: _highScore, onClose, onGameOver }: Mine
         </div>
 
         {/* Flag Mode Toggler */}
-        <button
+        <button aria-label={t('action.flag') || 'Flag'}
           onClick={() => setFlagMode(!flagMode)}
           className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all active:scale-95 ${
             flagMode
@@ -233,7 +233,7 @@ export function Minesweeper({ highScore: _highScore, onClose, onGameOver }: Mine
               : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10'
           }`}
         >
-          <span className="material-symbols-outlined text-lg">flag</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">flag</span>
           <span className="text-xs font-black">{isRTL ? 'وضع العلم' : 'Flag Mode'}</span>
         </button>
       </div>
@@ -315,11 +315,11 @@ export function Minesweeper({ highScore: _highScore, onClose, onGameOver }: Mine
           </div>
         )}
 
-        <button
+        <button aria-label={t('action.refresh') || 'Refresh'}
           onClick={initializeBoard}
           className="py-3.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white rounded-2xl text-sm font-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-lg">refresh</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">refresh</span>
           <span>{isRTL ? 'إعادة تشغيل اللعبة' : 'Restart Game'}</span>
         </button>
       </div>

@@ -54,8 +54,8 @@ function InvestmentModal({
             <span className="material-symbols-outlined text-blue-500">account_balance_wallet</span>
             {investment?.id ? t('investment.edit') : t('investment.add')}
           </h3>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
-             <span className="material-symbols-outlined text-sm">close</span>
+          <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+             <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -208,11 +208,11 @@ function InvestmentModal({
           {investment?.id && onDelete && (
             <div className="flex gap-2 items-center flex-1">
               {!confirmDelete ? (
-                <button 
+                <button aria-label={t('action.delete') || 'Delete'} 
                   onClick={() => setConfirmDelete(true)}
                   className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0 hover:bg-rose-500 hover:text-white transition-all"
                 >
-                  <span className="material-symbols-outlined">delete</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                 </button>
               ) : (
                 <div className="flex-1 flex gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
@@ -222,8 +222,8 @@ function InvestmentModal({
                   }} className="flex-1 py-4 rounded-2xl bg-rose-500 text-white font-black text-[10px] uppercase">
                     {t('action.confirm') || 'Confirm Delete'}
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="px-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
-                    <span className="material-symbols-outlined text-sm">close</span>
+                  <button aria-label={t('action.close') || 'Close'} onClick={() => setConfirmDelete(false)} className="px-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
                   </button>
                 </div>
               )}
@@ -333,15 +333,16 @@ export function Investments() {
         <div className="flex items-center gap-2">
           {investments.length > 0 && (
             <button 
+              aria-label={t('action.close') || 'Close'}
               onClick={() => { setIsSelectionMode(!isSelectionMode); setSelectedIds([]); }}
               className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isSelectionMode ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
             >
-              <span className="material-symbols-outlined">{isSelectionMode ? 'close' : 'checklist'}</span>
+              <span className="material-symbols-outlined" aria-hidden="true">{isSelectionMode ? 'close' : 'checklist'}</span>
             </button>
           )}
-          <button onClick={openAdd}
+          <button aria-label={t('action.add') || 'Add'} onClick={openAdd}
             className="w-12 h-12 rounded-[1.25rem] bg-[#002b59] text-white flex items-center justify-center shadow-xl shadow-blue-900/20 active:scale-90 transition-transform">
-            <span className="material-symbols-outlined text-2xl">add</span>
+            <span className="material-symbols-outlined text-2xl" aria-hidden="true">add</span>
           </button>
         </div>
       </div>
@@ -449,11 +450,11 @@ export function Investments() {
                 {/* Desktop/Tablet Hover Actions */}
                 {!isSelectionMode && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center gap-2 bg-white/80 dark:bg-[#1e2124]/80 backdrop-blur-sm p-2 rounded-xl">
-                    <button onClick={(e) => { e.stopPropagation(); openEdit(inv); }} className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    <button aria-label={t('action.edit') || 'Edit'} onClick={(e) => { e.stopPropagation(); openEdit(inv); }} className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-500 flex items-center justify-center hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-[18px]" aria-hidden="true">edit</span>
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); deleteInvestment(inv.id); }} className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-500 flex items-center justify-center hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <button aria-label={t('action.delete') || 'Delete'} onClick={(e) => { e.stopPropagation(); deleteInvestment(inv.id); }} className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-500 flex items-center justify-center hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
                     </button>
                   </div>
                 )}
@@ -474,11 +475,11 @@ export function Investments() {
           </div>
           <div className="flex items-center gap-2">
              <button onClick={() => setSelectedIds([])} className="px-4 py-2 text-xs font-bold uppercase hover:opacity-70 transition-opacity">{t('action.cancel')}</button>
-             <button 
+             <button aria-label={t('action.delete') || 'Delete'} 
                onClick={handleBulkDelete}
                className="bg-rose-500 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 hover:bg-rose-600 transition-colors shadow-lg shadow-rose-500/20"
              >
-               <span className="material-symbols-outlined text-sm">delete</span>
+               <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                {t('action.delete')}
              </button>
           </div>

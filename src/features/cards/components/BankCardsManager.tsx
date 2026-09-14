@@ -118,6 +118,7 @@ export function BankCardsManager() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
+              aria-label={getTxt('back') || 'Back'}
               onClick={() => navigate('/settings')}
               style={{
                 width: 40, height: 40, borderRadius: 14,
@@ -128,7 +129,7 @@ export function BankCardsManager() {
               }}
               className="dark:bg-white/5 dark:border-white/8 text-slate-700 dark:text-slate-300"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }} aria-hidden="true">
                 {isRTL ? 'arrow_forward' : 'arrow_back'}
               </span>
             </button>
@@ -156,7 +157,7 @@ export function BankCardsManager() {
             }}
             title={getTxt('addCard')}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 22 }}>add</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 22 }} aria-hidden="true">add</span>
           </button>
         </div>
 
@@ -417,6 +418,7 @@ export function BankCardsManager() {
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {/* Reveal toggle */}
                     <button
+                      aria-label={getTxt('back') || 'Back'}
                       onClick={() => toggleReveal(card.id)}
                       style={{
                         flex: 1, minWidth: 100,
@@ -428,14 +430,14 @@ export function BankCardsManager() {
                       }}
                       className={isRevealed ? 'dark:bg-amber-900/20 dark:text-amber-400' : 'dark:bg-blue-900/20 dark:text-blue-400'}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }} aria-hidden="true">
                         {isRevealed ? 'visibility_off' : 'visibility'}
                       </span>
                       {isRevealed ? getTxt('hideDetails') : getTxt('revealDetails')}
                     </button>
 
                     {/* Edit */}
-                    <button
+                    <button aria-label="Edit"
                       onClick={() => openEditModal(card)}
                       style={{
                         flex: 1, minWidth: 100,
@@ -447,7 +449,7 @@ export function BankCardsManager() {
                       }}
                       className="dark:bg-emerald-900/20 dark:text-emerald-400"
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }} aria-hidden="true">edit</span>
                       {getTxt('editCard')}
                     </button>
 
@@ -463,7 +465,7 @@ export function BankCardsManager() {
                       className="dark:bg-rose-900/20 dark:text-rose-400"
                       title={getTxt('deleteTitle')}
                     >
-                      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: 18 }} aria-hidden="true">delete</span>
                     </button>
                   </div>
                 </div>

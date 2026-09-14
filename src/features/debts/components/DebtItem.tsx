@@ -148,7 +148,7 @@ export function DebtItem({
                  aria-label={t('action.edit') || 'تعديل'}
                  title={t('action.edit') || 'تعديل'}
                >
-                 <span className="material-symbols-outlined text-sm sm:text-base">edit</span>
+                 <span className="material-symbols-outlined text-sm sm:text-base" aria-hidden="true">edit</span>
                </button>
                <button 
                  onClick={() => onDelete(debt.id)} 
@@ -156,7 +156,7 @@ export function DebtItem({
                  aria-label={t('action.delete') || 'حذف'}
                  title={t('action.delete') || 'حذف'}
                >
-                 <span className="material-symbols-outlined text-sm sm:text-base">close</span>
+                 <span className="material-symbols-outlined text-sm sm:text-base" aria-hidden="true">close</span>
                </button>
             </div>
           </div>
@@ -214,23 +214,23 @@ export function DebtItem({
                 className={`w-full h-11 sm:h-12 bg-surface-container-low dark:bg-slate-900 rounded-2xl border-none outline-none focus:ring-2 focus:ring-blue-500/20 text-xs sm:text-sm font-black dark:text-white transition-all ${isLTR ? 'pl-4 pr-9 sm:pl-5 sm:pr-10' : 'pr-4 pl-9 sm:pr-5 sm:pl-10'}`} 
                 placeholder={t('debt.payAmount')}
               />
-              <button 
+              <button aria-label={t('action.add') || 'Add'} 
                 type="button" 
                 tabIndex={-1}
                 className={`absolute ${isLTR ? 'right-2.5 sm:right-3' : 'left-2.5 sm:left-3'} top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-blue-600 transition-colors shrink-0`}
               >
-                <span className="material-symbols-outlined text-[18px] sm:text-[20px]">add_circle</span>
+                <span className="material-symbols-outlined text-[18px] sm:text-[20px]" aria-hidden="true">add_circle</span>
               </button>
             </div>
             
-            <button 
+            <button aria-label={t('action.refresh') || 'Refresh'} 
               onClick={handlePay}
               disabled={isPaying || !payAmount}
               className={`text-white px-4 sm:px-6 rounded-2xl text-[10px] font-black uppercase tracking-wider shadow-lg active:scale-95 transition-all shrink-0 whitespace-nowrap flex items-center justify-center ${
                 isOwed ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/30' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/30'
               } disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:shadow-none`}
             >
-              {isPaying ? <span className="material-symbols-outlined text-sm animate-spin">refresh</span> : t('debt.pay')}
+              {isPaying ? <span className="material-symbols-outlined text-sm animate-spin" aria-hidden="true">refresh</span> : t('debt.pay')}
             </button>
           </div>
         )}

@@ -389,13 +389,13 @@ export function GeneralSettingsCard({ settings, updateSetting }: GeneralSettings
                 </button>
               </div>
             </div>
-            <button
+            <button aria-label={t('action.calculator') || 'Calculator'}
               onClick={() => setShowCalc(!showCalc)}
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90 shrink-0 ${
                 showCalc ? 'bg-blue-600 text-white shadow-md' : 'bg-black/[0.03] dark:bg-white/[0.03] text-slate-400 border border-black/[0.01] dark:border-white/[0.01]'
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">calculate</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">calculate</span>
             </button>
           </div>
 

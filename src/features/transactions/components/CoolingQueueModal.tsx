@@ -114,11 +114,11 @@ export function CoolingQueueModal({ onClose, onRefreshList }: CoolingQueueModalP
               </p>
             </div>
           </div>
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-slate-400 hover:text-slate-600"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
           </button>
         </div>
 

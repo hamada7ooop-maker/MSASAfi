@@ -82,11 +82,11 @@ export function GoldSmartCalcModal({
                 {t('zakat.gold.calcType')}
               </h3>
             </div>
-            <button 
+            <button aria-label={t('action.close') || 'Close'} 
               onClick={() => onCancel()}
               className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white"
             >
-              <span className="material-symbols-outlined text-lg">close</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
             </button>
           </div>
 
@@ -179,11 +179,11 @@ export function GoldSmartCalcModal({
                     <h4 className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                       {t('zakat.gold.itemsList')}
                     </h4>
-                    <button
+                    <button aria-label={t('action.add') || 'Add'}
                       onClick={onAddItem}
                       className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-1"
                     >
-                      <span className="material-symbols-outlined text-sm">add</span>
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">add</span>
                       {t('zakat.gold.addItem')}
                     </button>
                   </div>
@@ -203,11 +203,11 @@ export function GoldSmartCalcModal({
                           className="bg-white dark:bg-[#121214] border border-slate-200/50 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-black text-slate-800 dark:text-white flex-1 focus:outline-none focus:ring-1 focus:ring-amber-500"
                         />
                         {items.length > 1 && (
-                          <button
+                          <button aria-label={t('action.delete') || 'Delete'}
                             onClick={() => onDeleteItem(item.id)}
                             className="w-8 h-8 rounded-full bg-red-50 dark:bg-red-950/20 text-red-500 hover:bg-red-100 flex items-center justify-center shrink-0"
                           >
-                            <span className="material-symbols-outlined text-sm">delete</span>
+                            <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                           </button>
                         )}
                       </div>

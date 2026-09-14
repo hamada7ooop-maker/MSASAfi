@@ -273,9 +273,9 @@ export function LightRiders({ highScore, onClose, onGameOver }: LightRidersProps
 
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button onClick={onClose}
+        <button aria-label={t('action.close') || 'Close'} onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90">
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
 
         <h2 className="text-xl font-black tracking-tighter text-blue-500 dark:text-blue-400">
@@ -354,26 +354,26 @@ export function LightRiders({ highScore, onClose, onGameOver }: LightRidersProps
 
       {/* D-Pad */}
       <div className="grid grid-cols-3 gap-2 max-w-[170px] mx-auto select-none relative z-10 my-2">
-        <div /><button onClick={(e) => { e.stopPropagation(); handleDpad('up'); }}
+        <div /><button aria-label={t('action.moveUp') || 'Move up'} onClick={(e) => { e.stopPropagation(); handleDpad('up'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-blue-400 shadow-sm active:scale-90 flex items-center justify-center transition-all">
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_up</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_up</span>
         </button><div />
 
-        <button onClick={(e) => { e.stopPropagation(); handleDpad('left'); }}
+        <button aria-label={t('action.moveLeft') || 'Move left'} onClick={(e) => { e.stopPropagation(); handleDpad('left'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-blue-400 shadow-sm active:scale-90 flex items-center justify-center transition-all">
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_left</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_left</span>
         </button>
         <div className="w-12 h-12 flex items-center justify-center">
           <div className="w-2.5 h-2.5 rounded-full bg-blue-500/30" />
         </div>
-        <button onClick={(e) => { e.stopPropagation(); handleDpad('right'); }}
+        <button aria-label={t('action.moveRight') || 'Move right'} onClick={(e) => { e.stopPropagation(); handleDpad('right'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-blue-400 shadow-sm active:scale-90 flex items-center justify-center transition-all">
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_right</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_right</span>
         </button>
 
-        <div /><button onClick={(e) => { e.stopPropagation(); handleDpad('down'); }}
+        <div /><button aria-label={t('action.moveDown') || 'Move down'} onClick={(e) => { e.stopPropagation(); handleDpad('down'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-blue-400 shadow-sm active:scale-90 flex items-center justify-center transition-all">
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_down</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_down</span>
         </button><div />
       </div>
 

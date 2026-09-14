@@ -47,11 +47,11 @@ export function InfoModal({
         onClick={e => e.stopPropagation()}
       >
         <div className="absolute top-0 right-0 p-4">
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose} 
             className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
           >
-            <span className="material-symbols-outlined text-sm text-slate-400">close</span>
+            <span className="material-symbols-outlined text-sm text-slate-400" aria-hidden="true">close</span>
           </button>
         </div>
         

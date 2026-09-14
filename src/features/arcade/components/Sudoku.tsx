@@ -13,7 +13,7 @@ type Board = number[][];
 type Notes = Set<number>[][];
 
 export function Sudoku({ highScore: _highScore, onClose, onGameOver }: SudokuProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [initialBoard, setInitialBoard] = useState<Board>(Array(9).fill(null).map(() => Array(9).fill(0)));
   const [board, setBoard] = useState<Board>(Array(9).fill(null).map(() => Array(9).fill(0)));
   const [solution, setSolution] = useState<Board>(Array(9).fill(null).map(() => Array(9).fill(0)));
@@ -246,11 +246,11 @@ export function Sudoku({ highScore: _highScore, onClose, onGameOver }: SudokuPro
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white">
       {/* Header */}
       <div className="w-full max-w-md mx-auto flex items-center justify-between mb-1">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center transition-all hover:bg-slate-100 dark:hover:bg-white/20 active:scale-95 text-slate-700 dark:text-white shadow-sm"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -370,14 +370,14 @@ export function Sudoku({ highScore: _highScore, onClose, onGameOver }: SudokuPro
 
       {/* Action Controls */}
       <div className="w-full max-w-md mx-auto flex justify-around gap-2 my-1">
-        <button
+        <button aria-label={t('action.hint') || 'Hint'}
           onClick={handleHint}
           className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all flex-1 shadow-sm"
         >
-          <span className="material-symbols-outlined text-amber-500 drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]">lightbulb</span>
+          <span className="material-symbols-outlined text-amber-500 drop-shadow-[0_0_4px_rgba(245,158,11,0.5)]" aria-hidden="true">lightbulb</span>
           <span className="text-[10px] font-black text-slate-600 dark:text-slate-400">{isRTL ? 'تلميح' : 'Hint'}</span>
         </button>
-        <button
+        <button aria-label={t('action.notes') || 'Notes'}
           onClick={() => setIsNoteMode(!isNoteMode)}
           className={`flex flex-col items-center gap-1 p-2 rounded-2xl border active:scale-90 transition-all flex-1 shadow-sm ${
             isNoteMode 
@@ -385,14 +385,14 @@ export function Sudoku({ highScore: _highScore, onClose, onGameOver }: SudokuPro
               : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
           }`}
         >
-          <span className="material-symbols-outlined">edit_note</span>
+          <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>
           <span className="text-[10px] font-black">{isRTL ? 'الملاحظات' : 'Notes'}</span>
         </button>
-        <button
+        <button aria-label={t('action.backspace') || 'Backspace'}
           onClick={handleClearCell}
           className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 active:scale-90 transition-all flex-1 shadow-sm"
         >
-          <span className="material-symbols-outlined text-rose-500">backspace</span>
+          <span className="material-symbols-outlined text-rose-500" aria-hidden="true">backspace</span>
           <span className="text-[10px] font-black text-slate-600 dark:text-slate-400">{isRTL ? 'مسح' : 'Clear'}</span>
         </button>
       </div>
@@ -412,11 +412,11 @@ export function Sudoku({ highScore: _highScore, onClose, onGameOver }: SudokuPro
 
       {/* Control Actions */}
       <div className="w-full max-w-md mx-auto flex gap-3 mt-2">
-        <button
+        <button aria-label={t('action.refresh') || 'Refresh'}
           onClick={() => generateNewPuzzle(difficulty)}
           className="flex-1 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-2xl text-xs font-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-base">refresh</span>
+          <span className="material-symbols-outlined text-base" aria-hidden="true">refresh</span>
           <span>{isRTL ? 'لعبة جديدة' : 'New Board'}</span>
         </button>
       </div>

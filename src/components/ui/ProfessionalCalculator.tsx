@@ -115,11 +115,11 @@ export function ProfessionalCalculator({ onClose, initialValue = '0' }: Professi
         <div className="flex items-center justify-between px-2 mb-4 shrink-0">
           <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">{t('misc.calculator')}</span>
           <div className="flex gap-2">
-            <button onClick={handleCopy} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform">
-              <span className="material-symbols-outlined text-lg">content_copy</span>
+            <button aria-label={t('action.copy') || 'Copy'} onClick={handleCopy} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">content_copy</span>
             </button>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform">
-              <span className="material-symbols-outlined text-lg">close</span>
+            <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
             </button>
           </div>
         </div>
@@ -143,6 +143,7 @@ export function ProfessionalCalculator({ onClose, initialValue = '0' }: Professi
         <div className="grid grid-cols-4 gap-3 shrink-0">
           {buttons.map((btn, i) => (
             <button
+              aria-label={btn.label}
               key={i}
               onClick={() => handleInput(btn.label)}
               className={`
@@ -153,7 +154,7 @@ export function ProfessionalCalculator({ onClose, initialValue = '0' }: Professi
               `}
             >
               {btn.icon ? (
-                <span className="material-symbols-outlined text-2xl">{btn.icon}</span>
+                <span className="material-symbols-outlined text-2xl" aria-hidden="true">{btn.icon}</span>
               ) : btn.label}
             </button>
           ))}

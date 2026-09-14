@@ -210,21 +210,21 @@ export function Debts() {
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('txn.all')}
               >
-                <span className="material-symbols-outlined text-lg sm:text-xl">done_all</span>
+                <span className="material-symbols-outlined text-lg sm:text-xl" aria-hidden="true">done_all</span>
               </button>
               <button 
                 onClick={handleBulkDelete}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('action.delete')}
               >
-                <span className="material-symbols-outlined text-lg sm:text-xl">delete</span>
+                <span className="material-symbols-outlined text-lg sm:text-xl" aria-hidden="true">delete</span>
               </button>
               <button 
                 onClick={clearSelection}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('action.cancel')}
               >
-                <span className="material-symbols-outlined text-lg sm:text-xl">close</span>
+                <span className="material-symbols-outlined text-lg sm:text-xl" aria-hidden="true">close</span>
               </button>
             </div>
           ) : (
@@ -233,7 +233,7 @@ export function Debts() {
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#002b59] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
               title={t('action.add')}
             >
-              <span className="material-symbols-outlined text-xl">add</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
             </button>
           )}
         </div>

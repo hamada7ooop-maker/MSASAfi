@@ -300,11 +300,11 @@ export function FlappyBird({ highScore, onClose, onGameOver }: FlappyBirdProps) 
       
       {/* Top Controls */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-xl font-black tracking-tighter text-cyan-500 dark:text-cyan-400">
@@ -408,11 +408,11 @@ export function FlappyBird({ highScore, onClose, onGameOver }: FlappyBirdProps) 
 
       {/* On-Screen Flap Button & Indicator */}
       <div className="flex flex-col items-center gap-1 my-2 relative z-10">
-        <button
+        <button aria-label={t('action.flap') || 'Flap'}
           onClick={(e) => { e.stopPropagation(); jump(); }}
           className="w-14 h-14 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white shadow-md active:scale-90 flex items-center justify-center transition-all"
         >
-          <span className="material-symbols-outlined text-2xl">flight_takeoff</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">flight_takeoff</span>
         </button>
         <span className="text-[10px] font-black text-slate-400 dark:text-white/40 uppercase tracking-wider">
           {isRTL ? 'انقر في أي مكان أو الزر للتحليق' : 'Tap anywhere or button to flap'}

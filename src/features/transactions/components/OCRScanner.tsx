@@ -135,8 +135,8 @@ export function OCRScanner({ onScan, onClose }: OCRScannerProps) {
   return (
     <div className="fixed inset-0 z-[100000] flex flex-col bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
       <div className="flex items-center justify-between p-6">
-        <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition-all hover:bg-white/20">
-          <span className="material-symbols-outlined">close</span>
+        <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition-all hover:bg-white/20">
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
         <h3 className="font-black text-white text-lg">{t('shop.perk.turboScanner')}</h3>
         <div className="w-10 h-10"></div>

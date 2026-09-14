@@ -102,13 +102,14 @@ export function Notifications() {
             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-red-50 text-red-500 active:scale-90 transition-all"
             title={t('notif.clearAll')}
           >
-            <span className="material-symbols-outlined">delete_sweep</span>
+            <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
           </button>
           <button 
+            aria-label={t('action.back') || 'Back'}
             onClick={() => navigate(-1)}
             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-surface-container text-slate-500 active:scale-90 transition-all"
           >
-            <span className="material-symbols-outlined">{isLTR ? 'arrow_back' : 'arrow_forward'}</span>
+            <span className="material-symbols-outlined" aria-hidden="true">{isLTR ? 'arrow_back' : 'arrow_forward'}</span>
           </button>
         </div>
       </div>

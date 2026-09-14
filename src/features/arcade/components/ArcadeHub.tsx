@@ -501,10 +501,11 @@ export function ArcadeHub() {
       <div className="flex items-center justify-between px-2 pt-2">
         <div className="flex items-center gap-3">
           <button 
+            aria-label={t('action.next') || 'Next'}
             onClick={() => navigate('/home')}
             className="w-9 h-9 rounded-xl bg-surface-container-low text-slate-500 hover:bg-surface-container-high flex items-center justify-center transition-all active:scale-90"
           >
-            <span className="material-symbols-outlined text-lg">
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">
               {isRTL ? 'arrow_forward' : 'arrow_back'}
             </span>
           </button>

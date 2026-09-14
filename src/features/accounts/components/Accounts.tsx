@@ -272,8 +272,8 @@ function AccountCard({ account, fmt, total, onEdit, onDelete, onArchive, confirm
 
       {/* Actions */}
       <div className="flex gap-2 mt-5 pt-5 border-t border-slate-50 dark:border-slate-800/50">
-        <button onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-surface-container-low dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
-          <span className="material-symbols-outlined text-sm">edit</span>
+        <button aria-label={t('action.edit') || 'Edit'} onClick={onEdit} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-surface-container-low dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
           {t('action.edit')}
         </button>
         <button onClick={onArchive} className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-surface-container-low dark:bg-slate-800 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all">
@@ -288,13 +288,13 @@ function AccountCard({ account, fmt, total, onEdit, onDelete, onArchive, confirm
             }} className="px-4 py-2 rounded-xl bg-rose-500 text-white font-black text-[10px] uppercase shadow-lg active:scale-95 transition-all">
               {t('action.confirm') || 'Confirm'}
             </button>
-            <button onClick={() => setConfirmDeleteId(null)} className="w-11 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 active:scale-95 transition-all">
-              <span className="material-symbols-outlined text-xl">close</span>
+            <button aria-label={t('action.close') || 'Close'} onClick={() => setConfirmDeleteId(null)} className="w-11 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 active:scale-95 transition-all">
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
             </button>
           </div>
         ) : (
-          <button onClick={() => setConfirmDeleteId(account.id)} className="w-11 h-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 active:scale-95 transition-all">
-            <span className="material-symbols-outlined text-xl">delete</span>
+          <button aria-label={t('action.delete') || 'Delete'} onClick={() => setConfirmDeleteId(account.id)} className="w-11 h-10 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 active:scale-95 transition-all">
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
           </button>
         )}
       </div>
@@ -353,12 +353,12 @@ export function Accounts() {
               className="w-10 h-10 rounded-2xl bg-surface-container-low dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-all active:scale-90"
               title={t('account.transfer')}
             >
-              <span className="material-symbols-outlined text-xl">swap_horiz</span>
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">swap_horiz</span>
             </button>
           )}
-          <button onClick={openAdd}
+          <button aria-label={t('action.add') || 'Add'} onClick={openAdd}
             className="w-10 h-10 rounded-2xl bg-[#002b59] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 transition-all active:scale-90">
-            <span className="material-symbols-outlined text-xl">add</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
           </button>
         </div>
       </div>

@@ -19,11 +19,11 @@ export function SearchPage() {
       {/* Header */}
       <div className="bg-white dark:bg-[#1c1f23] p-6 pt-12 rounded-b-[2.5rem] shadow-sm sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <button 
+          <button aria-label={t('action.back') || 'Back'} 
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 transition-transform"
           >
-            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
           </button>
           <div className="flex-1 relative">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>

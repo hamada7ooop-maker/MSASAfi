@@ -11,7 +11,7 @@ interface TicTacToeProps {
 type BoardState = ('X' | 'O' | null)[];
 
 export function TicTacToe({ highScore: _highScore, onClose, onGameOver }: TicTacToeProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [board, setBoard] = useState<BoardState>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
   const [gameMode, setGameMode] = useState<'pvp' | 'ai'>('ai');
@@ -188,11 +188,11 @@ export function TicTacToe({ highScore: _highScore, onClose, onGameOver }: TicTac
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white">
       {/* Header */}
       <div className="w-full max-w-md mx-auto flex items-center justify-between mb-2">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 flex items-center justify-center transition-all hover:bg-slate-100 dark:hover:bg-white/20 active:scale-95 text-slate-700 dark:text-white shadow-sm"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -319,11 +319,11 @@ export function TicTacToe({ highScore: _highScore, onClose, onGameOver }: TicTac
 
       {/* Control Buttons */}
       <div className="w-full max-w-md mx-auto flex gap-4 mt-2">
-        <button
+        <button aria-label={t('action.refresh') || 'Refresh'}
           onClick={resetGame}
           className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-sm font-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-lg">refresh</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">refresh</span>
           <span>{isRTL ? 'لعب مجدداً' : 'Play Again'}</span>
         </button>
       </div>

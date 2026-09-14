@@ -74,7 +74,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                   className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   aria-label={t('common.back') || 'Back'}
                 >
-                  <span className="material-symbols-outlined">{isRTL ? 'arrow_forward' : 'arrow_back'}</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">{isRTL ? 'arrow_forward' : 'arrow_back'}</span>
                 </button>
                 <h2 className="text-xl font-black text-slate-900 dark:text-blue-100">{t('settings.bank.selectBank')}</h2>
               </div>
@@ -90,7 +90,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                 className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 aria-label={t('common.close') || 'Close'}
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
           </div>
@@ -118,6 +118,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((c) => (
                     <button
+                      aria-label={c.name}
                       key={c.id}
                       type="button"
                       onClick={() => setCurrentCountry(c.id)}
@@ -127,7 +128,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                       <span className={`flex-1 ${isRTL ? 'text-right' : 'text-left'} font-bold text-sm text-slate-800 dark:text-slate-100`}>
                         {c.name}
                       </span>
-                      <span className="material-symbols-outlined text-slate-300 group-hover:text-blue-500 transition-colors">
+                      <span className="material-symbols-outlined text-slate-300 group-hover:text-blue-500 transition-colors" aria-hidden="true">
                         {isRTL ? 'chevron_left' : 'chevron_right'}
                       </span>
                     </button>
@@ -139,7 +140,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                 {providers.map((p) => {
                   const isConnected = connectedBanks.some((b) => b.id === p.id);
                   return (
-                    <button
+                    <button aria-label={t('action.confirm') || 'Confirm'}
                       key={p.id}
                       type="button"
                       onClick={() => handleSelectBank(p)}
@@ -159,7 +160,7 @@ export function BankSelectorModal({ isOpen, onClose }: BankSelectorModalProps) {
                       </span>
                       {isConnected && (
                         <div className="absolute top-2 right-2 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center scale-75">
-                          <span className="material-symbols-outlined !text-[14px]">check</span>
+                          <span className="material-symbols-outlined !text-[14px]" aria-hidden="true">check</span>
                         </div>
                       )}
                     </button>

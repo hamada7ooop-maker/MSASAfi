@@ -143,11 +143,11 @@ export function AdvancedAPICard({ settings }: AdvancedAPICardProps) {
                         onChange={(e) => api.set(e.target.value)}
                         className={`flex-1 bg-black/[0.02] dark:bg-white/[0.02] px-4 py-3 rounded-2xl text-[12px] font-bold border border-black/[0.03] dark:border-white/[0.03] outline-none focus:ring-2 ${colors.ring} dark:text-white transition-all`}
                       />
-                      <button
+                      <button aria-label={t('action.save') || 'Save'}
                         onClick={() => handleSave(api.key, api.val)}
                         className={`h-[46px] w-[46px] rounded-2xl text-white flex items-center justify-center active:scale-90 transition-all shadow-lg ${colors.badge}`}
                       >
-                        <span className="material-symbols-outlined text-[20px]">save</span>
+                        <span className="material-symbols-outlined text-[20px]" aria-hidden="true">save</span>
                       </button>
                     </div>
                   </div>

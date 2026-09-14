@@ -327,11 +327,11 @@ export function GoldMiner({ highScore, onClose, onGameOver }: GoldMinerProps) {
     >
       {/* Top Controls */}
       <div className="relative z-10 flex items-center justify-between">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-xl font-black tracking-tighter text-amber-500 dark:text-amber-400">
@@ -439,12 +439,12 @@ export function GoldMiner({ highScore, onClose, onGameOver }: GoldMinerProps) {
 
       {/* Tactile Button / Tap action */}
       <div className="flex flex-col items-center gap-2 relative z-10 my-2">
-        <button
+        <button aria-label={t('action.drop') || 'Drop'}
           onClick={(e) => { e.stopPropagation(); shootClaw(); }}
           disabled={!isPlaying || gameOver || gameWon}
           className="w-full max-w-[280px] py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-sm uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-lg">anchor</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">anchor</span>
           <span>{isRTL ? 'إطلاق الخطاف الآن' : 'Launch Claw Now'}</span>
         </button>
         <span className="text-[10px] font-bold text-slate-400 dark:text-white/40">

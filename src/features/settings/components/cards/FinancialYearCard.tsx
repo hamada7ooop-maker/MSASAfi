@@ -114,7 +114,7 @@ export function FinancialYearCard() {
                     className="ms-0.5 w-4 h-4 flex items-center justify-center rounded-full hover:bg-rose-500/20 transition-colors active:scale-90"
                     title={t('settings.advanced.archive.unlock') || 'إلغاء القفل'}
                   >
-                    <span className="material-symbols-outlined text-[12px]">close</span>
+                    <span className="material-symbols-outlined text-[12px]" aria-hidden="true">close</span>
                   </button>
                 </div>
               ))}

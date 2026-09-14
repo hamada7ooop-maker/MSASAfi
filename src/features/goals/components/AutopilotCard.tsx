@@ -37,15 +37,15 @@ export function AutopilotCard({ suggestedAuto, onRunAutopilot }: AutopilotCardPr
           </p>
         </div>
         
-        <button 
+        <button aria-label={t('action.refresh') || 'Refresh'} 
           onClick={handleRun}
           disabled={isRunning || suggestedAuto <= 0}
           className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-600/50 text-white px-5 py-3 rounded-2xl text-xs font-black shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center gap-2"
         >
           {isRunning ? (
-            <span className="material-symbols-outlined text-sm animate-spin">refresh</span>
+            <span className="material-symbols-outlined text-sm animate-spin" aria-hidden="true">refresh</span>
           ) : (
-            <span className="material-symbols-outlined text-sm">flight_takeoff</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">flight_takeoff</span>
           )}
           {t('goal.autopilotRun')}
         </button>

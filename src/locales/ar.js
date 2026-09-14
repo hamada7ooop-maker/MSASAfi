@@ -3130,7 +3130,23 @@ export const locale_ar = {
   "zakat.hawlComplete": "تمّ الحول، والزكاة مستحقة الآن.",
   "zakat.estimate": "تقديري",
   "bill.markUnpaid": "إلغاء الدفع",
-  "bill.workHoursToggle": "تبديل تقدير ساعات العمل"
+  "bill.workHoursToggle": "تبديل تقدير ساعات العمل",
+  "action.refresh": "تحديث",
+  "action.copy": "نسخ",
+  "action.info": "مزيد من المعلومات",
+  "action.hint": "تلميح",
+  "action.boost": "تعزيز",
+  "action.backspace": "مسح حرف",
+  "action.next": "التالي",
+  "action.scrollDown": "انتقل للأسفل",
+  "action.send": "إرسال",
+  "action.swap": "تبديل",
+  "action.lock": "قفل",
+  "action.unlock": "فتح القفل",
+  "action.crop": "اقتصاص",
+  "action.rotate": "تدوير",
+  "action.deleteAll": "حذف الكل",
+  "action.voiceInput": "إدخال صوتي"
 };
 
 export default locale_ar;

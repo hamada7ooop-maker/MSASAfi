@@ -243,31 +243,31 @@ export function GoalItem({
               className={`w-full h-12 bg-surface-container-low dark:bg-slate-900 rounded-2xl border-none outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-black dark:text-white transition-all ${isLTR ? 'pl-5 pr-10' : 'pr-5 pl-10'}`} 
               placeholder={t('goal.addAmount')}
             />
-            <button className={`absolute ${isLTR ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 transition-colors`}>
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
+            <button aria-label={t('action.add') || 'Add'} className={`absolute ${isLTR ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 transition-colors`}>
+              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add_circle</span>
             </button>
           </div>
           
-          <button 
+          <button aria-label={t('action.refresh') || 'Refresh'} 
             onClick={handleDeposit}
             disabled={isDepositing || !depositAmount}
             className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
           >
-            {isDepositing ? <span className="material-symbols-outlined text-sm animate-spin">refresh</span> : t('action.add')}
+            {isDepositing ? <span className="material-symbols-outlined text-sm animate-spin" aria-hidden="true">refresh</span> : t('action.add')}
           </button>
           
-          <button 
+          <button aria-label={t('action.edit') || 'Edit'} 
             onClick={() => onEdit(goal)}
             className="w-12 h-12 flex items-center justify-center rounded-2xl bg-surface-container-low dark:bg-slate-800 text-blue-500 hover:bg-blue-500/10 transition-all active:scale-95"
           >
-            <span className="material-symbols-outlined text-xl">edit</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
           </button>
           
-          <button 
+          <button aria-label={t('action.delete') || 'Delete'} 
             onClick={() => onDelete(goal.id)}
             className="w-12 h-12 flex items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all active:scale-95"
           >
-            <span className="material-symbols-outlined text-xl">delete</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
           </button>
         </div>
       </div>

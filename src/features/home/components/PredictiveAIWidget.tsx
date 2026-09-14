@@ -81,10 +81,10 @@ export function PredictiveAIWidget() {
                 <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5">AI Projection</p>
               </div>
             </div>
-            <button 
+            <button aria-label="More information" 
               className="w-8 h-8 rounded-full bg-slate-50/50 dark:bg-[#25282d]/50 group-hover:bg-slate-100 dark:group-hover:bg-[#25282d] flex items-center justify-center text-slate-400 group-hover:text-emerald-500 transition-colors pointer-events-auto"
             >
-              <span className="material-symbols-outlined text-sm">info</span>
+              <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
             </button>
           </div>
 

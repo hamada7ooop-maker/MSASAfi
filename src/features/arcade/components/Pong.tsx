@@ -272,11 +272,11 @@ export function Pong({ highScore: _highScore, onClose, onGameOver }: PongProps) 
       
       {/* Top Controls */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-xl font-black tracking-tighter text-cyan-500 dark:text-cyan-400">
@@ -384,17 +384,17 @@ export function Pong({ highScore: _highScore, onClose, onGameOver }: PongProps) 
 
       {/* Manual Vertical controls for Mobile */}
       <div className="flex justify-center gap-6 max-w-[200px] mx-auto select-none relative z-10 my-2">
-        <button 
+        <button aria-label={t('action.moveUp') || 'Move up'} 
           onClick={(e) => { e.stopPropagation(); handlePaddleMove(-1); }}
           className="w-14 h-14 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-cyan-400 shadow-sm active:scale-90 flex items-center justify-center transition-all"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_up</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_up</span>
         </button>
-        <button 
+        <button aria-label={t('action.moveDown') || 'Move down'} 
           onClick={(e) => { e.stopPropagation(); handlePaddleMove(1); }}
           className="w-14 h-14 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-cyan-400 shadow-sm active:scale-90 flex items-center justify-center transition-all"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_down</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_down</span>
         </button>
       </div>
 

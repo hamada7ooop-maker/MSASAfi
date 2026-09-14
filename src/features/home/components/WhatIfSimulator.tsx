@@ -33,8 +33,8 @@ export function WhatIfSimulator({ categoryBreakdown }: WhatIfSimulatorProps) {
           <span className="material-symbols-outlined text-indigo-500 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>tune</span>
           {t('home.whatIfTitle')}
         </h3>
-        <button className="w-8 h-8 rounded-full bg-slate-50 dark:bg-[#25282d] flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
-          <span className="material-symbols-outlined text-sm">info</span>
+        <button aria-label={t('action.info') || 'More information'} className="w-8 h-8 rounded-full bg-slate-50 dark:bg-[#25282d] flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
         </button>
       </div>
 

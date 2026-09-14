@@ -411,11 +411,11 @@ export function SnakeGame({ highScore, onClose, onGameOver }: SnakeGameProps) {
     <div className="h-full w-full max-w-xl mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white">
       {/* Top bar controls */}
       <div className="relative z-10 flex items-center justify-between">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-lg sm:text-xl font-black tracking-tight text-purple-600 dark:text-purple-400">
@@ -533,36 +533,36 @@ export function SnakeGame({ highScore, onClose, onGameOver }: SnakeGameProps) {
       {/* On-screen controls (D-Pad) for Mobile */}
       <div dir="ltr" className="grid grid-cols-3 gap-2 max-w-[170px] mx-auto my-2 relative z-10 select-none">
         <div></div>
-        <button 
+        <button aria-label={t('action.moveUp') || 'Move up'} 
           onClick={(e) => { e.stopPropagation(); handleDpadPress('up'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-purple-500/20 active:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-all active:scale-90 shadow-sm"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_up</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_up</span>
         </button>
         <div></div>
         
-        <button 
+        <button aria-label={t('action.moveLeft') || 'Move left'} 
           onClick={(e) => { e.stopPropagation(); handleDpadPress('left'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-purple-500/20 active:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-all active:scale-90 shadow-sm"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_left</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_left</span>
         </button>
         <div className="w-12 h-12 flex items-center justify-center text-purple-500/20">
           <span className="material-symbols-outlined text-sm">circle</span>
         </div>
-        <button 
+        <button aria-label={t('action.moveRight') || 'Move right'} 
           onClick={(e) => { e.stopPropagation(); handleDpadPress('right'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-purple-500/20 active:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-all active:scale-90 shadow-sm"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_right</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_right</span>
         </button>
         
         <div></div>
-        <button 
+        <button aria-label={t('action.moveDown') || 'Move down'} 
           onClick={(e) => { e.stopPropagation(); handleDpadPress('down'); }}
           className="w-12 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-purple-500/20 active:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center transition-all active:scale-90 shadow-sm"
         >
-          <span className="material-symbols-outlined text-2xl">keyboard_arrow_down</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">keyboard_arrow_down</span>
         </button>
         <div></div>
       </div>

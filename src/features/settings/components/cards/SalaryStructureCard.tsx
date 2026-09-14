@@ -177,11 +177,11 @@ export function SalaryStructureCard({ settings, updateSetting }: SalaryStructure
                         <p className="text-[12px] font-bold text-slate-700 dark:text-slate-300">{item.label}</p>
                         <p className="text-[13px] font-black text-emerald-600 dark:text-emerald-400">+{fmt(item.amount)}</p>
                       </div>
-                      <button
+                      <button aria-label={t('action.delete') || 'Delete'}
                         onClick={() => handleRemoveAllowance(item.id)}
                         className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center active:scale-90 transition-all"
                       >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   ))}
@@ -211,11 +211,11 @@ export function SalaryStructureCard({ settings, updateSetting }: SalaryStructure
                   onBlur={(e) => setNewAllowanceAmount(sanitizeNumericInput(e.target.value))}
                   className="w-20 sm:w-24 shrink-0 min-w-0 bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl px-2 sm:px-3 py-2.5 text-[12px] font-bold text-slate-800 dark:text-white outline-none border border-black/[0.03] dark:border-white/[0.03] focus:ring-2 focus:ring-emerald-500/20"
                 />
-                <button
+                <button aria-label={t('action.add') || 'Add'}
                   onClick={handleAddAllowance}
                   className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-emerald-500 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all shadow-md shadow-emerald-500/20"
                 >
-                  <span className="material-symbols-outlined text-[20px]">add</span>
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
                 </button>
               </div>
             </div>
@@ -233,11 +233,11 @@ export function SalaryStructureCard({ settings, updateSetting }: SalaryStructure
                         <p className="text-[12px] font-bold text-slate-700 dark:text-slate-300">{item.label}</p>
                         <p className="text-[13px] font-black text-rose-600 dark:text-rose-400">-{fmt(item.amount)}</p>
                       </div>
-                      <button
+                      <button aria-label={t('action.delete') || 'Delete'}
                         onClick={() => handleRemoveDeduction(item.id)}
                         className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 flex items-center justify-center active:scale-90 transition-all"
                       >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
                       </button>
                     </div>
                   ))}
@@ -267,11 +267,11 @@ export function SalaryStructureCard({ settings, updateSetting }: SalaryStructure
                   onBlur={(e) => setNewDeductionAmount(sanitizeNumericInput(e.target.value))}
                   className="w-20 sm:w-24 shrink-0 min-w-0 bg-black/[0.02] dark:bg-white/[0.02] rounded-2xl px-2 sm:px-3 py-2.5 text-[12px] font-bold text-slate-800 dark:text-white outline-none border border-black/[0.03] dark:border-white/[0.03] focus:ring-2 focus:ring-rose-500/20"
                 />
-                <button
+                <button aria-label={t('action.add') || 'Add'}
                   onClick={handleAddDeduction}
                   className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 bg-rose-500 text-white rounded-2xl flex items-center justify-center active:scale-90 transition-all shadow-md shadow-rose-500/20"
                 >
-                  <span className="material-symbols-outlined text-[20px]">add</span>
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
                 </button>
               </div>
             </div>
@@ -303,11 +303,11 @@ export function SalaryStructureCard({ settings, updateSetting }: SalaryStructure
                     <p className="text-[15px] font-black text-blue-600 dark:text-blue-400 mt-0.5 leading-none">{fmt(calculatedNet)}</p>
                   </div>
                 </div>
-                <button
+                <button aria-label={t('action.save') || 'Save'}
                   onClick={handleSave}
                   className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-black shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-1.5"
                 >
-                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
                   {t('settings.salarySave') || 'حفظ'}
                 </button>
               </div>

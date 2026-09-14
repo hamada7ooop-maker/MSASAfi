@@ -88,13 +88,13 @@ function CategoryModal({
             <button onClick={() => set('color', 'transparent')}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border-2 border-dashed border-slate-300 dark:border-slate-600 ${form.color === 'transparent' ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-[#1e2124] scale-110' : ''}`}
               title="Transparent">
-              <span className="material-symbols-outlined text-[14px] text-slate-400">do_not_disturb_on</span>
+              <span className="material-symbols-outlined text-[14px] text-slate-400" aria-hidden="true">do_not_disturb_on</span>
             </button>
             {CATEGORY_COLORS.map(c => (
-              <button key={c} onClick={() => set('color', c)}
+              <button aria-label={t('action.confirm') || 'Confirm'} key={c} onClick={() => set('color', c)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${form.color === c ? 'ring-2 ring-offset-2 dark:ring-offset-[#1e2124] scale-110' : ''}`}
                 style={{ backgroundColor: c }}>
-                {form.color === c && <span className="material-symbols-outlined text-white text-[16px] font-bold">check</span>}
+                {form.color === c && <span className="material-symbols-outlined text-white text-[16px] font-bold" aria-hidden="true">check</span>}
               </button>
             ))}
           </div>
@@ -113,14 +113,14 @@ function CategoryModal({
             ))}
             
             {PREMIUM_EMOJIS.map(ic => (
-              <button key={ic} 
+              <button aria-label={t('action.lock') || 'Lock'} key={ic} 
                 onClick={() => isPremiumUnlocked ? set('icon', ic) : (window as Window & { showShop?: () => void }).showShop?.()}
                 className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all relative ${form.icon === ic ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-[#1e2124] scale-110' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'} ${!isPremiumUnlocked ? 'opacity-60 grayscale' : ''}`}
                 style={{ backgroundColor: (form.icon === ic && form.color !== 'transparent') ? (form.color || '#002b59') : undefined }}>
                 {ic}
                 {!isPremiumUnlocked && (
                   <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center shadow-sm">
-                    <span className="material-symbols-outlined text-[10px] text-white font-black">lock</span>
+                    <span className="material-symbols-outlined text-[10px] text-white font-black" aria-hidden="true">lock</span>
                   </div>
                 )}
               </button>
@@ -234,9 +234,9 @@ export function CategoryEditor() {
           </div>
         </div>
         
-        <button onClick={() => { setEditingCat(undefined); setShowModal(true); }}
+        <button aria-label={t('action.add') || 'Add'} onClick={() => { setEditingCat(undefined); setShowModal(true); }}
           className="w-10 h-10 rounded-2xl bg-[#002b59] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-90 transition-transform">
-          <span className="material-symbols-outlined text-xl">add</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
         </button>
       </div>
 
@@ -270,11 +270,11 @@ export function CategoryEditor() {
             
             {/* Reorder handles */}
             <div className="flex flex-col gap-1 shrink-0">
-              <button onClick={() => moveUp(index)} disabled={index === 0} className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 transition-all">
-                <span className="material-symbols-outlined text-base font-bold">expand_less</span>
+              <button aria-label={t('action.collapse') || 'Collapse'} onClick={() => moveUp(index)} disabled={index === 0} className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 transition-all">
+                <span className="material-symbols-outlined text-base font-bold" aria-hidden="true">expand_less</span>
               </button>
-              <button onClick={() => moveDown(index)} disabled={index === filteredCategories.length - 1} className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 transition-all">
-                <span className="material-symbols-outlined text-base font-bold">expand_more</span>
+              <button aria-label={t('action.expand') || 'Expand'} onClick={() => moveDown(index)} disabled={index === filteredCategories.length - 1} className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-30 transition-all">
+                <span className="material-symbols-outlined text-base font-bold" aria-hidden="true">expand_more</span>
               </button>
             </div>
             
@@ -332,28 +332,28 @@ export function CategoryEditor() {
                 className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center active:scale-90 hover:bg-indigo-500/10 hover:text-indigo-500 transition-all"
                 title={t('settings.manageRules')}
               >
-                <span className="material-symbols-outlined text-xl">neurology</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">neurology</span>
               </button>
-              <button onClick={() => { setEditingCat(cat); setShowModal(true); }} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-blue-500 flex items-center justify-center active:scale-90 hover:bg-blue-500/10 transition-all">
-                <span className="material-symbols-outlined text-xl">edit</span>
+              <button aria-label={t('action.edit') || 'Edit'} onClick={() => { setEditingCat(cat); setShowModal(true); }} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 text-blue-500 flex items-center justify-center active:scale-90 hover:bg-blue-500/10 transition-all">
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">edit</span>
               </button>
               {filteredCategories.length > 1 && (
                 <>
                   {confirmDeleteId === cat.id ? (
                     <div className="flex gap-1 animate-in fade-in slide-in-from-right-2 duration-300">
-                      <button onClick={async () => {
+                      <button aria-label={t('action.confirm') || 'Confirm'} onClick={async () => {
                         await deleteCategory(cat.id);
                         setConfirmDeleteId(null);
                       }} className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all">
-                        <span className="material-symbols-outlined text-xl">check</span>
+                        <span className="material-symbols-outlined text-xl" aria-hidden="true">check</span>
                       </button>
-                      <button onClick={() => setConfirmDeleteId(null)} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-all">
-                        <span className="material-symbols-outlined text-xl">close</span>
+                      <button aria-label={t('action.close') || 'Close'} onClick={() => setConfirmDeleteId(null)} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-all">
+                        <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
                       </button>
                     </div>
                   ) : (
-                    <button onClick={() => setConfirmDeleteId(cat.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center active:scale-90 hover:bg-rose-500/20 transition-all">
-                      <span className="material-symbols-outlined text-xl">delete</span>
+                    <button aria-label={t('action.delete') || 'Delete'} onClick={() => setConfirmDeleteId(cat.id)} className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center active:scale-90 hover:bg-rose-500/20 transition-all">
+                      <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
                     </button>
                   )}
                 </>
@@ -449,8 +449,8 @@ function CategoryRulesOverlay({
     <div className="fixed inset-0 z-[1000] bg-slate-50 dark:bg-[#0f1113] flex flex-col animate-in slide-in-from-bottom duration-500">
       {/* Header */}
       <div className="p-6 flex items-center justify-between border-b border-black/5 dark:border-white/5 bg-white dark:bg-[#1c1f23]">
-        <button onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
-          <span className="material-symbols-outlined">close</span>
+        <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 active:scale-90 transition-all">
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
         <div className="flex flex-col items-center">
           <h2 className="text-sm font-black text-[#002b59] dark:text-blue-100">
@@ -458,8 +458,8 @@ function CategoryRulesOverlay({
           </h2>
           <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest">{formatCategoryLabel(category.name)}</p>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center active:scale-90 transition-all shadow-lg shadow-blue-500/20">
-          <span className="material-symbols-outlined">add</span>
+        <button aria-label={t('action.add') || 'Add'} onClick={() => setShowAddModal(true)} className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center active:scale-90 transition-all shadow-lg shadow-blue-500/20">
+          <span className="material-symbols-outlined" aria-hidden="true">add</span>
         </button>
       </div>
 
@@ -496,11 +496,11 @@ function CategoryRulesOverlay({
                 </p>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(rule)} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-blue-500 active:scale-90 transition-all">
-                  <span className="material-symbols-outlined text-sm">edit</span>
+                <button aria-label={t('action.edit') || 'Edit'} onClick={() => openEdit(rule)} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-blue-500 active:scale-90 transition-all">
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                 </button>
-                <button onClick={() => onDelete(rule.id)} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-all">
-                  <span className="material-symbols-outlined text-sm">delete</span>
+                <button aria-label={t('action.delete') || 'Delete'} onClick={() => onDelete(rule.id)} className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-all">
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                 </button>
               </div>
             </div>

@@ -61,7 +61,7 @@ export const AIPulse = React.memo(function AIPulse({ sustainability }: AIPulsePr
             className="w-8 h-8 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-slate-400 hover:text-blue-500 transition-colors"
             title={t('home.pulseExplainTitle') || 'النبض المالي'}
           >
-            <span className="material-symbols-outlined text-base">info</span>
+            <span className="material-symbols-outlined text-base" aria-hidden="true">info</span>
           </button>
         </div>
         

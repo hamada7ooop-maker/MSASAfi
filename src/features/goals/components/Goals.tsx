@@ -167,21 +167,21 @@ export function Goals() {
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('txn.all')}
               >
-                <span className="material-symbols-outlined text-xl">done_all</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">done_all</span>
               </button>
               <button 
                 onClick={handleBulkDelete}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('action.delete')}
               >
-                <span className="material-symbols-outlined text-xl">delete</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">delete</span>
               </button>
               <button 
                 onClick={clearSelection}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-all"
                 title={t('action.cancel')}
               >
-                <span className="material-symbols-outlined text-xl">close</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
               </button>
             </div>
           ) : (
@@ -191,14 +191,14 @@ export function Goals() {
                 className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-200 dark:border-indigo-900/40 active:scale-95 transition-all"
                 title={t('goal.inflationCalculator') || 'حاسبة التضخم'}
               >
-                <span className="material-symbols-outlined text-xl">analytics</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">analytics</span>
               </button>
               <button 
                 onClick={handleAddNew}
                 className="w-10 h-10 rounded-2xl bg-[#002b59] text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
                 title={t('goal.newGoal')}
               >
-                <span className="material-symbols-outlined text-xl">add</span>
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
               </button>
             </div>
           )}

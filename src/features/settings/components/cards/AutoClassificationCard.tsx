@@ -120,14 +120,14 @@ export function AutoClassificationCard() {
         <div className="fixed inset-0 z-[10000] bg-slate-50 dark:bg-[#0f1113] flex flex-col animate-slideUp">
           {/* Header */}
           <div className="p-6 flex items-center justify-between border-b border-black/5 dark:border-white/5 bg-white/80 dark:bg-[#1a1d21]/80 backdrop-blur-md">
-            <button onClick={() => setShowManager(false)} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-500 active:scale-90 transition-all">
-              <span className="material-symbols-outlined">close</span>
+            <button aria-label={t('action.close') || 'Close'} onClick={() => setShowManager(false)} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-500 active:scale-90 transition-all">
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
             </button>
             <h2 className="text-lg font-black text-[#002b59] dark:text-blue-100">
               {t('settings.manageRules')}
             </h2>
-            <button onClick={() => setShowAddModal(true)} className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center active:scale-90 transition-all shadow-lg shadow-blue-500/20">
-              <span className="material-symbols-outlined">add</span>
+            <button aria-label={t('action.add') || 'Add'} onClick={() => setShowAddModal(true)} className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-center active:scale-90 transition-all shadow-lg shadow-blue-500/20">
+              <span className="material-symbols-outlined" aria-hidden="true">add</span>
             </button>
           </div>
 
@@ -182,11 +182,11 @@ export function AutoClassificationCard() {
                     </p>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={(e) => { e.stopPropagation(); openEdit(rule); }} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-400 hover:text-blue-500 active:scale-90 transition-all">
-                      <span className="material-symbols-outlined text-sm">edit</span>
+                    <button aria-label={t('action.edit') || 'Edit'} onClick={(e) => { e.stopPropagation(); openEdit(rule); }} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-400 hover:text-blue-500 active:scale-90 transition-all">
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); openDelete(rule); }} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-all">
-                      <span className="material-symbols-outlined text-sm">delete</span>
+                    <button aria-label={t('action.delete') || 'Delete'} onClick={(e) => { e.stopPropagation(); openDelete(rule); }} className="w-10 h-10 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-all">
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                     </button>
                   </div>
                 </div>
@@ -221,8 +221,8 @@ export function AutoClassificationCard() {
               <div>
                 <div className="flex items-center justify-between mb-2 px-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('settings.ruleType')}</label>
-                  <button onClick={() => setShowExplanation(showExplanation === 'type' ? null : 'type')} className="text-blue-500">
-                    <span className="material-symbols-outlined text-sm">info</span>
+                  <button aria-label={t('action.info') || 'More information'} onClick={() => setShowExplanation(showExplanation === 'type' ? null : 'type')} className="text-blue-500">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
                   </button>
                 </div>
                 {showExplanation === 'type' && (
@@ -276,8 +276,8 @@ export function AutoClassificationCard() {
               <div>
                 <div className="flex items-center justify-between mb-2 px-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('settings.rulePriority')}</label>
-                  <button onClick={() => setShowExplanation(showExplanation === 'priority' ? null : 'priority')} className="text-blue-500">
-                    <span className="material-symbols-outlined text-sm">info</span>
+                  <button aria-label={t('action.info') || 'More information'} onClick={() => setShowExplanation(showExplanation === 'priority' ? null : 'priority')} className="text-blue-500">
+                    <span className="material-symbols-outlined text-sm" aria-hidden="true">info</span>
                   </button>
                 </div>
                 {showExplanation === 'priority' && (

@@ -28,7 +28,7 @@ const FINANCIAL_ICONS = [
 ];
 
 export function MemoryGame({ highScore, onClose, onGameOver }: MemoryGameProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('easy');
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
@@ -141,11 +141,11 @@ export function MemoryGame({ highScore, onClose, onGameOver }: MemoryGameProps) 
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300">
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -204,7 +204,7 @@ export function MemoryGame({ highScore, onClose, onGameOver }: MemoryGameProps) 
             const isFlipped = card.isFlipped || card.isMatched;
 
             return (
-              <button
+              <button aria-label={t('action.help') || 'Help'}
                 key={card.id}
                 onClick={() => handleCardClick(idx)}
                 className={`relative rounded-2xl flex items-center justify-center transition-all duration-500 active:scale-95 shadow-sm ${
@@ -217,11 +217,11 @@ export function MemoryGame({ highScore, onClose, onGameOver }: MemoryGameProps) 
                   <span 
                     className="material-symbols-outlined text-2xl text-emerald-600 dark:text-emerald-400 drop-shadow-sm animate-in zoom-in duration-300"
                     style={{ transform: 'rotateY(180deg)' }}
-                  >
+                   aria-hidden="true">
                     {card.icon}
                   </span>
                 ) : (
-                  <span className="material-symbols-outlined text-xl text-slate-400 dark:text-slate-600">
+                  <span className="material-symbols-outlined text-xl text-slate-400 dark:text-slate-600" aria-hidden="true">
                     help_outline
                   </span>
                 )}
@@ -239,11 +239,11 @@ export function MemoryGame({ highScore, onClose, onGameOver }: MemoryGameProps) 
           </div>
         )}
 
-        <button
+        <button aria-label={t('action.refresh') || 'Refresh'}
           onClick={() => startNewGame(difficulty)}
           className="py-3.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white rounded-2xl text-sm font-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-lg">refresh</span>
+          <span className="material-symbols-outlined text-lg" aria-hidden="true">refresh</span>
           <span>{isRTL ? 'إعادة تشغيل اللعبة' : 'Restart Game'}</span>
         </button>
       </div>

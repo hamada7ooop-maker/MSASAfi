@@ -70,7 +70,7 @@ export function ChildAccountCard({
             title={t('family.monitored.editChild')}
             aria-label={t('family.monitored.editChild') || 'Edit child'}
           >
-            <span className="material-symbols-outlined text-sm">edit</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">edit</span>
           </button>
           <button
             onClick={() => onDeleteChild(child.id)}
@@ -78,7 +78,7 @@ export function ChildAccountCard({
             title={t('action.delete') || 'Delete'}
             aria-label={t('action.delete') || 'Delete child'}
           >
-            <span className="material-symbols-outlined text-sm">delete</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
           </button>
         </div>
       </div>
@@ -93,11 +93,11 @@ export function ChildAccountCard({
       <div className="space-y-2 z-10 border-t border-slate-100 dark:border-slate-800 pt-3">
         <div className="flex justify-between items-center">
           <span className="text-[9px] font-black text-slate-400 uppercase">{t('family.monitored.quickActions')}</span>
-          <button
+          <button aria-label={t('action.add') || 'Add'}
             onClick={onToggleTxDrawer}
             className="text-[9px] font-black text-indigo-500 flex items-center gap-0.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[10px]">add</span>
+            <span className="material-symbols-outlined text-[10px]" aria-hidden="true">add</span>
             {t('family.monitored.addChildTx')}
           </button>
         </div>

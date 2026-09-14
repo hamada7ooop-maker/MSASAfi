@@ -143,11 +143,11 @@ export function HeatmapTab({
               {t('analytics.heatmap.txCount', { count: selectedHeatmapDay.count })}
             </p>
           </div>
-          <button
+          <button aria-label={t('action.close') || 'Close'}
             onClick={() => setSelectedHeatmapDay(null)}
             className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500"
           >
-            <span className="material-symbols-outlined text-sm">close</span>
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
           </button>
         </div>
       )}

@@ -120,12 +120,12 @@ export function Currencies() {
           <span className="material-symbols-outlined text-green-500 text-3xl">currency_exchange</span>
           {t('title.currencies') || 'Currencies'}
         </h2>
-        <button 
+        <button aria-label={t('action.refresh') || 'Refresh'} 
           onClick={handleUpdateRates}
           disabled={isUpdating}
           className={`w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 active:scale-90 transition-all ${isUpdating ? 'animate-spin' : ''}`}
         >
-          <span className="material-symbols-outlined">sync</span>
+          <span className="material-symbols-outlined" aria-hidden="true">sync</span>
         </button>
       </div>
 
@@ -257,8 +257,8 @@ export function Currencies() {
         </div>
 
         <div className="flex justify-center -my-3.5 relative z-20">
-          <button onClick={handleSwap} className="w-12 h-12 rounded-full bg-[#002b59] dark:bg-blue-600 text-white flex items-center justify-center active:scale-90 hover:scale-110 transition-all shadow-xl shadow-blue-900/35 dark:shadow-blue-500/20 border border-white/20">
-            <span className="material-symbols-outlined text-2xl transition-transform duration-500 hover:rotate-180">swap_vert</span>
+          <button aria-label={t('action.swap') || 'Swap'} onClick={handleSwap} className="w-12 h-12 rounded-full bg-[#002b59] dark:bg-blue-600 text-white flex items-center justify-center active:scale-90 hover:scale-110 transition-all shadow-xl shadow-blue-900/35 dark:shadow-blue-500/20 border border-white/20">
+            <span className="material-symbols-outlined text-2xl transition-transform duration-500 hover:rotate-180" aria-hidden="true">swap_vert</span>
           </button>
         </div>
 
@@ -292,8 +292,8 @@ export function Currencies() {
           className="flex-1 bg-transparent border-none text-sm font-bold dark:text-white outline-none p-1"
         />
         {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-            <span className="material-symbols-outlined text-sm">close</span>
+          <button aria-label={t('action.close') || 'Close'} onClick={() => setSearchQuery('')} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
           </button>
         )}
       </div>
@@ -331,7 +331,7 @@ export function Currencies() {
                         className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center transition-all active:scale-90"
                         title={t('currencies.setBase')}
                       >
-                        <span className="material-symbols-outlined text-xl">star</span>
+                        <span className="material-symbols-outlined text-xl" aria-hidden="true">star</span>
                       </button>
                     </div>
                   </div>

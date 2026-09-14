@@ -382,7 +382,7 @@ export function Assets() {
             className="no-print w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all"
             title={t('common.print') || 'طباعة قائمة الأصول'}
           >
-            <span className="material-symbols-outlined text-lg">print</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">print</span>
           </button>
           {/* زر تصدير PDF */}
           <button
@@ -393,16 +393,16 @@ export function Assets() {
             title={t('report.exportPdf') || 'تصدير PDF'}
           >
             {isExportingPage
-              ? <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-              : <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+              ? <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">progress_activity</span>
+              : <span className="material-symbols-outlined text-lg" aria-hidden="true">picture_as_pdf</span>
             }
           </button>
           {/* زر إضافة أصل جديد */}
-          <button 
+          <button aria-label={t('action.add') || 'Add'} 
             onClick={() => { setEditingAsset(undefined); setShowModal(true); }}
             className="no-print w-10 h-10 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined text-xl">add</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
           </button>
         </div>
       </div>
@@ -482,17 +482,17 @@ export function Assets() {
                 <div className="flex items-start justify-between">
                   {/* زر التعديل والحذف */}
                   <div className="flex gap-2">
-                    <button 
+                    <button aria-label={t('action.edit') || 'Edit'} 
                       onClick={(e) => { e.stopPropagation(); setEditingAsset(asset); setShowModal(true); }}
                       className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors"
                     >
-                      <span className="material-symbols-outlined text-base">edit</span>
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">edit</span>
                     </button>
-                    <button 
+                    <button aria-label={t('action.delete') || 'Delete'} 
                       onClick={(e) => handleDelete(e, asset.id)}
                       className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/20 text-rose-500 hover:bg-rose-100 dark:hover:bg-rose-900/30 flex items-center justify-center transition-colors"
                     >
-                      <span className="material-symbols-outlined text-base">delete</span>
+                      <span className="material-symbols-outlined text-base" aria-hidden="true">delete</span>
                     </button>
                   </div>
 

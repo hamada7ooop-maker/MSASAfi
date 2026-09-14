@@ -240,7 +240,7 @@ export function RecurringTransactions() {
                       }`}
                       title={tx.isActive ? 'Deactivate' : 'Activate'}
                     >
-                      <span className="material-symbols-outlined font-variation-fill">
+                      <span className="material-symbols-outlined font-variation-fill" aria-hidden="true">
                         {tx.isActive ? 'check_circle' : 'pause_circle'}
                       </span>
                     </button>
@@ -272,28 +272,28 @@ export function RecurringTransactions() {
                     
                     {confirmDeleteId === tx.id ? (
                       <div className="flex gap-1 animate-in fade-in slide-in-from-right-2 duration-300">
-                        <button 
+                        <button aria-label={t('action.confirm') || 'Confirm'} 
                           onClick={async () => {
                             await deleteRecurring(tx.id);
                             setConfirmDeleteId(null);
                           }} 
                           className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center shadow-lg active:scale-90 transition-all"
                         >
-                          <span className="material-symbols-outlined text-sm font-bold">check</span>
+                          <span className="material-symbols-outlined text-sm font-bold" aria-hidden="true">check</span>
                         </button>
-                        <button 
+                        <button aria-label={t('action.close') || 'Close'} 
                           onClick={() => setConfirmDeleteId(null)} 
                           className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center active:scale-90 transition-all"
                         >
-                          <span className="material-symbols-outlined text-sm font-bold">close</span>
+                          <span className="material-symbols-outlined text-sm font-bold" aria-hidden="true">close</span>
                         </button>
                       </div>
                     ) : (
-                      <button 
+                      <button aria-label={t('action.delete') || 'Delete'} 
                         onClick={() => setConfirmDeleteId(tx.id)} 
                         className="w-8 h-8 rounded-lg text-red-400 dark:text-red-500/80 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center justify-center active:scale-90"
                       >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        <span className="material-symbols-outlined text-[18px]" aria-hidden="true">delete</span>
                       </button>
                     )}
                   </div>
@@ -406,14 +406,14 @@ export function RecurringTransactions() {
                             className="p-1.5 bg-emerald-500 text-white rounded-lg active:scale-95 transition-all shadow-md"
                             title="Confirm Postpone"
                           >
-                            <span className="material-symbols-outlined text-sm font-bold">check</span>
+                            <span className="material-symbols-outlined text-sm font-bold" aria-hidden="true">check</span>
                           </button>
                           <button
                             onClick={() => setActivePostponeId(null)}
                             className="p-1.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg active:scale-95 transition-all"
                             title="Cancel"
                           >
-                            <span className="material-symbols-outlined text-sm font-bold">close</span>
+                            <span className="material-symbols-outlined text-sm font-bold" aria-hidden="true">close</span>
                           </button>
                         </div>
                       </div>

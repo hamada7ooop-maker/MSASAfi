@@ -185,11 +185,11 @@ export function ImageCropper({ imageUri, onCrop, onCancel }: ImageCropperProps) 
     <div className="fixed inset-0 z-[110000] flex flex-col bg-black/95 backdrop-blur-xl justify-between animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex items-center justify-between p-6 bg-gradient-to-b from-black/50 to-transparent">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={onCancel} 
           className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-95 transition-all hover:bg-white/20"
         >
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
         <h3 className="font-black text-white text-lg">{t('ocr.cropTitle') || 'تأطير وقص الفاتورة'}</h3>
         <div className="w-10 h-10"></div>
@@ -302,11 +302,11 @@ export function ImageCropper({ imageUri, onCrop, onCancel }: ImageCropperProps) 
           {t('ocr.cropTip') || 'اسحب المقابض لتأطير الفاتورة بدقة وتجنب حواف الطاولة أو الخلفية المشوشة للحصول على أفضل قراءة للمبالغ'}
         </p>
         
-        <button 
+        <button aria-label={t('action.crop') || 'Crop'} 
           onClick={handleCropConfirm}
           className="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-black flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all text-base"
         >
-          <span className="material-symbols-outlined">crop</span>
+          <span className="material-symbols-outlined" aria-hidden="true">crop</span>
           <span>{t('ocr.cropConfirm') || 'قص ومعالجة المستند'}</span>
         </button>
       </div>

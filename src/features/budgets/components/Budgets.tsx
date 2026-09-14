@@ -204,7 +204,7 @@ export function Budgets() {
             className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface-container-low dark:bg-slate-800 text-blue-600 dark:text-blue-400 transition-all active:scale-95"
             title={t('budget.smartButton')}
           >
-            <span className={`material-symbols-outlined text-xl ${isGenerating ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-xl ${isGenerating ? 'animate-spin' : ''}`} aria-hidden="true">
               {isGenerating ? 'refresh' : 'auto_awesome'}
             </span>
           </button>
@@ -213,7 +213,7 @@ export function Budgets() {
             className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-600 text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95"
             title={t('action.add')}
           >
-            <span className="material-symbols-outlined text-xl">add</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">add</span>
           </button>
         </div>
       </div>
@@ -430,7 +430,7 @@ export function Budgets() {
                       </div>
                     </div>
 
-                    <button 
+                    <button aria-label={t('action.delete') || 'Delete'} 
                       onClick={() => {
                         confirmSheet(
                           t('budget.envelope.deleteConfirm'),
@@ -444,7 +444,7 @@ export function Budgets() {
                       }}
                       className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 flex items-center justify-center transition-all opacity-0 group-hover/env:opacity-100 active:scale-90"
                     >
-                      <span className="material-symbols-outlined text-sm">delete</span>
+                      <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>
                     </button>
                   </div>
 

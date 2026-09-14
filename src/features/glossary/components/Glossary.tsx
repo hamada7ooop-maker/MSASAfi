@@ -282,8 +282,8 @@ export function Glossary() {
             className="w-full bg-transparent py-3 pr-4 pl-1 text-sm font-bold focus:outline-none dark:text-white placeholder:text-slate-400/80"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all mr-2">
-              <span className="material-symbols-outlined text-base">close</span>
+            <button aria-label={t('action.close') || 'Close'} onClick={() => setSearch('')} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all mr-2">
+              <span className="material-symbols-outlined text-base" aria-hidden="true">close</span>
             </button>
           )}
         </div>

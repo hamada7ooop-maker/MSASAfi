@@ -326,8 +326,8 @@ export function AssetDetailModal({
         {/* رأس النافذة مع أزرار الطباعة والتصدير */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="no-print w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
-              <span className="material-symbols-outlined text-lg">close</span>
+            <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="no-print w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors">
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
             </button>
             {/* زر الطباعة */}
             <button
@@ -335,7 +335,7 @@ export function AssetDetailModal({
               className="no-print w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-90 transition-all"
               title={t('common.print') || 'طباعة تفاصيل الأصل'}
             >
-              <span className="material-symbols-outlined text-lg">print</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">print</span>
             </button>
             {/* زر تصدير PDF */}
             <button
@@ -345,8 +345,8 @@ export function AssetDetailModal({
               title={t('report.exportPdf') || 'تصدير PDF'}
             >
               {isExporting
-                ? <span className="material-symbols-outlined text-lg animate-spin">progress_activity</span>
-                : <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+                ? <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">progress_activity</span>
+                : <span className="material-symbols-outlined text-lg" aria-hidden="true">picture_as_pdf</span>
               }
             </button>
           </div>

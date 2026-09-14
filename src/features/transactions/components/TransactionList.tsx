@@ -357,14 +357,14 @@ export function TransactionList() {
             className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center transition-all active:scale-95 shadow-sm"
             title={t('txn.importCsv')}
           >
-            <span className="material-symbols-outlined text-xl">upload_file</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">upload_file</span>
           </button>
           <button 
             onClick={() => setShowTrash(true)}
             className="w-10 h-10 rounded-2xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 flex items-center justify-center transition-all active:scale-95 shadow-sm"
             title={t('trash.title') || 'سلة المحذوفات'}
           >
-            <span className="material-symbols-outlined text-xl">delete_sweep</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">delete_sweep</span>
           </button>
           <button 
             onClick={() => setShowCooling(true)}
@@ -392,7 +392,7 @@ export function TransactionList() {
               }`}
               title={selectionMode || isSelecting ? t('action.cancel') : t('action.select')}
             >
-              <span className="material-symbols-outlined text-xl">
+              <span className="material-symbols-outlined text-xl" aria-hidden="true">
                 {selectionMode || isSelecting ? 'close' : 'checklist'}
               </span>
             </button>

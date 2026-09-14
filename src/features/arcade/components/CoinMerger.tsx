@@ -11,7 +11,7 @@ interface CoinMergerProps {
 type Board = number[][];
 
 export function CoinMerger({ highScore, onClose, onGameOver }: CoinMergerProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [board, setBoard] = useState<Board>([
     [0, 0, 0, 0],
     [0, 0, 0, 0],
@@ -287,11 +287,11 @@ export function CoinMerger({ highScore, onClose, onGameOver }: CoinMergerProps) 
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white">
       {/* Top bar */}
       <div className="relative z-10 flex items-center justify-between">
-        <button 
+        <button aria-label={t('action.close') || 'Close'} 
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
         
         <h2 className="text-lg sm:text-xl font-black tracking-tight text-amber-600 dark:text-amber-400">

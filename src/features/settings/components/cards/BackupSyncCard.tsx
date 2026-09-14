@@ -89,20 +89,20 @@ export function BackupSyncCard() {
         {sections.map((sec) => (
           <div key={sec.id}>
             {/* Accordion Header */}
-            <button
+            <button aria-label={t('action.expand') || 'Expand'}
               onClick={() => setExpanded(expanded === sec.id ? null : sec.id)}
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-all duration-150 group text-start active:scale-[0.99]"
             >
               <div className="flex items-center gap-3.5">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${sec.iconColor} shadow-sm`}>
-                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>{sec.icon}</span>
+                  <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">{sec.icon}</span>
                 </div>
                 <div>
                   <p className="text-[13px] font-black text-on-surface dark:text-white leading-tight">{sec.label}</p>
                   <p className={`text-[10px] font-bold mt-0.5 ${sec.sublabelColor}`}>{sec.sublabel}</p>
                 </div>
               </div>
-              <span className={`material-symbols-outlined text-slate-300 dark:text-slate-600 text-[20px] transition-transform duration-300 ${expanded === sec.id ? 'rotate-180 text-blue-500' : ''}`}>
+              <span className={`material-symbols-outlined text-slate-300 dark:text-slate-600 text-[20px] transition-transform duration-300 ${expanded === sec.id ? 'rotate-180 text-blue-500' : ''}`} aria-hidden="true">
                 expand_more
               </span>
             </button>

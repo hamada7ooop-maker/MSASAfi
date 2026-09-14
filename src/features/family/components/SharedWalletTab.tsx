@@ -251,14 +251,14 @@ export function SharedWalletTab({
                     className="w-4 h-4 rounded-full bg-amber-400 text-slate-900 flex items-center justify-center transition-transform shadow-md active:scale-95 hover:bg-amber-300"
                     title={t('family.editMember')}
                   >
-                    <span className="material-symbols-outlined text-[10px]">edit</span>
+                    <span className="material-symbols-outlined text-[10px]" aria-hidden="true">edit</span>
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); deleteMember(m.id); }} 
                     className="w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center transition-transform shadow-md active:scale-95 hover:bg-red-600"
                     title={t('action.delete') || 'Delete'}
                   >
-                    <span className="material-symbols-outlined text-[10px]">close</span>
+                    <span className="material-symbols-outlined text-[10px]" aria-hidden="true">close</span>
                   </button>
                 </div>
               </div>
@@ -268,7 +268,7 @@ export function SharedWalletTab({
               className="w-10 h-10 rounded-full border border-dashed border-white/50 flex items-center justify-center hover:bg-white/10 transition-colors active:scale-95"
               title={t('action.add') || 'Add Member'}
             >
-              <span className="material-symbols-outlined text-lg">add</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">add</span>
             </button>
           </div>
         </div>
@@ -409,6 +409,7 @@ export function SharedWalletTab({
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {['group', 'shopping_cart', 'restaurant', 'home', 'directions_car', 'flight', 'school', 'medical_services', 'celebration', 'pets'].map(ic => (
           <button 
+            aria-label={`${t('action.pickIcon') || 'Choose icon'}`}
             key={ic}
             onClick={() => setIcon(ic)}
             className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center transition-all ${
@@ -417,7 +418,7 @@ export function SharedWalletTab({
                 : 'bg-slate-50 dark:bg-slate-800/50 text-slate-500 border-2 border-transparent'
             }`}
           >
-            <span className="material-symbols-outlined">{ic}</span>
+            <span className="material-symbols-outlined" aria-hidden="true">{ic}</span>
           </button>
         ))}
       </div>
@@ -444,11 +445,11 @@ export function SharedWalletTab({
           >
             <span className="material-symbols-outlined text-sm">done_all</span>{t('txn.all')}
           </button>
-          <button 
+          <button aria-label={t('action.delete') || 'Delete'} 
             onClick={handleBulkDelete}
             className="bg-red-500 text-white px-3 py-1.5 rounded-xl text-[10px] font-black flex items-center gap-1 shadow-md active:scale-95"
           >
-            <span className="material-symbols-outlined text-sm">delete</span>{t('action.delete')}
+            <span className="material-symbols-outlined text-sm" aria-hidden="true">delete</span>{t('action.delete')}
           </button>
           <button 
             onClick={clearSelection}
@@ -524,17 +525,17 @@ export function SharedWalletTab({
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <p className="font-black text-sm text-[#d97706]">{fmt(tx.amount || 0)}</p>
                   <div className="flex items-center gap-1">
-                    <button 
+                    <button aria-label={t('action.edit') || 'Edit'} 
                       onClick={(e) => { e.stopPropagation(); handleEdit(tx); }}
                       className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center active:scale-90 transition-transform"
                     >
-                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">edit</span>
                     </button>
-                    <button 
+                    <button aria-label={t('action.close') || 'Close'} 
                       onClick={(e) => { e.stopPropagation(); deleteSharedExpense(tx.id!); }}
                       className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center active:scale-90 transition-transform"
                     >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
+                      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">close</span>
                     </button>
                   </div>
                 </div>

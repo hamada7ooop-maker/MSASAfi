@@ -124,12 +124,12 @@ export function ReportBuilderModal() {
               {t('report.builderSub')}
             </p>
           </div>
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             disabled={isGenerating}
             onClick={() => setReportBuilderOpen(false)}
             className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 active:scale-90 transition-all disabled:opacity-50"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" aria-hidden="true">close</span>
           </button>
         </div>
 
@@ -148,6 +148,7 @@ export function ReportBuilderModal() {
                 { id: 'json' as const, icon: 'data_object', color: 'slate' }
               ].map(f => (
                 <button
+                  aria-label={`${t('report.format') || 'Format'}: ${f.id}`}
                   key={f.id}
                   disabled={isGenerating}
                   onClick={() => setFormat(f.id)}
@@ -157,7 +158,7 @@ export function ReportBuilderModal() {
                     : 'border-transparent bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-2xl">{f.icon}</span>
+                  <span className="material-symbols-outlined text-2xl" aria-hidden="true">{f.icon}</span>
                   <span className="text-[10px] font-black uppercase tracking-widest">{f.id}</span>
                 </button>
               ))}

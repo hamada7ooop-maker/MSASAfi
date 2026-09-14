@@ -191,7 +191,7 @@ export function PushNotificationsCard() {
             </div>
 
             {/* Config Trigger Button */}
-            <button 
+            <button aria-label={t('nav.settings') || 'Settings'} 
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
@@ -200,7 +200,7 @@ export function PushNotificationsCard() {
                 isExpanded ? 'rotate-90 text-blue-500' : ''
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">settings</span>
+              <span className="material-symbols-outlined text-[18px]" aria-hidden="true">settings</span>
             </button>
           </div>
 
@@ -243,21 +243,21 @@ export function PushNotificationsCard() {
 
               {/* Action Buttons */}
               <div className="flex gap-2 pt-1">
-                <button
+                <button aria-label={t('action.lock') || 'Lock'}
                   onClick={handleSaveTelegram}
                   disabled={isSaving}
                   className="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-black text-[10px] hover:bg-blue-700 transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-blue-500/20 active:scale-95 disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-sm">lock</span>
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">lock</span>
                   {isSaving ? (t('action.saving') || 'جاري الحفظ...') : (t('action.save') || 'حفظ وتشفير')}
                 </button>
                 
-                <button
+                <button aria-label={t('action.boost') || 'Boost'}
                   onClick={handleTestTelegram}
                   disabled={isTesting}
                   className="flex-1 py-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/40 font-black text-[10px] hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all flex items-center justify-center gap-1.5 active:scale-95 disabled:opacity-50"
                 >
-                  <span className="material-symbols-outlined text-sm">bolt</span>
+                  <span className="material-symbols-outlined text-sm" aria-hidden="true">bolt</span>
                   {isTesting ? (t('settings.telegram.testing') || 'جاري الاختبار...') : (t('settings.telegram.test') || 'اختبار الاتصال')}
                 </button>
               </div>

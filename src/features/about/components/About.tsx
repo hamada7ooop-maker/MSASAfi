@@ -21,9 +21,9 @@ export function About() {
 
       {/* Back */}
       <div className="w-full flex items-center mb-6">
-        <button onClick={() => navigate(-1)}
+        <button aria-label={t('action.back') || 'Back'} onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center active:scale-90 transition-transform">
-          <span className="material-symbols-outlined text-slate-600 dark:text-slate-300">arrow_back</span>
+          <span className="material-symbols-outlined text-slate-600 dark:text-slate-300" aria-hidden="true">arrow_back</span>
         </button>
       </div>
 

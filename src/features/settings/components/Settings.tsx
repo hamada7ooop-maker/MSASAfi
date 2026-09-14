@@ -133,11 +133,11 @@ export function Settings() {
             className="w-full bg-slate-100/70 dark:bg-white/[0.04] border border-black/[0.03] dark:border-white/[0.05] rounded-2xl ps-11 pe-10 py-3 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500/30 focus:bg-white dark:focus:bg-[#1a1d21] transition-all dark:text-white"
           />
           {searchQuery && (
-            <button
+            <button aria-label={t('action.close') || 'Close'}
               onClick={() => setSearchQuery('')}
               className="absolute end-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 active:scale-90 transition-all flex items-center justify-center w-5 h-5 rounded-full bg-slate-200/50 dark:bg-white/10"
             >
-              <span className="material-symbols-outlined text-[14px]">close</span>
+              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">close</span>
             </button>
           )}
         </div>

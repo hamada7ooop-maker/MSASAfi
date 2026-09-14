@@ -28,7 +28,7 @@ type ShapeKey = keyof typeof SHAPES;
 const SHAPE_KEYS: ShapeKey[] = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
 
 export function Tetris({ highScore, onClose, onGameOver }: TetrisProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const [grid, setGrid] = useState<string[][]>(Array(ROWS).fill(null).map(() => Array(COLS).fill('')));
   const [score, setScore] = useState(0);
   const [linesCleared, setLinesCleared] = useState(0);
@@ -358,11 +358,11 @@ export function Tetris({ highScore, onClose, onGameOver }: TetrisProps) {
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300">
       {/* Header */}
       <div className="w-full flex items-center justify-between mb-2">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -461,38 +461,38 @@ export function Tetris({ highScore, onClose, onGameOver }: TetrisProps) {
       {/* D-Pad Touch Controller for Mobile */}
       <div className="w-full bg-white/80 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 p-3.5 rounded-3xl flex flex-col gap-2.5 shadow-sm mt-2">
         <div className="flex justify-center gap-4">
-          <button
+          <button aria-label={t('action.rotate') || 'Rotate'}
             onClick={rotate}
             disabled={!isPlaying || gameOver}
             className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center active:scale-90 active:bg-cyan-500/20 active:border-cyan-500/30 transition-all text-slate-700 dark:text-slate-300 shadow-xs"
           >
-            <span className="material-symbols-outlined text-xl">rotate_right</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">rotate_right</span>
           </button>
         </div>
 
         <div className="flex justify-around items-center">
-          <button
+          <button aria-label={t('action.back') || 'Back'}
             onClick={moveLeft}
             disabled={!isPlaying || gameOver}
             className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center active:scale-90 active:bg-cyan-500/20 active:border-cyan-500/30 transition-all text-slate-700 dark:text-slate-300 shadow-xs"
           >
-            <span className="material-symbols-outlined text-xl">arrow_back</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">arrow_back</span>
           </button>
 
-          <button
+          <button aria-label={t('action.scrollDown') || 'Scroll down'}
             onClick={dropHard}
             disabled={!isPlaying || gameOver}
             className="w-12 h-12 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white flex items-center justify-center active:scale-90 shadow-md transition-all"
           >
-            <span className="material-symbols-outlined text-xl">arrow_downward</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">arrow_downward</span>
           </button>
 
-          <button
+          <button aria-label={t('action.next') || 'Next'}
             onClick={moveRight}
             disabled={!isPlaying || gameOver}
             className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center active:scale-90 active:bg-cyan-500/20 active:border-cyan-500/30 transition-all text-slate-700 dark:text-slate-300 shadow-xs"
           >
-            <span className="material-symbols-outlined text-xl">arrow_forward</span>
+            <span className="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
           </button>
         </div>
       </div>

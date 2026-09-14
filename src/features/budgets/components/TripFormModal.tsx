@@ -150,11 +150,11 @@ export function TripFormModal({ open, tripToEdit, onClose, onSaved }: TripFormMo
                 {t('travel.modalSubtitle') || 'أدخل تفاصيل وميزانية رحلتك القادمة'}
               </p>
             </div>
-            <button 
+            <button aria-label={t('action.close') || 'Close'} 
               onClick={() => onClose()}
               className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-400 flex items-center justify-center"
             >
-              <span className="material-symbols-outlined text-lg">close</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
             </button>
           </div>
 

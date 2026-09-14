@@ -263,12 +263,12 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
                   <span className="material-symbols-outlined text-[14px]">lock</span>
                   {t('settings.lockNow') || 'قفل الآن'}
                 </button>
-                <button
+                <button aria-label={t('action.unlock') || 'Unlock'}
                   type="button"
                   onClick={handleRemovePin}
                   className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-2.5 py-1.5 rounded-xl active:scale-95 transition-all"
                 >
-                  <span className="material-symbols-outlined text-[14px]">lock_open</span>
+                  <span className="material-symbols-outlined text-[14px]" aria-hidden="true">lock_open</span>
                   {t('settings.disableLock')}
                 </button>
               </div>
@@ -289,7 +289,7 @@ export function SecurityCard({ settings, updateSetting, refreshSettings }: Secur
                   className="w-9 h-9 shrink-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   title={t('settings.savePin') || 'حفظ'}
                 >
-                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">save</span>
                 </button>
               </div>
             )}

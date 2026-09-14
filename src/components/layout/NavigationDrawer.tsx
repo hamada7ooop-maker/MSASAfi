@@ -80,8 +80,8 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/20">
                <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
              </div>
-             <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-               <span className="material-symbols-outlined text-sm">close</span>
+             <button aria-label={t('action.close') || 'Close'} onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+               <span className="material-symbols-outlined text-sm" aria-hidden="true">close</span>
              </button>
           </div>
           <h2 className="text-xl font-black tracking-tighter">{t('app.name')}</h2>
@@ -98,11 +98,12 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
                   const isActive = location.pathname === item.path;
                   return (
                     <button
+                      aria-label={item.label}
                       key={item.id}
                       onClick={() => handleNav(item.path)}
                       className={`w-full flex items-center gap-4 px-6 py-3 transition-all ${isActive ? 'bg-primary/10 text-primary border-r-4 border-primary' : 'text-on-surface-variant hover:bg-surface-container'}`}
                     >
-                      <span className={`material-symbols-outlined text-[22px] ${isActive ? 'fill-1' : ''}`}>
+                      <span className={`material-symbols-outlined text-[22px] ${isActive ? 'fill-1' : ''}`} aria-hidden="true">
                         {item.icon}
                       </span>
                       <span className={`text-sm ${isActive ? 'font-black' : 'font-bold'}`}>{item.label}</span>

@@ -26,12 +26,12 @@ export function BottomNav() {
         // Center FAB-style Add button
         if (item.big) {
           return (
-            <button
+            <button aria-label={t('action.add') || 'Add'}
               key={item.id}
               onClick={() => navigate('/transactions/add')}
               className="flex flex-col items-center justify-center -mt-6 w-16 h-16 rounded-full bg-primary text-on-primary shadow-xl shadow-primary/30 active:scale-90 transition-all border-4 border-surface z-40"
             >
-              <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }} aria-hidden="true">
                 add
               </span>
             </button>

@@ -47,11 +47,11 @@ export function AmortizationModal({ isOpen, onClose, debt }: AmortizationModalPr
               </p>
             </div>
           </div>
-          <button 
+          <button aria-label={t('action.close') || 'Close'} 
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-all"
           >
-            <span className="material-symbols-outlined text-lg">close</span>
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">close</span>
           </button>
         </div>
 

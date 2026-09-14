@@ -410,10 +410,10 @@ export function Match3({ highScore, onClose, onGameOver }: Match3Props) {
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300">
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between">
-        <button onClick={onClose}
+        <button aria-label={t('action.close') || 'Close'} onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">close</span>
         </button>
 
         <h2 className="text-xl font-black tracking-tighter text-pink-500 dark:text-pink-400">

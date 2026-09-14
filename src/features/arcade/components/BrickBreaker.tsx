@@ -42,7 +42,7 @@ interface PowerUp {
 }
 
 export function BrickBreaker({ highScore, onClose, onGameOver }: BrickBreakerProps) {
-  const { isRTL } = useI18n();
+  const { t, isRTL } = useI18n();
   const isDark = useIsDark();
   const isDarkRef = useRef(isDark);
   useEffect(() => {
@@ -552,11 +552,11 @@ export function BrickBreaker({ highScore, onClose, onGameOver }: BrickBreakerPro
     <div className="h-full w-full max-w-lg mx-auto flex flex-col justify-between p-3 sm:p-5 select-none overflow-hidden text-slate-800 dark:text-white animate-in fade-in duration-300">
       {/* Header */}
       <div className="w-full flex items-center justify-between">
-        <button
+        <button aria-label={t('action.back') || 'Back'}
           onClick={onClose}
           className="w-11 h-11 rounded-2xl bg-white dark:bg-white/10 hover:bg-slate-100 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white flex items-center justify-center backdrop-blur-xl transition-all shadow-sm active:scale-90"
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isRTL ? 'arrow_forward' : 'arrow_back'}
           </span>
         </button>
@@ -629,14 +629,14 @@ export function BrickBreaker({ highScore, onClose, onGameOver }: BrickBreakerPro
           className="w-14 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-cyan-400 shadow-sm active:scale-90 flex items-center justify-center transition-all"
           aria-label="Move paddle left"
         >
-          <span className="material-symbols-outlined text-2xl">arrow_back</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">arrow_back</span>
         </button>
 
-        <button
+        <button aria-label={t('action.refresh') || 'Refresh'}
           onClick={isPlaying ? () => initGame(1) : startGame}
           className="flex-1 py-3 px-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
-          <span className="material-symbols-outlined text-base">refresh</span>
+          <span className="material-symbols-outlined text-base" aria-hidden="true">refresh</span>
           <span>{isRTL ? 'إعادة' : 'Restart'}</span>
         </button>
 
@@ -646,7 +646,7 @@ export function BrickBreaker({ highScore, onClose, onGameOver }: BrickBreakerPro
           className="w-14 h-12 rounded-2xl bg-white dark:bg-white/[0.06] border border-slate-200 dark:border-white/15 text-slate-700 dark:text-cyan-400 shadow-sm active:scale-90 flex items-center justify-center transition-all"
           aria-label="Move paddle right"
         >
-          <span className="material-symbols-outlined text-2xl">arrow_forward</span>
+          <span className="material-symbols-outlined text-2xl" aria-hidden="true">arrow_forward</span>
         </button>
       </div>
 

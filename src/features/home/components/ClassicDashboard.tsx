@@ -351,7 +351,7 @@ export function ClassicDashboard() {
           className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isHomeEditing ? 'bg-green-500 text-white shadow-lg shadow-green-500/30' : 'bg-surface-container-low text-slate-500 hover:bg-surface-container-high'}`}
           title={isHomeEditing ? t('action.done') : t('action.customize')}
         >
-          <span className="material-symbols-outlined text-xl">
+          <span className="material-symbols-outlined text-xl" aria-hidden="true">
             {isHomeEditing ? 'check' : 'dashboard_customize'}
           </span>
         </button>
@@ -391,26 +391,27 @@ export function ClassicDashboard() {
                     {t(section.labelKey) || section.id}
                   </span>
                   <div className="flex gap-1.5 p-1 bg-white dark:bg-slate-700 rounded-full shadow-xl border border-black/5 dark:border-white/10">
-                    <button 
+                    <button aria-label={t('action.moveUp') || 'Move up'} 
                       onClick={() => moveItem(index, 'up')} 
                       disabled={index === 0}
                       className="w-9 h-9 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-30 transition-all active:scale-90"
                     >
-                      <span className="material-symbols-outlined text-xl">keyboard_arrow_up</span>
+                      <span className="material-symbols-outlined text-xl" aria-hidden="true">keyboard_arrow_up</span>
                     </button>
-                    <button 
+                    <button aria-label={t('action.moveDown') || 'Move down'} 
                       onClick={() => moveItem(index, 'down')} 
                       disabled={index === homeOrder.length - 1}
                       className="w-9 h-9 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-30 transition-all active:scale-90"
                     >
-                      <span className="material-symbols-outlined text-xl">keyboard_arrow_down</span>
+                      <span className="material-symbols-outlined text-xl" aria-hidden="true">keyboard_arrow_down</span>
                     </button>
                     <div className="w-px h-6 bg-slate-100 dark:bg-slate-600 my-auto mx-0.5"></div>
                     <button 
+                      aria-label={t('action.show') || 'Show'}
                       onClick={() => toggleVisibility(index)} 
                       className={`w-9 h-9 rounded-full flex items-center justify-center transition-all active:scale-90 ${section.visible ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}
                     >
-                      <span className="material-symbols-outlined text-xl">{section.visible ? 'visibility' : 'visibility_off'}</span>
+                      <span className="material-symbols-outlined text-xl" aria-hidden="true">{section.visible ? 'visibility' : 'visibility_off'}</span>
                     </button>
                   </div>
                 </div>
