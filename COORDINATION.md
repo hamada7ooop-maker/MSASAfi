@@ -338,3 +338,43 @@ Executed under the standing fast-track authorization, methodology unchanged: **c
 
 1. **(Owner) Visual gate for Batch 4**: build on your machine and look at the four surfaces — one glass tooltip everywhere (dashboard doughnut, reports trend, portfolio allocation, net-worth line), the soft gradient fills, the zero-aware emerald/rose gradient on the net-worth chart, and the unified 400ms entrances.
 2. **(Auditor, on your GO — already authorized by the fast-track) Batch 5 — the closing sweep**: the secondary screens wholesale (lockModal 9.61, detailModal 13.39, drawer 17.39 remaining from the low-coverage ladder), the last stray radius/bezier sweeps, and the closing report that seals the directive as **v23.3.0**.
+
+
+---
+
+## Auditor Report — Directive 19 / Batch 5 (The Closing Sweep): COMPLETE & GREEN — THE DIRECTIVE CLOSES AS v23.3.0
+
+Executed under the standing fast-track authorization, methodology unchanged to the last: **characterization before rebuild, zero behavioral regression, ci:check exit 0.**
+
+**1. The ladder trio falls (17 new tests):**
+- **NavigationDrawer 17.4% → 100% statements** — menu structure (21 items), active-route highlight, navigate-AND-close, backdrop + header close, closed-state off-canvas parking (RTL side), version footer.
+- **DevUnlockModal 9.61% → 92.6%** — the DEV gate, the guard branches (empty pass, missing env), the stay-open-on-wrong-pass behavior, and the FULL success path with a REAL PBKDF2 derivation (600k iterations, SHA-256, 256 bits) computed by the test with the component's own parameters, through the constant-time comparison, into the stores (points 99999, perks+themes, milestones, AI decade). The backdoorRemoval suite keeps guarding the static tree-shaking; this suite now guards the runtime DEV behavior.
+- **AssetDetailModal 13.39% → 71.3%** — backdrop close, web print path (window.print), the FULL PDF pipeline mocked at the module boundary (jspdf/html2canvas — a mock whose first draft taught the arrow-function lesson: `new` on an arrow throws), the spinner state, the print-scoped export container.
+
+**2. The easing tokens, drift-proof:** `--ease-snappy/smooth/gentle/playful` in `:root`, derived from SPRINGS — and a static test reads index.css and asserts every variable EQUALS `springCss(name)` at runtime. The stylesheet copy can never drift from the math. Tailwind (ease-[var(--ease-snappy)]) and inline styles now share one source.
+
+**3. The last hand-rolled beziers swept:** onboarding splash, the card flip, the glossary card, the Settings segmented indicator, three spots in AddTransactionPage — all on the sanctioned springs. And two DEAD CSS classes (`.deck-container`/`.deck-card-wrap`, orphaned by the Batch 3 rebuild) deleted.
+
+**4. The drawer joins the family:** slides on the smooth spring, and picking a destination answers with `touch.select`.
+
+**5. Version sealed:** 23.3.0 in constants + package.json (versionAlignment guards), GEMINI title updated.
+
+**Final numbers:** **1302/1302 × 131** (+21 tests) · coverage 66.94/61.67/50.30 then 66.98/61.71/50.42 across two consecutive full runs → **ratchet ninth and final raise to 66.7/61.5/50.1** · ci:check exit 0 end-to-end · build 9.4s · 0 lint problems.
+
+## ══════════ DIRECTIVE 19 — FINAL LEDGER ══════════
+
+| Batch | Delivered | Tests | Ratchet | Real defects fixed |
+|---|---|---|---|---|
+| 0 · Enablement | Obsidian tokens, radii/elevation, motion tokens, NumberText/GlassPanel/haptics + settings switch | 1152 × 121 | 64.1 | (baseline) |
+| 1 · Dashboard | HeroBalanceCard + AmbientGlow + NumberFlow, PulseStrip, IBM Plex Arabic physically bundled, 4 font families removed | 1193 × 125 | 64.4 | 3 (arabic-subset drop, NotificationType, aria-hidden) |
+| 2 · Quick Add | Thumb-first sheet (useSheetDrag), haptic vocabulary in the financial flow, useHaptic migrated | 1225 × 128 | 64.8 | 1 (close-timer re-open race) |
+| 3 · Wallet | 553→176+6 pieces, swipe chain (RTL-aware), entrance springs, wallet haptics | 1249 × 129 | 65.0 | 2 (loadCards dep loop, flick-at-edge clamp) |
+| 4 · Charts | chartTheme (semantic pair, glass tooltips, faint gridlines, motion gate) on all four surfaces | 1281 × 130 | 65.7 | 2 (eager chart.js import, dead Inter font) |
+| 5 · Closing | Ladder trio lifted, ease tokens + drift-proof pins, last beziers swept, dead CSS removed, v23.3.0 | **1302 × 131** | **66.7/61.5/50.1** | dead CSS removed |
+
+**+150 tests across the directive. Nine consecutive ratchet raises, never lowered. Eight real defects found by the suites written to prevent regression. Zero behavioral regressions — measured, not promised, in every batch.**
+
+### The one remaining gate — yours
+
+1. **(Owner) Build & sign v23.3.0** via your `@abc` line. The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, and the drawer on its spring.
+2. On your confirmation, the directive closes officially and the ladder debt is a memory.

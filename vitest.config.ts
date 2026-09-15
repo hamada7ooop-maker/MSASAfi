@@ -99,7 +99,14 @@ export default defineConfig({
       //   →95.5%, ReportsTrend →85.7%. Measured 65.92/61.23/50.05 → raised
       //   to 65.7/61.0/49.9 (margin below the measurement, per the drift
       //   rule; confirmed stable by the ci:check run on the same commit).
-      thresholds: { lines: 65.7, functions: 61.0, branches: 49.9 }
+      // - Directive 19 Batch 5 (2026-09-15): +21 tests (1302 × 131); the
+      //   closing sweep. The ladder trio lifted: NavigationDrawer 17.4%→100%
+      //   statements, DevUnlockModal 9.61%→92.6%, AssetDetailModal
+      //   13.39%→71.3%. Plus the ease-token static pins. Measured
+      //   66.94/61.67/50.30 → raised to 66.7/61.5/50.1 (margin below the
+      //   measurement, per the drift rule; confirmed stable by the ci:check
+      //   run on the same commit). The directive closes as v23.3.0.
+      thresholds: { lines: 66.7, functions: 61.5, branches: 50.1 }
     },
   },
 });
