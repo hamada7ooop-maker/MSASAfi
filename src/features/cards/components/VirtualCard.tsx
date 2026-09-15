@@ -1,5 +1,6 @@
 import React from 'react';
 import { onActivate } from '@/core/a11yKeyboard';
+import { springCss } from '@/components/motion/tokens';
 import type { CardStyleType } from '../data/cardConstants';
 
 // ─── Inline Card CSS ─────────────────────────────────────────────────────────
@@ -7,7 +8,7 @@ export const CARD_CSS = `
   .card-3d-wrap { perspective: 1200px; }
   .card-3d-inner {
     position: relative; width: 100%; height: 100%;
-    transition: transform 0.65s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 0.65s ${springCss('smooth')};
     transform-style: preserve-3d;
   }
   .card-3d-inner.flipped { transform: rotateY(180deg); }
@@ -21,17 +22,10 @@ export const CARD_CSS = `
   }
   .card-face-back { transform: rotateY(180deg); }
 
-  /* Stacked Deck */
-  .deck-container { position: relative; }
-  .deck-card-wrap {
-    position: absolute; left: 0; right: 0;
-    transition: all 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    cursor: pointer;
-  }
-  .deck-card-wrap.active {
-    position: relative;
-    z-index: 50;
-  }
+  /* Stacked Deck — Directive 19 Batch 5: the .deck-container /
+     .deck-card-wrap classes died with the Batch 3 rebuild (the deck moved
+     to inline styles + PeekStrip); dead CSS removed, the living classes
+     stay. */
   .shimmer-bar {
     background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
     background-size: 200% 100%;

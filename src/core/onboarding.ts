@@ -2,6 +2,7 @@ import { safeInnerHTML } from '../core/security';
 import { db as DB } from './db/core';
 import { t, isAppLTR, changeLanguage, LANGUAGE_META } from '../i18n/engine';
 import { getConversionRate, silentFail } from '../core/utils';
+import { springCss } from '../components/motion/tokens';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { useSettingsStore } from '../store/settingsStore';
 import { useAppStore } from '../store/appStore';
@@ -193,7 +194,7 @@ export function renderSplashPage(renderApp: () => void): string {
       <div class="absolute w-72 h-72 bg-emerald-400/[0.08] rounded-full blur-3xl -bottom-10 -left-10" style="animation:float 8s ease-in-out infinite 1s"></div>
       <div class="absolute w-64 h-64 bg-violet-400/[0.05] rounded-full blur-3xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="animation:float 7s ease-in-out infinite 0.5s"></div>
     </div>
-    <div class="relative z-10 flex flex-col items-center" style="animation:splashScale 0.8s cubic-bezier(0.16,1,0.3,1)">
+    <div class="relative z-10 flex flex-col items-center" style="animation:splashScale 0.8s ${springCss('smooth')}">
       <div class="w-28 h-28 bg-white/10 backdrop-blur-xl rounded-[1.75rem] flex items-center justify-center mb-8 shadow-2xl border border-white/10" style="animation:float 3s ease-in-out infinite">
         <span class="material-symbols-outlined text-white text-6xl" style="font-variation-settings:'FILL' 1">account_balance_wallet</span>
       </div>

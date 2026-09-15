@@ -149,7 +149,7 @@ export function Settings() {
           <div className="flex bg-slate-100 dark:bg-white/[0.06] p-1 rounded-2xl relative overflow-hidden">
             {/* Sliding Indicator */}
             <div
-              className={`absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+              className={`absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-slate-700 rounded-xl shadow-sm transition-transform duration-300 ease-[var(--ease-smooth)] ${
                 activeTab === 'advanced'
                   ? (isLTR ? 'translate-x-[calc(100%+8px)]' : '-translate-x-[calc(100%+8px)]')
                   : 'translate-x-0'

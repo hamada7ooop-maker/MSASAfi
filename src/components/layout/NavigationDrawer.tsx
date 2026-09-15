@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useI18n } from '../../i18n/index';
 import { APP_VERSION } from '../../core/constants';
+import { touch } from '../../core/haptics';
 
 interface NavigationDrawerProps {
   isOpen: boolean;
@@ -58,6 +59,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
   ];
 
   const handleNav = (path: string) => {
+    touch.select(); // picking a destination from the drawer is a segmented selection
     navigate(path);
     onClose();
   };
@@ -72,7 +74,7 @@ export function NavigationDrawer({ isOpen, onClose }: NavigationDrawerProps) {
 
       {/* Drawer Container */}
       <div 
-        className={`fixed top-0 bottom-0 z-[101] w-[280px] bg-surface shadow-2xl transition-transform duration-500 ease-out flex flex-col ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} ${isRTL ? 'right-0' : 'left-0'}`}
+        className={`fixed top-0 bottom-0 z-[101] w-[280px] bg-surface shadow-2xl transition-transform duration-500 ease-[var(--ease-smooth)] flex flex-col ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'} ${isRTL ? 'right-0' : 'left-0'}`}
       >
         {/* Header */}
         <div className="p-6 pb-4 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] border-b border-outline-variant/30 bg-gradient-to-br from-primary to-primary-container text-on-primary">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { onActivate } from '@/core/a11yKeyboard';
+import { springCss } from '@/components/motion/tokens';
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { useSettingsStore } from '../../../store/settingsStore';
@@ -185,7 +186,7 @@ export function Glossary() {
           position: relative;
           width: 100%;
           height: 100%;
-          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.6s ${springCss('smooth')};
           transform-style: preserve-3d;
           cursor: pointer;
         }

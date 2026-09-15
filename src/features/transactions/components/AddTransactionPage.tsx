@@ -189,7 +189,7 @@ export function AddTransactionPage() {
           <button 
             type="button"
             onClick={() => setType('expense')}
-            className={`flex-1 py-3 rounded-[1.5rem] text-xs font-black transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+            className={`flex-1 py-3 rounded-[1.5rem] text-xs font-black transition-all duration-500 ease-[var(--ease-snappy)] ${
               type === 'expense' 
                 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/30 scale-[1.02]' 
                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
@@ -200,7 +200,7 @@ export function AddTransactionPage() {
           <button 
             type="button"
             onClick={() => setType('income')}
-            className={`flex-1 py-3 rounded-[1.5rem] text-xs font-black transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+            className={`flex-1 py-3 rounded-[1.5rem] text-xs font-black transition-all duration-500 ease-[var(--ease-snappy)] ${
               type === 'income' 
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30 scale-[1.02]' 
                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
@@ -516,7 +516,7 @@ export function AddTransactionPage() {
               </div>
             </div>
             
-            <span className={`material-symbols-outlined text-slate-400 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${showAdvancedAccordion ? 'rotate-180 text-blue-500' : ''}`}>
+            <span className={`material-symbols-outlined text-slate-400 transition-transform duration-500 ease-[var(--ease-snappy)] ${showAdvancedAccordion ? 'rotate-180 text-blue-500' : ''}`}>
               expand_more
             </span>
           </button>
