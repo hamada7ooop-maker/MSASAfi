@@ -9,6 +9,8 @@ import { ExportService } from '../../reports/services/exportService';
 import { silentFail } from '../../../core/utils';
 import { RetirementSimulator } from './RetirementSimulator';
 import { NecessityBreakdown } from './NecessityBreakdown';
+import { AdvisorChallenges } from './AdvisorChallenges';
+import { AdvisorRecommendations } from './AdvisorRecommendations';
 
 import { oklabToRgb, oklchToRgb } from '../utils/pdfColors';
 
@@ -428,78 +430,9 @@ export function AdvisorPage() {
 
       <RetirementSimulator necessityStats={necessityStats} />
 
-      {/* Smart Challenges */}
-      {challenges.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
-              {t('ai.advisor.challenges')}
-            </h4>
-            <span className="px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-black rounded-full animate-pulse">
-              HOT
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-4">
-            {challenges.map((ch) => (
-              <div key={ch.id} className="bg-gradient-to-br from-surface to-surface-container-low border border-outline-variant/30 rounded-[2.5rem] p-6 shadow-sm group active:scale-[0.98] transition-all">
-                <div className="flex gap-5">
-                  <div className="w-16 h-16 rounded-[1.8rem] bg-amber-500/10 flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform duration-500">
-                    {ch.icon}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h5 className="text-base font-black text-slate-800 dark:text-white">{ch.title}</h5>
-                      <span className="text-xs font-black text-amber-600 tabular-nums">+{ch.reward} 🪙</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                      {ch.body}
-                    </p>
-                    <button 
-                      onClick={() => handleAcceptChallenge(ch.id)}
-                      className="mt-3 w-full py-3 rounded-2xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-black/10 hover:shadow-xl transition-all"
-                    >
-                      {t('ai.challenge.accept')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <AdvisorChallenges challenges={challenges} onAccept={handleAcceptChallenge} />
 
-      {/* Smart Recommendations */}
-      <section className="space-y-4">
-        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">
-          {t('ai.advisor.recs')}
-        </h4>
-        <div className="space-y-4">
-          {recommendations.map((rec) => (
-            <div 
-              key={rec.id} 
-              className={`p-6 rounded-[2.5rem] bg-white dark:bg-[#1e2124] border border-black/5 dark:border-white/5 shadow-sm flex gap-5 items-start relative overflow-hidden group hover:shadow-md transition-all ${rec.priority === 'high' ? 'border-l-4 border-l-rose-500' : ''}`}
-            >
-              <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
-                {rec.icon}
-              </div>
-              <div className="flex-1 space-y-2">
-                <h5 className="text-sm font-black text-slate-800 dark:text-white">{rec.title}</h5>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
-                  {rec.body}
-                </p>
-                {rec.action && (
-                  <button 
-                    onClick={() => navigate(`/${rec.action}`)}
-                    className="mt-2 text-blue-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:gap-2 transition-all"
-                  >
-                    {t('action.show')} <span className="material-symbols-outlined text-[14px]">chevron_right</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <AdvisorRecommendations recommendations={recommendations} onNavigate={(action) => navigate(`/${action}`)} />
 
       {/* Footer Insight */}
       <div className="py-10 text-center opacity-30 select-none">

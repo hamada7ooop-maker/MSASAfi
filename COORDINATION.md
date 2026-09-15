@@ -598,3 +598,31 @@ Continue Directive 20 with the next leverage cluster: deepen `AdvisorPage` decom
 ### Next Step Proposal
 
 Continue the same composition-root strategy on Advisor's presentation sections, then extract the remaining calculator/report orchestration only where characterization identifies a stable boundary. Do not alter the 70.07% ratchet downward.
+
+## Auditor Report — Directive 20 Batch 3: Advisor Presentation Decomposition — GREEN
+
+**Status: COMPLETE and GREEN.** This batch continued characterization-first decomposition without changing the Advisor interaction contract.
+
+### What shipped
+
+- Extracted the Smart Challenges presentation into `src/features/advisor/components/AdvisorChallenges.tsx`.
+- Extracted the Smart Recommendations presentation into `src/features/advisor/components/AdvisorRecommendations.tsx`.
+- Kept `AdvisorPage.tsx` as the orchestration root: challenge acceptance remains wired through `handleAcceptChallenge`, while recommendation actions preserve the existing route navigation callback.
+- The extracted components receive data and callbacks through explicit props and retain the existing translated labels, visual states, action buttons, and empty-state behavior.
+
+### Verification
+
+- Targeted Directive 20 suites: **24/24 tests passing across 3 suites**.
+- `tsc --noEmit`: clean.
+- Changed-file ESLint: clean.
+- Full `npm run ci:check`: **exit 0**; TypeScript, coverage, security, audit, lint, and production build all green.
+- Full coverage remains above the ratchet: **70.09% lines / 66.17% functions / 74.20% branches**.
+- Known jsdom canvas, `getComputedStyle`, and `scrollTo` warnings remain non-failing and unchanged.
+
+### Defect ledger
+
+- No behavioral defects surfaced. Existing characterization verified challenge acceptance and recommendation navigation after extraction.
+
+### Next Step Proposal
+
+Continue with the next stable Advisor presentation boundary only when characterization supports it; otherwise prioritize remaining zero-coverage clusters while preserving the current coverage ratchet and full CI gate.
