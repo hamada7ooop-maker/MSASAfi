@@ -3,11 +3,9 @@ import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
 import { AssetsEngine } from '../../../core/utils/assetsEngine';
 import type { Asset } from '../../../types';
-import { ExportService } from '../../reports/services/exportService';
 import { toast } from '../../../toast';
-import { silentFail } from '../../../core/utils';
-import { oklchToRgb, oklabToRgb } from '../../reports/utils/colorUtils';
 import { useFocusTrap } from '../../../core/hooks/useFocusTrap';
+import { exportElementAsPdf } from '../utils/exportElementAsPdf';
 
 export interface AssetDetailModalProps {
   asset: Asset;
@@ -51,156 +49,15 @@ export function AssetDetailModal({
     }
   };
 
-  const handleExportAssetPDF = async () => {
-    setIsExporting(true);
-    const element = document.getElementById('asset-detail-print-container');
-    if (!element) { setIsExporting(false); return; }
-
-    // تزييف مؤقت لـ getComputedStyle لتصفية وتحويل ألوان oklch و oklab إلى rgb لتفادي استثناءات html2canvas باستخدام Proxy محكم
-    const originalGetComputedStyle = window.getComputedStyle;
-    window.getComputedStyle = function (el: Element, pseudoElt?: string | null): CSSStyleDeclaration {
-      const style = originalGetComputedStyle(el, pseudoElt);
-      
-      const colorProps = [
-        'backgroundColor', 'color', 'borderColor', 
-        'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
-        'outlineColor', 'fill', 'stroke'
-      ];
-
-      return new Proxy(style, {
-        get(target, prop) {
-          if (prop === 'getPropertyValue') {
-            return function(propertyName: string) {
-              const val = target.getPropertyValue(propertyName);
-              if (typeof val === 'string') {
-                if (val.includes('oklch')) return oklchToRgb(val);
-                if (val.includes('oklab')) return oklabToRgb(val);
-              }
-              return val;
-            };
-          }
-          
-          const value = Reflect.get(target, prop);
-          if (typeof value === 'function') {
-            return value.bind(target);
-          }
-          
-          if (typeof prop === 'string') {
-            const isColorProp = colorProps.includes(prop) || 
-              prop.toLowerCase().includes('color') || 
-              prop === 'fill' || prop === 'stroke';
-            if (isColorProp && typeof value === 'string') {
-              if (value.includes('oklch')) return oklchToRgb(value);
-              if (value.includes('oklab')) return oklabToRgb(value);
-            }
-          }
-          
-          return value;
-        }
-      });
-    };
-
-    // حفظ الأنماط الأصلية للعناصر التي تعيق html2canvas (مثل الـ backdropFilter)
-    const savedStyles: { el: HTMLElement; backdropFilter: string; background: string }[] = [];
-    const allEls = element.querySelectorAll<HTMLElement>('*');
-    allEls.forEach(el => {
-      const cs = window.getComputedStyle(el);
-      if (cs.backdropFilter && cs.backdropFilter !== 'none') {
-        savedStyles.push({ el, backdropFilter: el.style.backdropFilter, background: el.style.background });
-        el.style.backdropFilter = 'none';
-        el.style.setProperty('-webkit-backdrop-filter', 'none');
-        if (!el.style.background) el.style.background = '#ffffff';
-      }
+  const handleExportAssetPDF = () =>
+    exportElementAsPdf({
+      elementId: 'asset-detail-print-container',
+      fileName: `masarifi_asset_${asset.name.replace(/[^a-z0-9؀-ۿ]/gi, '_').slice(0, 30)}_${new Date().toISOString().split('T')[0]}.pdf`,
+      successToast: t('report.exportPdfOk') || 'تم تصدير تفاصيل الأصل بنجاح ✅',
+      errorToast: t('report.exportFail') || 'فشل التصدير',
+      errorLabel: 'Asset detail PDF export error',
+      onExportingChange: setIsExporting,
     });
-
-    const origStyle = {
-      backdropFilter: element.style.backdropFilter,
-      background: element.style.background,
-      boxShadow: element.style.boxShadow,
-    };
-    element.style.backdropFilter = 'none';
-    element.style.setProperty('-webkit-backdrop-filter', 'none');
-    element.style.background = document.documentElement.classList.contains('dark') ? '#1e2124' : '#ffffff';
-    element.style.boxShadow = 'none';
-
-    // حفظ تنسيقات العرض والأبعاد الأصلية للحاوية لفرض مظهر سطح المكتب
-    const originalWidth = element.style.width;
-    const originalMaxWidth = element.style.maxWidth;
-    const originalMinWidth = element.style.minWidth;
-
-    element.classList.add('force-desktop-print');
-    element.style.width = '1200px';
-    element.style.maxWidth = '1200px';
-    element.style.minWidth = '1200px';
-
-    // إعطاء مهلة قصيرة للمتصفح لإعادة رسم الحاوية بالتنسيق العريض الجديد قبل الالتقاط
-    await new Promise(resolve => setTimeout(resolve, 50));
-
-    try {
-      const { jsPDF } = await import('jspdf');
-      const { default: html2canvas } = await import('html2canvas');
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#1e2124' : '#ffffff',
-        foreignObjectRendering: false,
-        ignoreElements: (el: Element) => el.classList.contains('no-print'),
-      });
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const doc = new jsPDF('p', 'mm', 'a4');
-      let heightLeft = imgHeight;
-      let position = 0;
-      doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pageHeight;
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        doc.addPage();
-        doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pageHeight;
-      }
-      const dateStr = new Date().toISOString().split('T')[0];
-      const safeName = asset.name.replace(/[^a-z0-9؀-ۿ]/gi, '_').slice(0, 30);
-      const fileName = `masarifi_asset_${safeName}_${dateStr}.pdf`;
-      const { Capacitor } = await import('@capacitor/core');
-      if (Capacitor.isNativePlatform()) {
-        const pdfBase64 = doc.output('datauristring').split(',')[1];
-        await ExportService.saveFileNative(pdfBase64, fileName, 'application/pdf', true);
-      } else {
-        doc.save(fileName);
-      }
-      toast(t('report.exportPdfOk') || 'تم تصدير تفاصيل الأصل بنجاح ✅', 'success');
-    } catch (error) {
-      silentFail('Asset detail PDF export error')(error);
-      toast(t('report.exportFail') || 'فشل التصدير', 'error');
-    } finally {
-      // استعادة الدالة الأصلية لـ getComputedStyle
-      window.getComputedStyle = originalGetComputedStyle;
-
-      // استعادة فئات التجاوز وعرض سطح المكتب الأصلي
-      element.classList.remove('force-desktop-print');
-      element.style.width = originalWidth;
-      element.style.maxWidth = originalMaxWidth;
-      element.style.minWidth = originalMinWidth;
-
-      // استعادة الأنماط الأصلية
-      savedStyles.forEach(({ el, backdropFilter, background }) => {
-        el.style.backdropFilter = backdropFilter;
-        el.style.setProperty('-webkit-backdrop-filter', backdropFilter);
-        el.style.background = background;
-      });
-
-      element.style.backdropFilter = origStyle.backdropFilter;
-      element.style.setProperty('-webkit-backdrop-filter', origStyle.backdropFilter);
-      element.style.background = origStyle.background;
-      element.style.boxShadow = origStyle.boxShadow;
-      setIsExporting(false);
-    }
-  };
 
   return (
     <>

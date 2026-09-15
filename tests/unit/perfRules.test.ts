@@ -60,6 +60,10 @@ describe('§5.1 rule 3 — every long screen renders its entries as cv-items', (
     ['src/features/debts/components/InstallmentsCard.tsx', 1],
     ['src/features/settings/components/cards/AutoClassificationCard.tsx', 1],
     ['src/features/glossary/components/Glossary.tsx', 1],
+    // Extracted by the deferred decomposition — the cards kept their
+    // virtualization as they became standalone modules.
+    ['src/features/assets/components/AssetCard.tsx', 1],
+    ['src/features/investments/components/InvestmentCard.tsx', 1],
   ];
 
   it.each(targets)('%s carries at least %i cv-item line(s)', (file, min) => {
