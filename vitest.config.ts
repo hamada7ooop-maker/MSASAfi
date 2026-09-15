@@ -23,6 +23,9 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx,js,jsx}', 'tests/**/*.test.{ts,tsx,js,jsx}'],
     fileParallelism: false,
     testTimeout: 20000,
+    onConsoleLog() {
+      return false;
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
