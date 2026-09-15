@@ -2623,6 +2623,8 @@ export const locale_ms = {
   "settings.separator": "Pemisah Nombor",
   "settings.shakeToBlur": "Goncang untuk Kabur",
   "settings.shakeToBlurSub": "Goncangkan telefon anda dengan cepat untuk mengaburkan baki kewangan anda dengan selamat",
+  "settings.haptics": "Maklum Balas Haptik",
+  "settings.hapticsSub": "Gegelutan halus apabila mengesahkan tindakan kewangan dan interaksi penting",
   "settings.shop": "Tema & Penampilan",
   "settings.signOut": "Log Keluar",
   "settings.simpleMode": "Mod Mudah (Permulaan)",

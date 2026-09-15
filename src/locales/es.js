@@ -2623,6 +2623,8 @@ export const locale_es = {
   "settings.separator": "Separadores Numéricos",
   "settings.shakeToBlur": "Agitar para Difuminar",
   "settings.shakeToBlurSub": "Agite rápidamente su teléfono para difuminar sus saldos financieros de forma segura",
+  "settings.haptics": "Respuesta háptica",
+  "settings.hapticsSub": "Vibraciones sutiles al confirmar acciones financieras e interacciones clave",
   "settings.shop": "Temas y apariencia",
   "settings.signOut": "Desconectar",
   "settings.simpleMode": "Modo Simple (Principiante)",

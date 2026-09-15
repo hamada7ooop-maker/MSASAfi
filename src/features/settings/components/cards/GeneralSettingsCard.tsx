@@ -351,6 +351,20 @@ export function GeneralSettingsCard({ settings, updateSetting }: GeneralSettings
           />
         </Row>
 
+        {/* Haptic Feedback — Directive 19 */}
+        <Row
+          icon="vibration"
+          iconColor="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 text-teal-600 dark:text-teal-400"
+          label={t('settings.haptics')}
+          sublabel={t('settings.hapticsSub')}
+        >
+          <Toggle
+            value={settings.hapticsEnabled !== false}
+            onChange={() => updateSetting('hapticsEnabled', !settings.hapticsEnabled)}
+            isLTR={isLTR}
+          />
+        </Row>
+
         {/* Simple Mode */}
         <Row
           icon="toggle_off"

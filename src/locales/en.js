@@ -2623,6 +2623,8 @@ export const locale_en = {
   "settings.separator": "Number Separator",
   "settings.shakeToBlur": "Shake to Blur",
   "settings.shakeToBlurSub": "Quickly shake your phone to securely blur your financial balances",
+  "settings.haptics": "Haptic Feedback",
+  "settings.hapticsSub": "Subtle vibration responses when confirming financial actions and key interactions",
   "settings.shop": "Themes & Appearance",
   "settings.signOut": "Sign Out",
   "settings.simpleMode": "Simple Mode (Beginner)",

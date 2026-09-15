@@ -2623,6 +2623,8 @@ export const locale_fr = {
   "settings.separator": "Séparateurs de nombres",
   "settings.shakeToBlur": "Secouer pour Flouter",
   "settings.shakeToBlurSub": "Secouez rapidement votre téléphone pour flouter vos soldes financiers en toute sécurité",
+  "settings.haptics": "Retour haptique",
+  "settings.hapticsSub": "Vibrations subtiles lors de la confirmation d'actions financières et d'interactions clés",
   "settings.shop": "Thèmes et Apparence",
   "settings.signOut": "Se déconnecter",
   "settings.simpleMode": "Mode Simple (Débutant)",

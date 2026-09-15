@@ -68,7 +68,7 @@ export function buildSettingsSections(ctx: SettingsSectionContext): SettingsSect
         'settings.currencyDisplay', 'settings.numbers', 'settings.decimals', 
         'settings.separator', 'settings.sectionCalendar', 'settings.startOfMonth', 
         'settings.firstDayOfWeek', 'settings.sectionAppearance', 'settings.fontSize', 
-        'settings.sectionProductivity', 'settings.shakeToBlur', 'settings.simpleMode', 
+        'settings.sectionProductivity', 'settings.shakeToBlur', 'settings.haptics', 'settings.simpleMode', 
         'settings.hourlyRatePh', 'settings.notifications'
       ],
       keywords: [

@@ -2719,6 +2719,8 @@ export const locale_it = {
   "settings.separator": "Separatore numerico",
   "settings.shakeToBlur": "Scuoti per Sfocare",
   "settings.shakeToBlurSub": "Scuoti rapidamente il telefono per oscurare in sicurezza i tuoi saldi",
+  "settings.haptics": "Feedback aptico",
+  "settings.hapticsSub": "Vibrazioni discrete alla conferma di azioni finanziarie e interazioni chiave",
   "settings.shop": "Temi e Aspetto",
   "settings.signOut": "Disconnessione",
   "settings.simpleMode": "Modalità Semplice (Principianti)",

@@ -2631,6 +2631,8 @@ export const locale_ar = {
   "settings.separator": "فواصل الأرقام",
   "settings.shakeToBlur": "الهز لإخفاء الأرقام",
   "settings.shakeToBlurSub": "هز الهاتف بسرعة لإخفاء أرصدتك المالية بشكل آمن",
+  "settings.haptics": "الاهتزاز اللمسي",
+  "settings.hapticsSub": "رد فعل اهتزازي خفيف عند تأكيد العمليات المالية والتفاعلات المهمة",
   "settings.shop": "الثيمات والمظهر",
   "settings.signOut": "تسجيل الخروج",
   "settings.simpleMode": "الوضع البسيط (للمبتدئين)",

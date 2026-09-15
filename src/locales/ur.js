@@ -2623,6 +2623,8 @@ export const locale_ur = {
   "settings.separator": "نمبر علیحدہ کرنے والے",
   "settings.shakeToBlur": "دھندلا کرنے کے لیے ہلائیں",
   "settings.shakeToBlurSub": "اپنے مالیاتی بیلنس کو محفوظ طریقے سے دھندلا کرنے کے لیے اپنے فون کو تیزی سے ہلائیں",
+  "settings.haptics": "ہیپٹک فیڈ بیک",
+  "settings.hapticsSub": "مالی کارروائیوں اور اہم تعاملات کی تصدیق پر ہلکی وائبریشن",
   "settings.shop": "تھیمز اور ظاهری شکل",
   "settings.signOut": "سائن آؤٹ کریں۔",
   "settings.simpleMode": "سادہ موڈ (مبتدی)",

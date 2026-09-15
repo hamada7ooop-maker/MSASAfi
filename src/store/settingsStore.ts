@@ -13,6 +13,7 @@ interface SettingsState extends AppSettings {
   setCurrencyDisplayMode: (m: AppSettings['currencyDisplayMode']) => void;
   setIncognito: (v: boolean) => void;
   setDbEncryption: (v: boolean) => void;
+  setHapticsEnabled: (v: boolean) => void;
   setDarkPalette: (p: string) => void;
   setLightPalette: (p: string) => void;
   setHomeOrder: (o: SettingsState['homeOrder']) => void;
@@ -78,6 +79,7 @@ export const DEFAULT_SETTINGS = {
   incognito: false,
   dbEncryption: true,
   useBiometric: false,
+  hapticsEnabled: true,
   aiResponseLength: 'short',
   firstDayOfMonth: 1,
   firstDayOfWeek: 0,
@@ -142,6 +144,7 @@ export const useSettingsStore = create<SettingsState>()(
       setCurrencyDisplayMode: (m) => set({ currencyDisplayMode: m }),
       setIncognito: (v) => set({ incognito: v }),
       setDbEncryption: (v) => set({ dbEncryption: v }),
+      setHapticsEnabled: (v) => set({ hapticsEnabled: v }),
       setDarkPalette: (p) => set({ darkPalette: p }),
       setLightPalette: (p) => set({ lightPalette: p }),
       setHomeOrder: (o) => set({ homeOrder: o }),

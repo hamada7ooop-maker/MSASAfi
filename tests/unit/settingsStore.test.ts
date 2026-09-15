@@ -171,4 +171,28 @@ describe('Settings Store Unit Tests (settingsStore.ts)', () => {
       expect(useSettingsStore.getState().homeOrder).toEqual(DEFAULT_SETTINGS.homeOrder);
     });
   });
+
+  describe('hapticsEnabled — Directive 19 vocabulary master switch', () => {
+    it('defaults to enabled', () => {
+      expect(DEFAULT_SETTINGS.hapticsEnabled).toBe(true);
+      expect(useSettingsStore.getState().hapticsEnabled).toBe(true);
+    });
+
+    it('flips via the setter and persists through rehydrate', async () => {
+      useSettingsStore.getState().setHapticsEnabled(false);
+      expect(useSettingsStore.getState().hapticsEnabled).toBe(false);
+      await useSettingsStore.persist.rehydrate();
+      expect(useSettingsStore.getState().hapticsEnabled).toBe(false);
+      useSettingsStore.getState().setHapticsEnabled(true);
+      expect(useSettingsStore.getState().hapticsEnabled).toBe(true);
+    });
+
+    it('heals old persists that predate the key: defaults to enabled', async () => {
+      const legacy = { state: { language: 'en', theme: 'dark' }, version: 0 };
+      localStorage.setItem('masarifi-settings-v2', JSON.stringify(legacy));
+      await useSettingsStore.persist.rehydrate();
+      expect(useSettingsStore.getState().hapticsEnabled).toBe(true);
+      expect(useSettingsStore.getState().language).toBe('en');
+    });
+  });
 });

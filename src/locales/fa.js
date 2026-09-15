@@ -2625,6 +2625,8 @@ export const locale_fa = {
   "settings.separator": "جداکننده اعداد",
   "settings.shakeToBlur": "تکان دادن برای محو کردن",
   "settings.shakeToBlurSub": "گوشی خود را به سرعت تکان دهید تا موجودی‌های مالی شما به طور ایمن محو شوند",
+  "settings.haptics": "بازخورد لمسی",
+  "settings.hapticsSub": "لرزش‌های ظریف هنگام تأیید اقدامات مالی و تعاملات مهم",
   "settings.shop": "تم ها و ظاهر",
   "settings.signOut": "از سیستم خارج شوید",
   "settings.simpleMode": "حالت ساده (مبتدی)",

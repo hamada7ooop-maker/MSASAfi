@@ -2623,6 +2623,8 @@ export const locale_tr = {
   "settings.separator": "Sayı Ayırıcılar",
   "settings.shakeToBlur": "Bulanıklaştırmak için Salla",
   "settings.shakeToBlurSub": "Finansal bakiyelerinizi güvenli bir şekilde bulanıklaştırmak için telefonunuzu hızlıca sallayın",
+  "settings.haptics": "Dokunsal Geri Bildirim",
+  "settings.hapticsSub": "Finansal işlemleri ve önemli etkileşimleri onaylarken hafif titreşim yanıtları",
   "settings.shop": "Temalar ve Görünüm",
   "settings.signOut": "Oturumu Kapat",
   "settings.simpleMode": "Basit Mod (Yeni Başlayanlar)",

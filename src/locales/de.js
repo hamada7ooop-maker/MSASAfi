@@ -2623,6 +2623,8 @@ export const locale_de = {
   "settings.separator": "Zahlentrennzeichen",
   "settings.shakeToBlur": "Schütteln zum Verwischen",
   "settings.shakeToBlurSub": "Schütteln Sie Ihr Telefon schnell, um Ihre Finanzsalden sicher zu verwischen",
+  "settings.haptics": "Haptisches Feedback",
+  "settings.hapticsSub": "Dezente Vibrationen beim Bestätigen von Finanzaktionen und wichtigen Interaktionen",
   "settings.shop": "Themen und Erscheinungsbild",
   "settings.signOut": "Abmelden",
   "settings.simpleMode": "Einfacher Modus (Anfänger)",

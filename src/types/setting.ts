@@ -68,6 +68,8 @@ export interface AppSettings {
   incognito: boolean;
   dbEncryption: boolean;
   useBiometric: boolean;
+  /** Directive 19 — master switch for the unified haptic vocabulary layer. */
+  hapticsEnabled: boolean;
   aiResponseLength: 'short' | 'long';
   firstDayOfMonth: number;
   firstDayOfWeek: number;

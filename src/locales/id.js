@@ -2624,6 +2624,8 @@ export const locale_id = {
   "settings.separator": "Pemisah Angka",
   "settings.shakeToBlur": "Goyang untuk Memburamkan",
   "settings.shakeToBlurSub": "Goyangkan ponsel Anda dengan cepat untuk memburamkan saldo keuangan Anda dengan aman",
+  "settings.haptics": "Umpan Balik Haptik",
+  "settings.hapticsSub": "Getaran halus saat mengonfirmasi tindakan keuangan dan interaksi penting",
   "settings.shop": "Tema & Penampilan",
   "settings.signOut": "Keluar",
   "settings.simpleMode": "Mode Sederhana (Pemula)",

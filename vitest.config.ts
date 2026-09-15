@@ -67,7 +67,11 @@ export default defineConfig({
       //   (nominal test file replaced with a real one), zakat banner
       //   38.5%→85.7%. Measured 64.01/59.02/48.11 → raised to
       //   63.9/58.8/48.0. Ladder complete for this directive round.
-      thresholds: { lines: 63.9, functions: 58.8, branches: 48.0 }
+      // - Directive 19 Batch 0 (2026-09-15): +40 tests (1152 × 121); motion
+      //   tokens, NumberText, GlassPanel, haptics vocabulary + settings
+      //   switch fully covered. Measured 64.16/59.22/48.33 → raised to
+      //   64.1/59.2/48.3.
+      thresholds: { lines: 64.1, functions: 59.2, branches: 48.3 }
     },
   },
 });
