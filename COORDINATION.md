@@ -374,7 +374,33 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 
 **+150 tests across the directive. Nine consecutive ratchet raises, never lowered. Eight real defects found by the suites written to prevent regression. Zero behavioral regressions — measured, not promised, in every batch.**
 
+### The one remaining gate — yours (as of Batch 5; superseded by the addendum below)
+
+## Auditor Report — Directive 19 / Closing Addendum (§5.1 Perf Rules): COMPLETE & GREEN — v23.3.1
+
+**What this is**: the three §5.1 rules that the approved proposal listed but no batch had delivered — delivered now as static-pin CI rules instead of PR-review memoranda.
+
+1. **Rule 3 — long screens & card containment**: `cv-item` / `cv-item-lg` utilities in index.css (`content-visibility: auto` + `contain-intrinsic-size: auto`, browser-remembered heights) applied to the six long lists — TransactionItem row, RecurringTransactions (both item types), AuditLog entries, InstallmentsCard items, Glossary flashcards (lg only, no contain — the 3D flip must not be clipped). `contain-card` (`contain: layout paint`) on the in-flow cards with closed bounds only.
+2. **Rule 2 — blur budget**: the worst kind of violation found and fixed — **the repeated list item itself was a glass surface** in five places (Recurring ×2, AuditLog, Installments, AutoClassification rules): a 20-row list was 20 live backdrop-filter layers. Blur removed from those items (near-opaque backgrounds over near-flat page backgrounds — visually inert; your eye remains the gate). Currencies' bounded carousel (~6 cards, 1–2 visible) stays within budget.
+3. **Rule 5 — will-change**: the app's only standing copy (`.card-stable`, duplicated in two CSS files) deleted — `translateZ(0)` already promotes the layer; a permanent will-change is a layer the GPU never gets back. **Current prescription: ZERO will-change in all of src**, enforced by a walking guardian test; any future exception must amend the test with its justification.
+4. **Sealed by tests, not memory**: `tests/unit/perfRules.test.ts` — 15 static pins (the three utilities in CSS, cv-item present in every target list, no glass on any virtualized item, fixed files' glass counts, zero will-change tree-wide).
+5. **Numbers**: **1317/1317 × 134** (+15) · coverage 66.95/61.67/50.31 above the untouched 66.7/61.5/50.1 ratchet · ci:check exit 0 · build 10.08s · version **23.3.1**.
+
+### Final ledger (amended)
+
+| Batch | Delivered | Tests | Ratchet | Real defects fixed |
+|---|---|---|---|---|
+| 0 · Enablement | Obsidian tokens, radii/elevation, motion tokens, NumberText/GlassPanel/haptics + settings switch | 1152 × 121 | 64.1 | (baseline) |
+| 1 · Dashboard | HeroBalanceCard + AmbientGlow + NumberFlow, PulseStrip, IBM Plex Arabic physically bundled, 4 font families removed | 1193 × 125 | 64.4 | 3 (arabic-subset drop, NotificationType, aria-hidden) |
+| 2 · Quick Add | Thumb-first sheet (useSheetDrag), haptic vocabulary in the financial flow, useHaptic migrated | 1225 × 128 | 64.8 | 1 (close-timer re-open race) |
+| 3 · Wallet | 553→176+6 pieces, swipe chain (RTL-aware), entrance springs, wallet haptics | 1249 × 129 | 65.0 | 2 (loadCards dep loop, flick-at-edge clamp) |
+| 4 · Charts | chartTheme (semantic pair, glass tooltips, faint gridlines, motion gate) on all four surfaces | 1281 × 130 | 65.7 | 2 (eager chart.js import, dead Inter font) |
+| 5 · Closing | Ladder trio lifted, ease tokens + drift-proof pins, last beziers swept, dead CSS removed, v23.3.0 | **1302 × 131** | **66.7/61.5/50.1** | dead CSS removed |
+| 5+ · Addendum | §5.1 rules 2/3/5 delivered as CI pins: cv-item ×6 lists, contain-card, per-item glass ×5 removed, zero will-change, v23.3.1 | **1317 × 134** | 66.7/61.5/50.1 (held) | per-item glass blowout |
+
+**+165 tests across the directive. Nine ratchet raises, never lowered — and held by the addendum. The §5.1 60FPS rulebook is now fully machine-enforced.**
+
 ### The one remaining gate — yours
 
-1. **(Owner) Build & sign v23.3.0** via your `@abc` line. The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, and the drawer on its spring.
+1. **(Owner) Build & sign v23.3.1** via your `@abc` line (it includes this addendum). The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, the drawer on its spring — and a fast scroll through a long transactions list, which is what this addendum bought you.
 2. On your confirmation, the directive closes officially and the ladder debt is a memory.
