@@ -16,6 +16,8 @@ import { parseSMS } from '../../services/smsService';
 import { checkMilestone } from '../../core/loyalty';
 import { silentFail } from '../../core/utils';
 import { useFocusTrap } from '../../core/hooks/useFocusTrap';
+import { useSheetDrag } from '../../core/hooks/useSheetDrag';
+import { touch } from '../../core/haptics';
 
 /**
  * QuickAddModal Component - React port of the legacy Quick Add feature.
@@ -34,6 +36,11 @@ export function QuickAddModal() {
     }))
   );
   const containerRef = useFocusTrap<HTMLDivElement>(isQuickAddOpen);
+  // Directive 19 Batch 2 — the thumb-first sheet: grab the handle, pull down.
+  const closeModalRef = useRef<() => void>(() => {});
+  const { dragY, transition, handlers: dragHandlers } = useSheetDrag({
+    onDismiss: () => closeModalRef.current(),
+  });
   const { unlockedItems } = useSettingsStore(
     useShallow((s) => ({ unlockedItems: s.unlockedItems }))
   );
@@ -126,16 +133,19 @@ export function QuickAddModal() {
   const handleSave = async () => {
     const numAmount = parseNum(amount);
     if (!numAmount || numAmount <= 0) {
+      touch.error();
       toast(t('txn.errAmount'), 'error');
       return;
     }
 
     if (!selectedCategory) {
+      touch.error();
       toast(t('txn.errCategory'), 'error');
       return;
     }
 
     if (accounts.length === 0) {
+      touch.error();
       toast(t('account.noAccounts'), 'error');
       return;
     }
@@ -143,6 +153,7 @@ export function QuickAddModal() {
     const txnYear = new Date(datetime).getFullYear();
     const { lockedYears = [] } = useSettingsStore.getState();
     if (lockedYears.includes(txnYear)) {
+      touch.error();
       toast(t('settings.yearLockedError', { year: String(txnYear) }) || `السنة المالية ${txnYear} مغلقة ومؤرشفة! لا يمكن تعديل أو إضافة معاملات بها.`, 'error');
       return;
     }
@@ -159,6 +170,7 @@ export function QuickAddModal() {
           date: txnDate,
           // Don't overwrite account if editing unless we build an account selector
         });
+        touch.confirm();
         toast(t('txn.updated') || 'تم التحديث', 'success');
       } else {
         await TransactionRepository.add({
@@ -170,6 +182,7 @@ export function QuickAddModal() {
           accountId: defaultAccount?.id,
           account: defaultAccount?.name,
         });
+        touch.confirm();
         toast(t('txn.saved'), 'success');
         checkMilestone('FIRST_TRANSACTION');
       }
@@ -194,6 +207,7 @@ export function QuickAddModal() {
         }
       }
       if (confirm(t('txn.deleteOne') || 'هل أنت متأكد من الحذف؟')) {
+        touch.destruct();
         await TransactionRepository.delete(editingTransactionId);
         toast(t('txn.deleted') || 'تم الحذف', 'error');
         closeModal();
@@ -206,11 +220,19 @@ export function QuickAddModal() {
   const closeModal = () => {
     setQuickAddOpen(false);
     setTimeout(() => {
+      // Guard: if the sheet was re-opened while the close animation timer was
+      // still pending, this cleanup must NOT wipe the fresh session's state
+      // (found by the Batch 2 haptics suite: a leaked timer from a previous
+      // close raced an immediate edit-open and nulled editingTransactionId).
+      if (useAppStore.getState().isQuickAddOpen) return;
       setEditingTransactionId(null);
       setAmount('');
       setShowScanner(false);
     }, 300); // Wait for transition
   };
+  // The drag hook lives above (with the other hooks) but dismisses through
+  // this stable callback — kept in sync so hook order never moves.
+  closeModalRef.current = closeModal;
 
 
   const handleScanClick = () => {
@@ -258,6 +280,7 @@ export function QuickAddModal() {
       const cat = await classifyTransactionSmart(result.description || smsText);
       if (cat) setSelectedCategory(cat);
       
+      touch.light();
       toast(t('txn.smsParsed') || 'تم تحليل الرسالة', 'success');
       setShowSMSInput(false);
       setSmsText('');
@@ -282,8 +305,14 @@ export function QuickAddModal() {
         aria-modal="true"
         aria-labelledby="quick-add-title"
         className="bottom-sheet-content relative bg-gradient-to-b from-white to-slate-50 dark:from-[#1c1f23] dark:to-[#141618] animate-in slide-in-from-bottom-full duration-500"
+        style={{ transform: dragY > 0 ? `translateY(${dragY}px)` : undefined, transition }}
       >
-        <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6" aria-hidden="true"></div>
+        <div
+          data-testid="sheet-handle"
+          className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6 cursor-grab touch-none"
+          aria-hidden="true"
+          {...dragHandlers}
+        ></div>
 
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -307,7 +336,7 @@ export function QuickAddModal() {
         {/* Type Toggle */}
         <div className="flex p-1.5 bg-slate-100 dark:bg-slate-800/50 rounded-2xl mb-6" role="group" aria-label={t('txn.type') || 'Transaction Type'}>
           <button 
-            onClick={() => setType('expense')}
+            onClick={() => { setType('expense'); touch.select(); }}
             aria-pressed={type === 'expense'}
             className={`flex-1 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${type === 'expense' ? 'bg-white dark:bg-[#2a2d31] shadow-md text-red-600' : 'text-slate-500'}`}
           >
@@ -315,7 +344,7 @@ export function QuickAddModal() {
             {t('txn.expense')}
           </button>
           <button 
-            onClick={() => setType('income')}
+            onClick={() => { setType('income'); touch.select(); }}
             aria-pressed={type === 'income'}
             className={`flex-1 py-3 rounded-xl text-sm font-black transition-all flex items-center justify-center gap-2 ${type === 'income' ? 'bg-white dark:bg-[#2a2d31] shadow-md text-green-600' : 'text-slate-500'}`}
           >
@@ -402,7 +431,7 @@ export function QuickAddModal() {
             {filteredCategories.map(c => (
               <button 
                 key={c.id}
-                onClick={() => setSelectedCategory(c.name)}
+                onClick={() => { setSelectedCategory(c.name); touch.light(); }}
                 className="flex flex-col items-center gap-1.5 min-w-[72px] group"
               >
                 <div 
