@@ -18,12 +18,20 @@ function fontOptimizerPlugin(): Plugin {
       // 1. Drop legacy .woff fallback URLs (modern WebView/browsers only need .woff2)
       const transformed = code.replace(/,\s*url\([^)]+\.woff\)\s*format\(['"]woff['"]\)/g, '');
 
-      // 2. Drop unused non-Arabic / non-Latin subsets (Cyrillic, Greek, Vietnamese)
+      // 2. Keep only the subsets this app actually renders: arabic, latin,
+      //    latin-ext. POSITIVE match on the file name inside each block's own
+      //    src url — the old negative filter split on '@font-face', and each
+      //    block inherited the NEXT subset's leading comment in its tail, so
+      //    the arabic block carried a stray 'cyrillic-ext' comment and was
+      //    silently dropped (an Arabic app shipping without its Arabic
+      //    glyphs). Comment placement can't lie about which file a block
+      //    references.
       const blocks = transformed.split('@font-face');
       const filtered = blocks.filter((block, idx) => {
         if (idx === 0) return true;
-        const lower = block.toLowerCase();
-        return !lower.includes('cyrillic') && !lower.includes('greek') && !lower.includes('vietnamese');
+        const m = block.match(/url\([^)]*-([a-z]+(?:-ext)?)-\d+-normal\.woff2\)/);
+        if (!m) return true; // unrecognized shape — keep (defensive)
+        return m[1] === 'arabic' || m[1] === 'latin' || m[1] === 'latin-ext';
       });
 
       return {
