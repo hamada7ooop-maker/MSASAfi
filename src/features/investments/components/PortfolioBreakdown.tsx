@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { getChart } from '../../../core/charts';
+import { INVESTMENT_COLORS, glassTooltip, chartAnimation, CHART_FONT } from '../../../core/chartTheme';
 import type { Investment } from '@/types';
 
 interface PortfolioBreakdownProps {
@@ -31,11 +32,10 @@ export function PortfolioBreakdown({ investments }: PortfolioBreakdownProps) {
       const labels = Object.keys(groups).map(k => t(`investment.${k}`) || k);
       const data = Object.values(groups);
       
-      const COLORS: Record<string, string> = {
-        stocks: '#3b82f6', crypto: '#f59e0b', real_estate: '#10b981',
-        gold: '#fbbf24', reit: '#6366f1', other: '#8b5cf6'
-      };
-      const backgroundColor = Object.keys(groups).map(k => COLORS[k] || COLORS.other);
+      // The allocation palette moved to the unified chart theme. The legend
+      // font was 'Inter' — a family REMOVED from the bundle in Batch 1, so it
+      // silently fell back; it now asks for the app font by name.
+      const backgroundColor = Object.keys(groups).map(k => INVESTMENT_COLORS[k] || INVESTMENT_COLORS.other);
 
       chartInstance.current = new ChartJS(canvasRef.current, {
         type: 'doughnut',
@@ -51,23 +51,20 @@ export function PortfolioBreakdown({ investments }: PortfolioBreakdownProps) {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: chartAnimation(),
           plugins: {
             legend: {
               display: true,
               position: 'bottom',
               labels: {
-                font: { family: "'Inter', sans-serif", size: 10, weight: 'bold' },
+                font: { family: CHART_FONT, size: 10, weight: 'bold' },
                 padding: 20,
                 usePointStyle: true,
                 pointStyle: 'circle',
                 color: '#64748b'
               }
             },
-            tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              cornerRadius: 12,
-              padding: 12
-            }
+            tooltip: glassTooltip()
           },
           cutout: '70%'
         }

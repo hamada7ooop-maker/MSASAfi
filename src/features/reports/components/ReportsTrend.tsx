@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useI18n } from '../../../i18n/index';
 import { getChart } from '../../../core/charts';
+import { SEMANTIC, glassTooltip, axisTicks, softFill, chartAnimation, CHART_FONT } from '../../../core/chartTheme';
 import type { MonthTrendStats } from '../hooks/useReportsData';
 
 interface ReportsTrendProps {
@@ -36,26 +37,28 @@ export function ReportsTrend({ data }: ReportsTrendProps) {
             {
               label: t('home.income'),
               data: incomeData,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderColor: SEMANTIC.income,
+              backgroundColor: (context) =>
+                softFill(context.chart.ctx, context.chart.chartArea, SEMANTIC.income),
               fill: true,
               tension: 0.4,
               borderWidth: 3,
               pointRadius: 4,
-              pointBackgroundColor: '#10b981',
+              pointBackgroundColor: SEMANTIC.income,
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
             },
             {
               label: t('home.expense'),
               data: expenseData,
-              borderColor: '#f43f5e',
-              backgroundColor: 'rgba(244, 63, 94, 0.05)',
+              borderColor: SEMANTIC.expense,
+              backgroundColor: (context) =>
+                softFill(context.chart.ctx, context.chart.chartArea, SEMANTIC.expense, 0.16),
               fill: true,
               tension: 0.4,
               borderWidth: 3,
               pointRadius: 4,
-              pointBackgroundColor: '#f43f5e',
+              pointBackgroundColor: SEMANTIC.expense,
               pointBorderColor: '#fff',
               pointBorderWidth: 2,
             }
@@ -64,6 +67,7 @@ export function ReportsTrend({ data }: ReportsTrendProps) {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: chartAnimation(),
           plugins: {
             legend: {
               display: true,
@@ -72,29 +76,19 @@ export function ReportsTrend({ data }: ReportsTrendProps) {
                 usePointStyle: true,
                 padding: 20,
                 font: {
-                  family: "'IBM Plex Sans Arabic', sans-serif",
+                  family: CHART_FONT,
                   size: 11,
                   weight: 'bold'
                 },
                 color: '#94a3b8'
               }
             },
-            tooltip: {
-              backgroundColor: '#1e293b',
-              padding: 12,
-              titleFont: { size: 14, weight: 'bold' },
-              bodyFont: { size: 13 },
-              cornerRadius: 12,
-              displayColors: true
-            }
+            tooltip: glassTooltip()
           },
           scales: {
             x: {
               grid: { display: false },
-              ticks: {
-                color: '#94a3b8',
-                font: { size: 10, weight: 'bold' }
-              }
+              ticks: axisTicks()
             },
             y: {
               display: false,

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { getChart } from '../../../core/charts';
+import { glassTooltip, chartAnimation } from '../../../core/chartTheme';
 import { useI18n } from '../../../i18n/index';
 import { getMonthName, silentFail } from '../../../core/utils';
 import { getCategoryColor } from '../../../core/categoryUtils';
@@ -63,21 +64,12 @@ export const DashboardCharts = React.memo(function DashboardCharts({ categoryBre
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: {
-              duration: 750
-            },
+            animation: chartAnimation(),
             plugins: {
               legend: {
                 display: false
               },
-              tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                padding: 12,
-                titleFont: { size: 14, weight: 'bold' },
-                bodyFont: { size: 13 },
-                cornerRadius: 12,
-                displayColors: true
-              }
+              tooltip: glassTooltip()
             },
             cutout: '72%'
           }

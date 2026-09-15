@@ -1,26 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  Chart,
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip
-} from 'chart.js';
+import type { TooltipItem } from 'chart.js'; // type-only: erased, the chunk stays lazy
 import { useI18n } from '../../../i18n/index';
 import { useFormat } from '../../../core/hooks/useFormat';
-
-Chart.register(
-  LineController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Filler,
-  Tooltip
-);
+import { getChart } from '../../../core/charts';
+import { SEMANTIC, glassTooltip, faintGrid, axisTicks, chartAnimation } from '../../../core/chartTheme';
 
 export interface NetWorthItem {
   label?: string;
@@ -40,17 +23,26 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
   const { t } = useI18n();
   const { fmt } = useFormat();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const chartRef = useRef<Chart | null>(null);
+  const chartRef = useRef<{ destroy: () => void } | null>(null);
 
   useEffect(() => {
-    if (!canvasRef.current || !data || data.length === 0) return;
+    // Directive 19 Batch 4: chart.js now arrives through the shared lazy
+    // loader like every other chart surface — this component used to import
+    // it statically and register controllers at module scope, taxing the
+    // dashboard chunk whether or not the chart ever rendered.
+    let active = true;
+    const build = async () => {
+      if (!canvasRef.current || !data || data.length === 0) return;
 
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
+      const ChartJS = await getChart();
+      if (!active || !ChartJS) return;
 
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
+      const ctx = canvasRef.current.getContext('2d');
+      if (!ctx) return;
+
+      if (chartRef.current) {
+        chartRef.current.destroy();
+      }
 
     // Safety: ensure no NaN values and map label/value flexibly
     const cleanData = data
@@ -69,27 +61,30 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
     const min = Math.min(...values, 0);
     const range = max - min;
     
+    // The zero-aware gradient, now speaking the app-wide semantic pair
+    // (emerald above the zero line, rose below) instead of ad-hoc greens
+    // and reds that disagreed with every other chart surface.
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
     if (range > 0) {
       const zeroPos = max / range; // 0 to 1 from top
       
-      // Positive part (Green)
-      gradient.addColorStop(0, 'rgba(34, 197, 94, 0.3)'); // Light green
-      gradient.addColorStop(Math.max(0, zeroPos - 0.01), 'rgba(34, 197, 94, 0.05)');
+      // Positive part (emerald)
+      gradient.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+      gradient.addColorStop(Math.max(0, zeroPos - 0.01), 'rgba(16, 185, 129, 0.05)');
       
       // Transition at Zero
       gradient.addColorStop(zeroPos, 'rgba(255, 255, 255, 0)');
       
-      // Negative part (Red)
-      gradient.addColorStop(Math.min(1, zeroPos + 0.01), 'rgba(239, 68, 68, 0.05)');
-      gradient.addColorStop(1, 'rgba(239, 68, 68, 0.3)'); // Light red
+      // Negative part (rose)
+      gradient.addColorStop(Math.min(1, zeroPos + 0.01), 'rgba(244, 63, 94, 0.05)');
+      gradient.addColorStop(1, 'rgba(244, 63, 94, 0.3)');
     } else {
       // Fallback if all values are 0 or range is 0
       gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
       gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
     }
 
-    chartRef.current = new Chart(ctx, {
+    chartRef.current = new ChartJS(ctx, {
       type: 'line',
       data: {
         labels: cleanData.map(d => d.label),
@@ -98,7 +93,7 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
           data: cleanData.map(d => d.value),
           borderColor: (context) => {
              const val = context.parsed?.y ?? 0;
-             return val >= 0 ? '#22c55e' : '#ef4444';
+             return val >= 0 ? SEMANTIC.income : SEMANTIC.expense;
           },
           borderWidth: 3,
           fill: 'origin',
@@ -107,12 +102,12 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
           segment: {
             borderColor: (ctx) => {
               const val = ((ctx.p0.parsed.y ?? 0) + (ctx.p1.parsed.y ?? 0)) / 2;
-              return val >= 0 ? '#22c55e' : '#ef4444';
+              return val >= 0 ? SEMANTIC.income : SEMANTIC.expense;
             }
           },
           pointBackgroundColor: (context) => {
             const val = context.raw as number;
-            return val >= 0 ? '#22c55e' : '#ef4444';
+            return val >= 0 ? SEMANTIC.income : SEMANTIC.expense;
           },
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
@@ -123,38 +118,32 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: chartAnimation(),
         plugins: {
           legend: { display: false },
-          tooltip: {
+          tooltip: glassTooltip({
             mode: 'index',
             intersect: false,
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-            padding: 12,
             displayColors: false,
             callbacks: {
-              label: (context) => `${context.dataset.label}: ${fmt(context.parsed.y ?? 0)}`
+              label: (context: TooltipItem<'line'>) => `${context.dataset.label}: ${fmt(context.parsed.y ?? 0)}`
             }
-          }
+          })
         },
         scales: {
           x: {
-            grid: { display: false },
+            grid: faintGrid('x'),
             ticks: {
-              font: { family: 'IBM Plex Sans Arabic', size: 10 },
-              color: 'rgba(156, 163, 175, 0.8)',
+              ...axisTicks(),
               autoSkip: true,
               maxRotation: 0
             }
           },
           y: {
             grace: '10%',
-            grid: { 
-              color: (context) => context.tick.value === 0 ? 'rgba(156, 163, 175, 0.5)' : 'rgba(156, 163, 175, 0.1)',
-              lineWidth: (context) => context.tick.value === 0 ? 2 : 1
-            },
+            grid: faintGrid('y'),
             ticks: {
-              font: { family: 'IBM Plex Sans Arabic', size: 10 },
-              color: 'rgba(156, 163, 175, 0.8)',
+              ...axisTicks(),
               callback: (value) => fmt(value as number)
             }
           }
@@ -162,8 +151,15 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
       }
     });
 
+    };
+    build();
+
     return () => {
-      if (chartRef.current) chartRef.current.destroy();
+      active = false;
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
     };
   }, [data, t, fmt]);
 
