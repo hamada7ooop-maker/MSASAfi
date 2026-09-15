@@ -1,8 +1,21 @@
 import React from 'react';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BankCardsManager } from '@/features/cards/components/BankCardsManager';
+import { CardRepository } from '@/core/db/repositories/cards';
+import { touch } from '../../src/core/haptics';
+
+vi.mock('../../src/core/haptics', () => ({
+  touch: {
+    light: vi.fn(),
+    select: vi.fn(),
+    confirm: vi.fn(),
+    destruct: vi.fn(),
+    error: vi.fn(),
+    triumph: vi.fn(),
+  },
+}));
 import { db as DB } from '@/core/db/core';
 import type { BankCard } from '@/types';
 
@@ -128,6 +141,14 @@ const positionText = (c: HTMLElement) => {
 
 describe('BankCardsManager — characterization', () => {
   beforeEach(() => seedCards());
+
+  // The imperative confirm sheets live outside the React tree, so unmounting
+  // at test end does not remove them (a sheet mid-fade leaves its buttons
+  // attached for 300ms). Without this sweep, sheet N+1's assertions can be
+  // answered by sheet N's still-live handlers.
+  afterEach(() => {
+    document.querySelectorAll('.bottom-sheet-overlay').forEach((el) => el.remove());
+  });
 
   describe('Rendering the deck', () => {
     it('shows the first card as active, with its holder and masked number', async () => {
@@ -415,6 +436,332 @@ describe('BankCardsManager — characterization', () => {
       // ...no card was added, and the user is still on card 2.
       expect(await DB.cards.count()).toBe(3);
       expect(positionText(container)).toEqual({ index: 2, total: 3 });
+    });
+  });
+
+  // ═══ Directive 19 Batch 3 — pre-decomposition additions ═══
+  // The suite above was blind to four paths the rebuild could silently break:
+  // deletion (the only mutating action with a confirm sheet), the navigation
+  // dots, the reveal toggle's OFF leg, and keyboard activation of peeks.
+  // Pinned BEFORE any line moves, same as the rest of this file.
+
+  describe('Deleting cards', () => {
+    /**
+     * The imperative confirm sheet lives on document.body, outside `container`.
+     * Its overlay removes itself only after a 300ms fade -- which is LONGER
+     * than a whole test, so leftover sheets from previous tests can still be
+     * in the DOM with live buttons. Picking the FIRST matching button then
+     * clicks a previous test's handler (measured: a stale sheet swallowed a
+     * delete click while the fresh sheet sat untouched). The newest overlay
+     * is the LAST one appended, so we take the last match.
+     */
+    const bodyButton = (label: string) => {
+      const all = Array.from(document.body.querySelectorAll('button')).filter(
+        (x) => clean(x.textContent) === label
+      );
+      if (!all.length) throw new Error(`No body button "${label}"`);
+      return all[all.length - 1];
+    };
+
+    it('deletes the active card after confirm; the deck falls back to the first remaining card', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      const delBtn = container.querySelector('button[title="حذف البطاقة"]');
+      expect(delBtn).toBeTruthy();
+      fireEvent.click(delBtn as Element);
+
+      fireEvent.click(bodyButton('حذف'));
+
+      // Gone from the database...
+      await waitFor(async () => {
+        expect(await DB.cards.count()).toBe(2);
+      });
+      // ...deck reloads, and deleting the ACTIVE card resets selection to the
+      // first remaining one -- the observable end-state of the load-again path.
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 1, total: 2 });
+      });
+      expect(clean(detailPanel(container).textContent)).toContain('SARA ALMUTAIRI');
+    });
+
+    it('deleting the active card after prior switches still falls back cleanly', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      // Move to card 2, then delete the peek for card 3 (بنك الرياض / 2468).
+      fireEvent.click(peekStripFor(container, 'البنك الأهلي', '8765'));
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 2, total: 3 }));
+
+      // The delete button always acts on the ACTIVE card -- so to delete card
+      // 3 we must first be ON it. Switch there, then delete.
+      fireEvent.click(peekStripFor(container, 'بنك الرياض', '2468'));
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 3, total: 3 }));
+      fireEvent.click(container.querySelector('button[title="حذف البطاقة"]') as Element);
+      fireEvent.click(bodyButton('حذف'));
+
+      await waitFor(async () => {
+        expect(await DB.cards.count()).toBe(2);
+      });
+      // Selection was ON the deleted card, so it falls back to card 1.
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 1, total: 2 });
+      });
+    });
+
+    it('keeps the card when the confirm sheet is cancelled', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      fireEvent.click(container.querySelector('button[title="حذف البطاقة"]') as Element);
+      fireEvent.click(bodyButton('إلغاء'));
+
+      await waitFor(async () => {
+        expect(await DB.cards.count()).toBe(3);
+      });
+      expect(positionText(container)).toEqual({ index: 1, total: 3 });
+    });
+  });
+
+  describe('Navigation dots', () => {
+    it('switches the active card from the dots row', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      // The dots are the only 8px-tall <button> elements on the screen, in
+      // deck order. Clicking the third must land on card 3.
+      const dots = Array.from(container.querySelectorAll('button')).filter(
+        (b) => b.style.height === '8px'
+      );
+      expect(dots.length).toBe(3);
+      fireEvent.click(dots[2]);
+
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 3, total: 3 });
+      });
+      expect(clean(detailPanel(container).textContent)).toContain('KHALID ALHARBI');
+    });
+  });
+
+  describe('Revealing card numbers (toggle off)', () => {
+    it('masks the number again when hide is pressed', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      const revealBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        clean(b.textContent).includes('إظهار')
+      );
+      fireEvent.click(revealBtn as Element);
+      await waitFor(() => {
+        expect(clean(detailPanel(container).textContent)).toContain('4111 1111 1111 4321');
+      });
+
+      const hideBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        clean(b.textContent).includes('إخفاء')
+      );
+      expect(hideBtn).toBeTruthy();
+      fireEvent.click(hideBtn as Element);
+
+      await waitFor(() => {
+        expect(clean(detailPanel(container).textContent)).not.toContain('4111 1111 1111 4321');
+      });
+      expect(clean(detailPanel(container).textContent)).toContain('•••• •••• •••• 4321');
+    });
+  });
+
+  describe('Keyboard activation', () => {
+    it('promotes a peeked card via Enter on the strip', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      const peek = peekStripFor(container, 'بنك الرياض', '2468') as HTMLElement;
+      fireEvent.keyDown(peek, { key: 'Enter' });
+
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 3, total: 3 });
+      });
+    });
+  });
+
+  describe('Load failure', () => {
+    it('shows the error toast when the repository rejects', async () => {
+      const spy = vi.spyOn(CardRepository, 'getAll').mockRejectedValueOnce(new Error('db down'));
+      const { container } = renderScreen();
+
+      await waitFor(() => {
+        expect(document.body.textContent).toContain('Failed to load cards');
+      });
+      // The deck must not pretend to have data: empty state after the failure.
+      await waitFor(() => {
+        expect(screenText(container)).toContain('لا توجد بطاقات مضافة حالياً');
+      });
+      spy.mockRestore();
+    });
+  });
+
+  // ═══ Directive 19 Batch 3 — the new interactions (haptics + swipe chain) ═══
+
+  describe('The haptic vocabulary of the wallet', () => {
+    beforeEach(() => {
+      vi.mocked(touch.light).mockClear();
+      vi.mocked(touch.select).mockClear();
+      vi.mocked(touch.confirm).mockClear();
+      vi.mocked(touch.destruct).mockClear();
+    });
+
+    it('picking a card from a peek strip answers with touch.select', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      fireEvent.click(peekStripFor(container, 'البنك الأهلي', '8765'));
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 2, total: 3 }));
+      expect(touch.select).toHaveBeenCalledTimes(1);
+    });
+
+    it('switching from a navigation dot answers with touch.select', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      const dots = Array.from(container.querySelectorAll('button')).filter(
+        (b) => b.style.height === '8px'
+      );
+      fireEvent.click(dots[2]);
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 3, total: 3 }));
+      expect(touch.select).toHaveBeenCalledTimes(1);
+    });
+
+    it('revealing a card number answers with touch.light', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      const revealBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+        clean(b.textContent).includes('إظهار')
+      );
+      fireEvent.click(revealBtn as Element);
+      await waitFor(() => expect(touch.light).toHaveBeenCalledTimes(1));
+    });
+
+    it('a confirmed deletion carries the gravity: touch.destruct', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      fireEvent.click(container.querySelector('button[title="حذف البطاقة"]') as Element);
+      const sheets = Array.from(document.body.querySelectorAll('button')).filter(
+        (x) => clean(x.textContent) === 'حذف'
+      );
+      fireEvent.click(sheets[sheets.length - 1]);
+      await waitFor(() => expect(touch.destruct).toHaveBeenCalledTimes(1));
+      await waitFor(async () => {
+        expect(await DB.cards.count()).toBe(2);
+      });
+    });
+
+    it('saving a card answers with touch.confirm', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      fireEvent.click(container.querySelector('button[title="إضافة بطاقة جديدة"]') as Element);
+      await waitFor(() => expect(screenText(container)).toContain('رقم البطاقة'));
+
+      const inputs = Array.from(container.querySelectorAll('input')) as HTMLInputElement[];
+      const byPlaceholder = (frag: string) =>
+        inputs.find((i) => (i.placeholder || '').includes(frag));
+      fireEvent.change(byPlaceholder('0000 0000') as HTMLInputElement, {
+        target: { value: '4555 5555 5555 9911' },
+      });
+      fireEvent.change(byPlaceholder('MOHAMMED') as HTMLInputElement, {
+        target: { value: 'CONFIRM HOLDER' },
+      });
+      fireEvent.change(byPlaceholder('MM/YY') as HTMLInputElement, {
+        target: { value: '09/30' },
+      });
+      fireEvent.change(byPlaceholder('•••') as HTMLInputElement, {
+        target: { value: '123' },
+      });
+      fireEvent.click(
+        Array.from(container.querySelectorAll('button')).find(
+          (b) => clean(b.textContent) === 'حفظ البطاقة'
+        ) as Element
+      );
+
+      await waitFor(async () => {
+        expect(await DB.cards.count()).toBe(4);
+      });
+      await waitFor(() => expect(touch.confirm).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('The swipe chain (سلسلة السحب)', () => {
+    /**
+     * The screen runs RTL in the test locale (arabic). In RTL the mirrored
+     * gesture applies: dragging the active card rightward walks FORWARD
+     * (next), leftward walks back. Slow drags so the flick path stays out.
+     */
+    const swipeActive = (container: HTMLElement, fromX: number, toX: number) => {
+      const active = container.querySelector('[data-testid="deck-active"]') as HTMLElement;
+      expect(active).toBeTruthy();
+      fireEvent.pointerDown(active, { pointerId: 1, clientX: fromX });
+      fireEvent.pointerMove(active, { pointerId: 1, clientX: toX });
+      fireEvent.pointerUp(active, { pointerId: 1, clientX: toX });
+    };
+
+    it('RTL: dragging the active card rightward walks to the next card', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      expect(positionText(container)).toEqual({ index: 1, total: 3 });
+
+      // Slow drag, well past the 48px commit distance: +80px rightward.
+      swipeActive(container, 200, 280);
+
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 2, total: 3 });
+      });
+      expect(clean(detailPanel(container).textContent)).toContain('SARA ALMUTAIRI');
+    });
+
+    it('RTL: dragging leftward walks back to the previous card', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      // move to card 2 first
+      fireEvent.click(peekStripFor(container, 'البنك الأهلي', '8765'));
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 2, total: 3 }));
+
+      swipeActive(container, 200, 120); // -80px leftward = previous in RTL
+      await waitFor(() => {
+        expect(positionText(container)).toEqual({ index: 1, total: 3 });
+      });
+    });
+
+    it('the last card refuses a forward swipe: position holds', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+      // go to the LAST card
+      fireEvent.click(peekStripFor(container, 'بنك الرياض', '2468'));
+      await waitFor(() => expect(positionText(container)).toEqual({ index: 3, total: 3 }));
+
+      swipeActive(container, 200, 300); // forward in RTL, but no card is next
+      // A beat for any (wrong) async switch to land — then assert it held.
+      await new Promise((r) => setTimeout(r, 60));
+      expect(positionText(container)).toEqual({ index: 3, total: 3 });
+    });
+
+    it('a short drag springs back without switching', async () => {
+      const { container } = renderScreen();
+      await waitFor(() => expect(screenText(container)).toContain('AHMED AL SAUD'));
+
+      // The drag must be SLOW, or the flick rule (0.5 px/ms) commits it: the
+      // pointer events here execute microseconds apart on the real clock, so
+      // performance.now() is faked to give the finger 200ms of travel.
+      vi.useFakeTimers({ toFake: ['performance'] });
+      try {
+        const active = container.querySelector('[data-testid="deck-active"]') as HTMLElement;
+        fireEvent.pointerDown(active, { pointerId: 1, clientX: 200 });
+        vi.advanceTimersByTime(200); // 25px over 200ms = 0.125 px/ms — no flick
+        fireEvent.pointerMove(active, { pointerId: 1, clientX: 225 });
+        fireEvent.pointerUp(active, { pointerId: 1, clientX: 225 });
+      } finally {
+        vi.useRealTimers();
+      }
+
+      expect(positionText(container)).toEqual({ index: 1, total: 3 });
+      const active = container.querySelector('[data-testid="deck-active"]') as HTMLElement;
+      expect(active.style.transform).toBe('');
     });
   });
 });
