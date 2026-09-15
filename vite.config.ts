@@ -132,6 +132,9 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    // Dev-server only: accept the sandbox preview proxy host so the owner can
+    // visually inspect branches in the browser. Never affects production builds.
+    allowedHosts: true,
     headers: {
       // Single source of truth: src/csp.ts (also injected into index.html).
       'Content-Security-Policy': CSP
