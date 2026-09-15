@@ -17,7 +17,7 @@ vi.mock('@capacitor/haptics', () => ({
     notification: vi.fn().mockResolvedValue(undefined),
   },
   ImpactStyle: { Light: 'LIGHT', Medium: 'MEDIUM', Heavy: 'HEAVY' },
-  NotificationStyle: { Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' },
+  NotificationType: { Success: 'SUCCESS', Warning: 'WARNING', Error: 'ERROR' },
 }));
 vi.mock('@capacitor/core', () => ({
   Capacitor: { isNativePlatform: vi.fn(() => false) },
@@ -58,7 +58,7 @@ describe('touch — the semantic vocabulary on native', () => {
 
   it('confirm maps to a success notification (financial confirmation)', () => {
     touch.confirm();
-    expect(notification).toHaveBeenCalledWith({ style: 'SUCCESS' });
+    expect(notification).toHaveBeenCalledWith({ type: 'SUCCESS' });
     expect(impact).not.toHaveBeenCalled();
   });
 
@@ -69,7 +69,7 @@ describe('touch — the semantic vocabulary on native', () => {
 
   it('error maps to an error notification', () => {
     touch.error();
-    expect(notification).toHaveBeenCalledWith({ style: 'ERROR' });
+    expect(notification).toHaveBeenCalledWith({ type: 'ERROR' });
   });
 
   it('triumph is a distinct double pulse (medium then light after 90ms)', () => {

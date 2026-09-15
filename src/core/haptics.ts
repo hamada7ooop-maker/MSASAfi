@@ -20,7 +20,7 @@
  * Platform routing: native builds use @capacitor/haptics (system Taptic/
  * vibration engines); web falls back to navigator.vibrate when available.
  */
-import { Haptics, ImpactStyle, NotificationStyle } from '@capacitor/haptics';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 import { prefersReducedMotion } from './a11y';
 import { useSettingsStore } from '../store/settingsStore';
@@ -65,8 +65,8 @@ function nativeImpact(style: ImpactStyle): void {
   Haptics.impact({ style }).catch(() => {});
 }
 
-function nativeNotification(style: NotificationStyle): void {
-  Haptics.notification({ style }).catch(() => {});
+function nativeNotification(type: NotificationType): void {
+  Haptics.notification({ type }).catch(() => {});
 }
 
 /** The double pulse that marks a meaningful win (goal, nisab, streak). */
@@ -92,7 +92,7 @@ export const touch: Record<TouchEventName, () => void> = {
   },
   confirm: () => {
     if (!gate()) return;
-    if (isNative()) nativeNotification(NotificationStyle.Success);
+    if (isNative()) nativeNotification(NotificationType.Success);
     else webVibrate([10, 40, 20]);
   },
   destruct: () => {
@@ -102,7 +102,7 @@ export const touch: Record<TouchEventName, () => void> = {
   },
   error: () => {
     if (!gate()) return;
-    if (isNative()) nativeNotification(NotificationStyle.Error);
+    if (isNative()) nativeNotification(NotificationType.Error);
     else webVibrate([50, 50, 50]);
   },
   triumph: () => {
