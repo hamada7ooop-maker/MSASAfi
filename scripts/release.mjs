@@ -7,16 +7,21 @@ import { packageCleanSource } from './package-clean-source.mjs';
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 let version = packageJson.version;
 
-// Smart version bump — handles rollover (19.9.9 → 20.0.0, 1.9.9 → 2.0.0)
-const parts = version.split('.').map(Number);
-if (parts.length === 3) {
-    parts[2] += 1;          // bump patch
-    if (parts[2] >= 20) { parts[2] = 0; parts[1] += 1; }  // patch rollover
-    if (parts[1] >= 10) { parts[1] = 0; parts[0] += 1; }  // minor rollover
-    version = parts.join('.');
-    packageJson.version = version;
-    fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 4));
-    console.log(`🆙 Version bumped to v${version}`);
+const noBump = process.argv.includes('--no-bump');
+if (!noBump) {
+    // Smart version bump — handles rollover (19.9.9 → 20.0.0, 1.9.9 → 2.0.0)
+    const parts = version.split('.').map(Number);
+    if (parts.length === 3) {
+        parts[2] += 1;          // bump patch
+        if (parts[2] >= 20) { parts[2] = 0; parts[1] += 1; }  // patch rollover
+        if (parts[1] >= 10) { parts[1] = 0; parts[0] += 1; }  // minor rollover
+        version = parts.join('.');
+        packageJson.version = version;
+        fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 4));
+        console.log(`🆙 Version bumped to v${version}`);
+    }
+} else {
+    console.log(`📌 Using current version v${version} (--no-bump specified)`);
 }
 
 const projectName = "Masarifi";
