@@ -434,3 +434,27 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 
 1. **(Owner) Build & sign v23.3.2** via your `@abc` line (performance addendum + decomposition included). The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, the drawer on its spring — and a fast scroll through a long list, plus an assets/investments page PDF export, which is what these last two batches bought you.
 2. On your confirmation, the directive closes officially and the ladder debt is a memory.
+
+## Auditor Report — Decomposition Continuation (TravelBudget, the last big monolith): COMPLETE & GREEN — v23.3.3
+
+**What this is**: the post-batch survey found TravelBudget.tsx at 584 lines — larger than two of the three files in the previous decomposition batch — with its characterization suite (12 tests pinning the cross-currency conversion) written "before any extraction" since day one. Same contract: existing suite green on the monolith, split, still green.
+
+1. **TravelBudget 584→194**: the trip card (277 lines, verbatim) extracted with cv-item/contain-card; the cross-currency math became pure `tripSpendMetrics` (both directions + the 85%/100% warning bands + the zero-rate and NaN guards); the bilingual weather vocabulary (`extractCountry` / `getWeatherInfo`) became `travelWeather`; the entire live-forecast effect (cache-first, flicker-proof local fallback, Open-Meteo geocoding + weather, abort on trip change) became the `useTravelForecast` hook.
+2. **Characterization corrected the test author, not the code**: two primitive tests were written on wrong assumptions and failed against the real behavior — the `|| 1` rate guard also applies to the forward limit conversion (a zero rate yields limit 2000, not 0), and weather code 99 is thunderstorm territory (≥95), not "moderate". Both expectations fixed to what the code actually does. That is the discipline working in both directions.
+3. **+9 tests** → **1353/1353 × 138** · coverage 67.2/62.12/50.93 → **eleventh ratchet raise to 67.2/62.1/50.9** · ci:check exit 0 · version **23.3.3**.
+
+### Final ledger (amended)
+
+| Batch | Delivered | Tests | Ratchet |
+|---|---|---|---|
+| 0–5 · Directive 19 | Obsidian + springs + wallet + charts + closing sweep | 1152→1302 ×131 | 64.1→66.7/61.5/50.1 |
+| 5+ · Addendum | §5.1 rules 2/3/5 as CI pins, v23.3.1 | 1317 × 134 | held |
+| 5++ · Decomposition | Assets/AssetDetailModal/Investments split, ONE shared PDF service, v23.3.2 | 1344 × 137 | 67.1/62.0/50.6 |
+| 5+++ · Continuation | TravelBudget 584→194: TripCard + tripMetrics + travelWeather + useTravelForecast, v23.3.3 | **1353 × 138** | **67.2/62.1/50.9** |
+
+**The monolith as a category is finished**: no component file exceeds 520 lines, and the largest three remaining (ZakatCalculator 517, FamilyExpenses 420, Challenges 381) are already orchestrators over extracted subcomponents.
+
+### The one remaining gate — yours
+
+1. **(Owner) Build & sign v23.3.3** via your `@abc` line (all three addenda included). The visual tour is unchanged from the v23.3.2 list — nothing in these splits moves a pixel; that is what the green-before-and-after suites prove.
+2. On your confirmation, the directive closes officially.

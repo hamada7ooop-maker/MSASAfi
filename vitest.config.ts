@@ -114,7 +114,14 @@ export default defineConfig({
       //   green on the monolith before the split), then primitives.
       //   Measured 67.13/62.08/50.64 → raised to 67.1/62.0/50.6 (tenth
       //   raise; margin below the measurement, per the drift rule).
-      thresholds: { lines: 67.1, functions: 62.0, branches: 50.6 }
+      // - Decomposition continuation (2026-09-15): +9 tests (1353 × 138);
+      //   TravelBudget 584→194 — the trip card, the cross-currency math
+      //   (tripMetrics), the weather vocabulary (travelWeather) and the
+      //   live-forecast effect (useTravelForecast) all extracted; the
+      //   pre-existing travelBudget suite stayed green through the split.
+      //   Measured 67.2/62.12/50.93 → raised to 67.2/62.1/50.9 (eleventh
+      //   raise; margin below the measurement, per the drift rule).
+      thresholds: { lines: 67.2, functions: 62.1, branches: 50.9 }
     },
   },
 });
