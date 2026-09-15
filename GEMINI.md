@@ -1,4 +1,15 @@
-# Masarifi Project Status (v23.3.4 — التوجيه 19 + أربعة ملحقات، بانتظار توقيعك 🏁)
+# Masarifi Project Status (v23.4.0 — Directive 20 Closed ✅)
+
+## Release v23.4.0 — Directive 20 Closure
+
+- Directive 20 is formally closed after Batches 1–5 were accepted and verified.
+- Coverage ratchet 13 raised to **70.2% lines / 66.1% functions / 54.0% branches**.
+- Latest measured coverage remains above the ratchet at **70.53% / 66.50% / 54.18%**.
+- Full verification remains green: **1,407/1,407 tests across 144 suites** (including the OCR characterization suite), with TypeScript, ESLint, security, audit, coverage, and production build passing.
+- Version synchronized to **23.4.0** in `package.json`, `package-lock.json`, and `src/core/constants.ts`.
+- **Real Defect #10 fixed:** `ProfessionalCalculator` had a percent handler but no reachable `%` control; the missing button was restored and characterized.
+- Advisor and Accounts decomposition, Advisor PDF color utilities, zero-coverage cluster characterization, and OCR scanner characterization are complete.
+
 
 ## 🏁 التوجيه 19 (ثورة الـ UI/UX الشاملة) — الدفعة 5 الختامية مكتملة، التوجيه يُغلق بإصدار v23.3.0
 

@@ -129,7 +129,7 @@ export default defineConfig({
       //   detached from its receiver, so the TypeError vanished into the
       //   catch and restores re-imported over stale rows. Measured
       //   68.13/62.8/51.34 → raised to 68.1/62.7/51.3 (twelfth raise).
-      thresholds: { lines: 68.1, functions: 62.7, branches: 51.3 }
+      thresholds: { lines: 70.2, functions: 66.1, branches: 54.0 }
     },
   },
 });
