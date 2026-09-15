@@ -38,25 +38,32 @@ This is a masterclass in architectural elegance: balancing artistic luxury with 
 
 ---
 
-### Authorized Execution: Batch 0 (Enablement / التمكين)
+### Authorized Execution: Batch 0 (Enablement / التمكين) — COMPLETED & VERIFIED ✅
+Batch 0 landed cleanly in commit `1f9dc4c` with all tokens, primitives, motion tokens, haptics vocabulary, settings toggle, and 40 new tests (1,152/1,152 tests, coverage ratchet raised to 64.1/59.2/48.3).
 
-Proceed immediately with **Batch 0**:
-1. **Design Tokens & Theme System**:
-   - Implement the Obsidian 6-level palette and ceramic warm light mode in `@theme` within `src/index.css`.
-   - Standardize the 5-step radius scale (`--radius-sm: 12px` to `--radius-full`) and 4-tier elevation scale.
-2. **Motion System**:
-   - Create `src/components/motion/tokens.ts` with the 4 standard spring curves (`spring.snappy`, `spring.smooth`, `spring.gentle`, `spring.playful`) using CSS/WAAPI (`transform` and `opacity` only).
-3. **Core Primitives**:
-   - Build `<NumberText/>` primitive enforcing `font-variant-numeric: tabular-nums` to eliminate horizontal number dancing.
-   - Build `<GlassPanel/>` with strict blur budgeting (`backdrop-blur(16px)`).
-   - Generalize `AnimatedNumber` into `<NumberFlow/>` with adaptive duration and delta-flash.
-4. **Haptic Vocabulary Layer**:
-   - Create `src/core/haptics.ts` (`touch.light`, `touch.select`, `touch.confirm`, `touch.destruct`, `touch.error`, `touch.triumph`) honoring user settings toggle and `prefers-reduced-motion`.
-5. **Font Consolidation**:
-   - Consolidate typography into IBM Plex Sans Arabic Variable.
-6. **Testing & Quality Gates**:
-   - Write comprehensive unit tests for all new primitives (`NumberText`, `GlassPanel`, `NumberFlow`, `haptics.ts`, motion tokens).
-   - Ensure `npm run ci:check` exits with code 0 (1,112+ tests passing, zero regression, ratchet preserved).
+---
+
+### 🚀 Directive 19 Batch 0 Verified & Batch 1+ Authorized: Full Speed Green Light!
+
+**The Owner and Lead Architect have verified Batch 0 on Windows with JDK 21 and officially granted FULL UNCONDITIONAL GREEN LIGHT for everything requested, with explicit orders for accelerated execution:**
+
+- **Batch 0 Local Verification & Release Run**:
+  - `npm run ci:check`: Exit 0 across all 5 verification stages.
+  - **1,152 / 1,152 tests passing (100%)** across 121 suites (+40 tests for Batch 0).
+  - Coverage Ratchet safely exceeded: **64.48% lines / 59.35% functions / 48.57% branches** (ratchet locked at 64.1 / 59.2 / 48.3).
+  - Windows `@abc` pipeline with `--no-bump` executed and produced signed APK `Masarifi_V23.2.0_Signed_Release.apk` (15.87 MB, SHA-256: `768FADAD7306205FB8BDD5E0DF21DC1B18A9B8CDF51A14DB9F61472D7F77645C`).
+  - Dark mode rendering confirmed: Deep Obsidian `#0B0F17` provides superior contrast and elegance with hairline borders; haptics setting and primitives are rock-solid.
+
+- **Formal Owner Decisions & Directives**:
+  1. **Font Bundling (Decision 2)**: **YES — APPROVED.** Bundle the physical variable font file `IBM Plex Sans Arabic Variable` (~150KB) directly into the app assets in Batch 1. This guarantees 100% typography consistency and zero font popping across all Android and iOS devices offline.
+  2. **Batch 1 (Dashboard Transformation)**: **APPROVED & AUTHORIZED IMMEDIATELY.**
+     - Characterization tests for `ClassicDashboard.tsx` before touching code.
+     - Decompose `ClassicDashboard.tsx` (446 lines) into modular, single-responsibility components (≤120 lines each) with dedicated unit tests.
+     - Build the Hero Glass Balance Card featuring semantic `AmbientGlow` (emerald for positive net worth, coral for negative) and `<NumberFlow/>` adaptive counter ticker.
+     - Transform market pulses into a unified sleek single-strip horizontal feed instead of cluttered cards.
+  3. **Fast-Track Authorization (Velocity Over Staging)**:
+     - The Owner's explicit instruction: *"ابدأ فوراً وأعطه الضوء الأخضر لكل ما يريد، نريد سرعة التنفيذ بدلاً من العمل على أكثر من مرحلة ونأخذ وقت طويل"*.
+     - You have full authority to execute at maximum velocity. If you are in flow and ready to chain Batch 1 and Batch 2 (QuickAddModal thumb-sheet + haptics integration) or proceed continuously, do not hesitate! Maintain your signature rigor (characterization first, zero regressions, `ci:check` exit 0), and push ahead.
 
 ---
 
