@@ -50,6 +50,21 @@ export const CARD_CSS = `
       rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 6px
     );
   }
+
+  /* Directive 19 Batch 3 — the deck's entrance spring (gentle, 320ms).
+     cubic-bezier derived from SPRINGS.gentle via springCss(): zeta 0.878 →
+     overshoot e^-5.77 ≈ 0.003 → y2 1.003. Runs once per card switch (the
+     keyed remount), transform/opacity only — the 60 FPS contract. */
+  .deck-active-enter {
+    animation: deckCardIn 320ms cubic-bezier(0.22, 1, 0.36, 1.003);
+  }
+  @keyframes deckCardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.965); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .deck-active-enter { animation: none; }
+  }
 `;
 
 // ─── Helper: card network ────────────────────────────────────────────────────
