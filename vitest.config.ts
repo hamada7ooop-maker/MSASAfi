@@ -23,6 +23,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx,js,jsx}', 'tests/**/*.test.{ts,tsx,js,jsx}'],
     fileParallelism: false,
     testTimeout: 20000,
+    silent: true,
     onConsoleLog() {
       return false;
     },

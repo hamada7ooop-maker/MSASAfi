@@ -368,10 +368,10 @@ describe('Challenges — characterization', () => {
       // parent-owned. With no spending seeded it succeeds and persists.
       await waitFor(() => {
         expect(localStorage.getItem('masarifi_nospend_claimed_date')).toBe(today);
+        expect(screenText(container)).toContain(
+          'لقد نجحت في تحدي اليوم بلا إنفاق وحصلت على الجائزة!'
+        );
       });
-      expect(screenText(container)).toContain(
-        'لقد نجحت في تحدي اليوم بلا إنفاق وحصلت على الجائزة!'
-      );
     });
 
     it('reflects bulk selection made in the list back in the header', async () => {

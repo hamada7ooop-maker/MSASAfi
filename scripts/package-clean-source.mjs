@@ -63,17 +63,15 @@ export async function packageCleanSource(customVersion) {
       recursive: true,
       filter: (src) => {
         const rel = path.relative(androidSrc, src);
+        if (!rel || rel === '.') return true;
+        const segments = rel.split(path.sep);
         if (
-          rel.startsWith('.gradle') ||
-          rel.startsWith('.kotlin') ||
-          rel.startsWith('build') ||
-          rel.includes(path.sep + 'build') ||
-          rel.includes('.gradle') ||
-          rel.includes('.kotlin') ||
-          rel.startsWith('app' + path.sep + 'build') ||
+          segments.includes('.gradle') ||
+          segments.includes('.kotlin') ||
+          segments.includes('build') ||
+          segments.includes('.idea') ||
           rel.startsWith('app' + path.sep + 'src' + path.sep + 'main' + path.sep + 'assets' + path.sep + 'public') ||
           rel.startsWith('app' + path.sep + 'src' + path.sep + 'main' + path.sep + 'assets' + path.sep + 'capacitor.config.json') ||
-          rel.startsWith('.idea') ||
           rel.endsWith('.apk') ||
           rel.endsWith('.aab') ||
           rel.endsWith('.keystore') ||

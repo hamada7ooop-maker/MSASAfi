@@ -10,6 +10,12 @@ import '@testing-library/jest-dom';
 import { vi, beforeAll } from 'vitest';
 import nodeCrypto from 'node:crypto';
 
+// Suppress console output during test runs to eliminate Windows worker teardown RPC race
+console.log = vi.fn();
+console.info = vi.fn();
+console.warn = vi.fn();
+console.error = vi.fn();
+
 // ── Polyfills ──────────────────────────────────────────────────────────────
 
 // structuredClone is required by fake-indexeddb and missing on older Node.
