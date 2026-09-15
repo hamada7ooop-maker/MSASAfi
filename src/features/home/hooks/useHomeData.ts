@@ -10,7 +10,7 @@ import { AccountRepository } from '../../../core/db/repositories/accounts';
 import { StatisticsService, calculateFinancialScore } from '../../../core/services/StatisticsService';
 import { silentFail } from '../../../core/utils';
 import type { Goal, Bill, Debt, Budget, Transaction, SmartRecommendation } from '@/types';
-import type { EconomicIndicator, CryptoCoin, MarketNewsItem } from '../components/MarketWidgets';
+import type { EconomicIndicator, CryptoCoin, MarketNewsItem } from '../components/dashboard/PulseStrip';
 
 export interface SustainabilityInfo {
   status: 'sunny' | 'cloudy' | 'stormy';

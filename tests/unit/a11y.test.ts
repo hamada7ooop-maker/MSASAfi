@@ -231,7 +231,9 @@ describe('call sites actually use the guards', () => {
   });
 
   it('the balance is a live region and is not read aloud while hidden', () => {
-    const src = read('src/features/home/components/BalanceCard.tsx');
+    // Directive 19 Batch 1: the balance widget is now HeroBalanceCard —
+    // same contract, new chassis.
+    const src = read('src/features/home/components/dashboard/HeroBalanceCard.tsx');
     expect(src).toContain('aria-live="polite"');
     // The digits themselves are hidden; an aria-label carries the meaning.
     expect(src).toContain('aria-hidden="true"');
@@ -259,7 +261,8 @@ describe('colour contrast meets WCAG AA', () => {
   it('the balance card label clears AA over every score gradient', () => {
     // text-white/75, the value this was raised to. At /55 it measured
     // 4.17-4.42:1 — under the floor for 9px text.
-    for (const bg of ['#022c22', '#2d1202', '#3b0712', '#0b0f19']) {
+    // Directive 19 Batch 1 hero gradients (emerald positive / coral negative)
+    for (const bg of ['#0d2b22', '#103a2c', '#2b1118', '#3a1520', '#0b0f17']) {
       const r = contrast(composite([255, 255, 255], 0.75, hex(bg)), hex(bg));
       expect(r, `${bg} measured ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
     }
@@ -269,11 +272,11 @@ describe('colour contrast meets WCAG AA', () => {
     // Asserting the maths alone is not enough: reverting the class in the
     // component would leave the arithmetic tests happily green. Pin the value
     // that ships.
-    const src = read('src/features/home/components/BalanceCard.tsx');
+    const src = read('src/features/home/components/dashboard/HeroBalanceCard.tsx');
     const label = src.match(/text-\[9px\][^"]*text-white\/(\d+)/);
     expect(label, 'the 9px balance label class was not found').not.toBeNull();
     const opacity = Number(label![1]) / 100;
-    for (const bg of ['#022c22', '#2d1202', '#3b0712']) {
+    for (const bg of ['#0d2b22', '#103a2c', '#2b1118', '#3a1520']) {
       const r = contrast(composite([255, 255, 255], opacity, hex(bg)), hex(bg));
       expect(r, `text-white/${label![1]} over ${bg} measured ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
     }
