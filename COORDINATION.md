@@ -404,3 +404,33 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 
 1. **(Owner) Build & sign v23.3.1** via your `@abc` line (it includes this addendum). The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, the drawer on its spring — and a fast scroll through a long transactions list, which is what this addendum bought you.
 2. On your confirmation, the directive closes officially and the ladder debt is a memory.
+
+## Auditor Report — Post-Directive Decomposition Batch (the deferred three): COMPLETE & GREEN — v23.3.2
+
+**What this is**: the three files the directive deferred as optional-if-not-blocking, delivered with the directive's own methodology — characterization first (17 tests, written green on the monolith), then the split, then the same tests green on the new build.
+
+1. **Assets.tsx 591→200**: AssetCard / AssetSummaryPanel / AssetCategoryFilter extracted verbatim; portfolio aggregation became the pure `assetPortfolio` helpers; the ~100-line print stylesheet became `ASSETS_PRINT_CSS`. The extracted card joined the cv-item/contain-card program (§5.1 rule 3) — the pin now guards it.
+2. **The duplicated pipeline is dead**: the ~150-line element→PDF gauntlet (oklch→rgb getComputedStyle proxy, backdrop-filter stripping with finally-restore, 1200px desktop forcing, A4 pagination, native save) lived as two near-identical copies in Assets and AssetDetailModal. One shared `exportElementAsPdf` service now serves both; the single hex difference (dark backdrop) is an explicit option, preserved on purpose. Batch 5's pipeline tests stayed green through the swap — behavioral identity proven, not asserted.
+3. **AssetDetailModal 472→329** (the handler is now a ten-line service call).
+4. **Investments.tsx 505→213**: InvestmentModal (232 lines lifted verbatim), InvestmentCard (with cv-item/contain-card), and pure `investmentMetrics`. Behavioral note for the owner, documented not changed: the desktop hover-delete on an investment card deletes without a confirm sheet, unlike every other delete path.
+5. **+27 tests** → **1344/1344 × 137** · coverage 67.13/62.08/50.64 → **tenth ratchet raise to 67.1/62.0/50.6** · ci:check exit 0 · version **23.3.2**.
+
+### Final ledger (amended again)
+
+| Batch | Delivered | Tests | Ratchet | Real defects fixed |
+|---|---|---|---|---|
+| 0 · Enablement | Obsidian tokens, radii/elevation, motion tokens, NumberText/GlassPanel/haptics + settings switch | 1152 × 121 | 64.1 | (baseline) |
+| 1 · Dashboard | HeroBalanceCard + AmbientGlow + NumberFlow, PulseStrip, IBM Plex Arabic physically bundled, 4 font families removed | 1193 × 125 | 64.4 | 3 (arabic-subset drop, NotificationType, aria-hidden) |
+| 2 · Quick Add | Thumb-first sheet (useSheetDrag), haptic vocabulary in the financial flow, useHaptic migrated | 1225 × 128 | 64.8 | 1 (close-timer re-open race) |
+| 3 · Wallet | 553→176+6 pieces, swipe chain (RTL-aware), entrance springs, wallet haptics | 1249 × 129 | 65.0 | 2 (loadCards dep loop, flick-at-edge clamp) |
+| 4 · Charts | chartTheme (semantic pair, glass tooltips, faint gridlines, motion gate) on all four surfaces | 1281 × 130 | 65.7 | 2 (eager chart.js import, dead Inter font) |
+| 5 · Closing | Ladder trio lifted, ease tokens + drift-proof pins, last beziers swept, dead CSS removed, v23.3.0 | **1302 × 131** | **66.7/61.5/50.1** | dead CSS removed |
+| 5+ · Addendum | §5.1 rules 2/3/5 delivered as CI pins: cv-item ×6 lists, contain-card, per-item glass ×5 removed, zero will-change, v23.3.1 | 1317 × 134 | 66.7/61.5/50.1 (held) | per-item glass blowout |
+| 5++ · Decomposition | Assets 591→200+4, AssetDetailModal 472→329 via ONE shared PDF service (was duplicated ×2), Investments 505→213+3; characterization-first, v23.3.2 | **1344 × 137** | **67.1/62.0/50.6** | duplicated ~150-line pipeline |
+
+**+192 tests since enablement. Ten ratchet raises, never lowered. Zero behavioral regressions — every one measured by suites that were green before the change and stayed green after.**
+
+### The one remaining gate — yours
+
+1. **(Owner) Build & sign v23.3.2** via your `@abc` line (performance addendum + decomposition included). The visual tour: the Obsidian night mode, the Plex Arabic everywhere, the hero balance card with its counting flow, the springy Quick Add sheet (pull the handle), the wallet deck (swipe it, RTL-aware), the glass-unified charts, the drawer on its spring — and a fast scroll through a long list, plus an assets/investments page PDF export, which is what these last two batches bought you.
+2. On your confirmation, the directive closes officially and the ladder debt is a memory.

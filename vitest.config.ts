@@ -106,7 +106,15 @@ export default defineConfig({
       //   66.94/61.67/50.30 → raised to 66.7/61.5/50.1 (margin below the
       //   measurement, per the drift rule; confirmed stable by the ci:check
       //   run on the same commit). The directive closes as v23.3.0.
-      thresholds: { lines: 66.7, functions: 61.5, branches: 50.1 }
+      // - Post-directive decomposition batch (2026-09-15): +27 tests
+      //   (1344 × 137); the deferred splits delivered — Assets 591→200+
+      //   4 modules, AssetDetailModal 472→329 via the shared PDF export
+      //   service (the ~150-line pipeline that used to live twice),
+      //   Investments 505→213+3 modules. Characterization first (17 tests,
+      //   green on the monolith before the split), then primitives.
+      //   Measured 67.13/62.08/50.64 → raised to 67.1/62.0/50.6 (tenth
+      //   raise; margin below the measurement, per the drift rule).
+      thresholds: { lines: 67.1, functions: 62.0, branches: 50.6 }
     },
   },
 });
