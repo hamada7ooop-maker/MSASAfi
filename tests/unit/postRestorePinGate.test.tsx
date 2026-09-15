@@ -125,10 +125,14 @@ describe('PostRestorePinGate', () => {
     await user.type(await screen.findByLabelText(/confirm|تأكيد/i), '3690');
     await user.click(screen.getByRole('button'));
 
+    // pinHash is written first and the legacy 'pin' field is cleared right
+    // after — two separate Dexie writes. Poll for BOTH conditions: reading
+    // 'pin' immediately after pinHash appears races the cleanup write under
+    // parallel-suite CPU load.
     await waitFor(async () => {
       expect(await DB.getSetting('pinHash')).toBeTruthy();
+      expect(await DB.getSetting('pin')).toBeFalsy();
     });
-    expect(await DB.getSetting('pin')).toBeFalsy();
   });
 
   it('is dismissed for good once the flag is cleared', async () => {

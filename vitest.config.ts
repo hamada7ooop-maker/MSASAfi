@@ -58,9 +58,13 @@ export default defineConfig({
       //   them (useShallow); statementParser 73.6%→98.9% with two column-
       //   guessing weaknesses documented. Measured 62.62/58.05/47.24 →
       //   raised to 62.5/57.8/46.9.
-      //   Ladder continues: marketData 73%, sabBanner 38%, exportService
-      //   0.8%, settingsStore 80.3%.
-      thresholds: { lines: 62.5, functions: 57.8, branches: 46.9 }
+      // · 2026-09-15 (Directive 18, step 3 — third raise): +52 tests and the
+      //   owner-approved statementParser column-guess fix. marketData
+      //   73%→95%, settingsStore 80.3%→95.5%, exportService 0.8%→94.6%
+      //   (nominal test file replaced with a real one), zakat banner
+      //   38.5%→85.7%. Measured 64.01/59.02/48.11 → raised to
+      //   63.9/58.8/48.0. Ladder complete for this directive round.
+      thresholds: { lines: 63.9, functions: 58.8, branches: 48.0 }
     },
   },
 });
