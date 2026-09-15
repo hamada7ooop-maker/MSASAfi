@@ -287,3 +287,30 @@ Executed under the standing fast-track authorization, methodology unchanged: **c
 1. **(Owner) Visual + touch gate for Batch 2**: build on your machine and feel the sheet — pull the handle down slowly (rubber-band past 120px, springs back), pull past 96px (dismisses), flick it (dismisses), and confirm the haptics fire on save/delete/validation on device.
 2. **(Auditor, on your GO — already authorized by the fast-track) Batch 3 candidates** from the remaining low-coverage cluster: lockModal 9.61, detailModal 13.39, drawer 17.39, netWorthTrend 25.53.
 3. If you approve, the same rhythm: characterization → rebuild onto the motion/haptic primitives → ratchet raise.
+
+
+---
+
+## Auditor Report — Directive 19 / Batch 3 (Bank Cards → the wallet experience): COMPLETE & GREEN
+
+Executed under the standing fast-track authorization, methodology unchanged: **characterization before rebuild, zero behavioral regression, ci:check exit 0.**
+
+**1. Characterization extended FIRST (7 new tests, 20 total):** the existing 13-test suite was blind to four paths the decomposition could silently break — deletion (3 tests: confirm-and-fallback, delete-after-switches, cancel), the navigation dots, the reveal toggle's OFF leg, and keyboard activation of peek strips (plus the repository-rejection toast). **All 20 stayed green through the entire decomposition.**
+
+**2. Decomposition (553 → 176-line root + six pieces + two hooks):** `CardsHeader`, `EmptyCardsState`, `CardDeck`, `PeekStrip`, `CardDetailPanel`, `SecurityFooter` in `components/deck/` (each ≤139 lines, single responsibility), `useCardText` + `useDeckSwipe` in `hooks/`. The root owns only state and the data lifecycle (load/add/edit/delete). The composition root went from 79% to **100% statement coverage**.
+
+**3. The swipe chain (سلسلة السحب):** drag the active card sideways to walk the deck. RTL-aware (rightward = next in Arabic, mirrored in English), deck edges refuse the direction — no tracking, no commit, even on a hard flick (the velocity rule was initially not direction-clamped; the unit suite caught it and it's now pinned) — rubber-band past 96px, commit past 48px or on a 0.5 px/ms flick, spring back on the smooth spring, reduced-motion keeps the command and drops the shadow-tracking. 8-test physics suite + 4 integration tests.
+
+**4. Motion tokens own the screen now:** every card switch replays the `deck-active-enter` entrance (gentle spring, 320ms, transform/opacity only — the 60 FPS contract, derived from SPRINGS.gentle via springCss in CARD_CSS); the peek strips and dots moved from a hand-rolled bezier to `springCss('snappy')`.
+
+**5. The haptic vocabulary of the wallet:** `touch.select` on card pick (strip, dot, or swipe commit), `touch.light` on reveal, `touch.destruct` on confirmed delete, `touch.confirm` on save/update. 5 tests pin the wiring.
+
+**6. A fifth real defect — the deepest one yet:** `loadCards` had `[activeCardId]` in its deps, so EVERY card switch re-queried IndexedDB **and flashed the loading spinner over the deck**, and the mount-time auto-select caused a double load that could remount the deck mid-gesture and detach the swipe handlers (the new swipe tests hit it as a phantom race before its true shape was clear — a product defect, not a test artifact). Fixed at the root: auto-select reads through the setter's functional form, selection changes are pure state, one load per mount. Also fixed en route: the reveal button carried a copy-pasted "back" aria-label — it now names its action.
+
+**Final numbers:** **1249/1249 × 129** (+24 tests) · coverage 65.19/60.24/49.45 and 65.22/60.27/49.48 across two consecutive full runs → **ratchet seventh raise to 65.0/60.0/49.3** · ci:check exit 0 end-to-end (tsc first) · build 9.7s.
+
+### Next Step Proposals
+
+1. **(Owner) Touch gate for Batch 3**: build on your machine and feel the wallet — swipe the active card rightward (Arabic UI) to walk the deck, feel the edge refusal on the last card, watch the entrance spring on each switch, and confirm the haptics on pick/reveal/delete/save.
+2. **(Auditor, on your GO — already authorized by the fast-track) Batch 4 — Charts & Reports**: unified semantic color grid for the chart.js surfaces, soft gradients, glass tooltips, faint gridlines (the proposal's هـ batch).
+3. Same rhythm: characterization first where contracts are unpinned, rebuild onto the motion/haptic primitives, ratchet raise, ci:check exit 0.

@@ -83,7 +83,16 @@ export default defineConfig({
       //   64.93/59.95/49.31 → raised to 64.8/59.8/49.2 (margin below the
       //   measurement, per the drift rule; confirmed stable by the ci:check
       //   run on the same commit).
-      thresholds: { lines: 64.8, functions: 59.8, branches: 49.2 }
+      // - Directive 19 Batch 3 (2026-09-15): +24 tests (1249 × 129);
+      //   BankCardsManager characterized (20, of which 7 new: delete ×3,
+      //   dots, reveal-off, keyboard, load failure) then decomposed into
+      //   deck pieces; useDeckSwipe physics suite (8) + haptic/swipe
+      //   integration (9). The composition root reached 100/90/100/100
+      //   (was 79.22/79.41/80.64/78.46). Measured 65.19/60.24/49.45 →
+      //   raised to 65.0/60.0/49.3 (margin below the measurement, per the
+      //   drift rule; confirmed stable by the ci:check run on the same
+      //   commit).
+      thresholds: { lines: 65.0, functions: 60.0, branches: 49.3 }
     },
   },
 });
