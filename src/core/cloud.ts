@@ -363,9 +363,16 @@ export async function cloudRestore(encPassword: string): Promise<{ backed_up_at:
         // over stale rows — duplicates or resurrected records. The restore
         // itself still reports its overall failure to the user; this log
         // makes the clear-phase visible to telemetry instead of void.
-        await delFunc((item as { id: string }).id).catch(
-          silentFail('[CloudRestore] clear-phase delete failed')
-        );
+      // Directive 19 (cloud ladder): the delete used to be invoked DETACHED
+      // from its receiver — `delFunc(id)` instead of `delFunc.call(dbRecord,
+      // id)` — so `this` was undefined inside deleteTransaction, the
+      // TypeError was swallowed by this very catch, and the restore
+      // re-imported over the stale rows it was supposed to clear first
+      // (duplicates, resurrected records). Found by
+      // tests/unit/cloudSync.test.ts: the stale row survived the restore.
+      await delFunc.call(dbRecord, (item as { id: string }).id).catch(
+        silentFail('[CloudRestore] clear-phase delete failed')
+      );
       }
     }
   }
