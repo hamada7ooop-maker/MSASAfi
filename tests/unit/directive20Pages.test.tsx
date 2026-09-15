@@ -25,7 +25,8 @@ vi.mock('../../src/features/advisor/components/NecessityBreakdown', () => ({ Nec
 vi.mock('../../src/features/reports/services/exportService', () => ({ ExportService: { saveFileNative: vi.fn() } }));
 
 import { Accounts } from '../../src/features/accounts/components/Accounts';
-import { AdvisorPage, oklabToRgb, oklchToRgb } from '../../src/features/advisor/components/AdvisorPage';
+import { AdvisorPage } from '../../src/features/advisor/components/AdvisorPage';
+import { oklabToRgb, oklchToRgb } from '../../src/features/advisor/utils/pdfColors';
 
 const account = (id: string, archived = false) => ({ id, name: `Account ${id}`, type: 'bank', balance: 100, initialBalance: 100, archived });
 

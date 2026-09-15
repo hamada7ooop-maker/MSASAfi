@@ -574,3 +574,27 @@ Proceed with Directive 20 Batch 1: decompose the Advisor page's export/analysis 
 ### Next Step Proposal
 
 Continue Directive 20 with the next leverage cluster: deepen `AdvisorPage` decomposition around the PDF/export and analysis presentation responsibilities, then extract `Accounts` modal/card responsibilities behind the now-green characterization suite. Maintain the new **70.07 / 66.14 / 74.20** ratchet without lowering it.
+
+## Auditor Report — Directive 20 Batch 2: Accounts & Advisor Decomposition — GREEN
+
+**Status: COMPLETE (structural decomposition, characterization preserved).** Continued directly from the 70% crossing batch without changing the behavioral contract.
+
+### What shipped
+
+- Extracted the Accounts page's two modal responsibilities into dedicated modules:
+  - `src/features/accounts/components/AccountModal.tsx`
+  - `src/features/accounts/components/TransferModal.tsx`
+- `Accounts.tsx` is now the composition/data-lifecycle root; the existing characterization suite remains green, proving account creation, validation, archive/delete, and transfers survived the split.
+- Extracted Advisor PDF color conversion into `src/features/advisor/utils/pdfColors.ts`; the conversion is now an independently testable utility used by the page's export pipeline. No conversion behavior changed.
+- The calculator/report and zero-coverage suites remain in place as the regression net for this decomposition.
+
+### Verification
+
+- `tsc --noEmit`: clean.
+- Targeted Advisor/Accounts characterization: green.
+- Changed-file ESLint: clean.
+- Full `npm run ci:check`: **exit 0** across all stages; **1,404/1,404 tests across 143 suites**; exact coverage **70.07% lines / 66.14% functions / 74.14% branches**; production build clean.
+
+### Next Step Proposal
+
+Continue the same composition-root strategy on Advisor's presentation sections, then extract the remaining calculator/report orchestration only where characterization identifies a stable boundary. Do not alter the 70.07% ratchet downward.
