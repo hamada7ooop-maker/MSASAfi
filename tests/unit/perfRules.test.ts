@@ -64,6 +64,7 @@ describe('§5.1 rule 3 — every long screen renders its entries as cv-items', (
     // virtualization as they became standalone modules.
     ['src/features/assets/components/AssetCard.tsx', 1],
     ['src/features/investments/components/InvestmentCard.tsx', 1],
+    ['src/features/budgets/components/TripCard.tsx', 1],
   ];
 
   it.each(targets)('%s carries at least %i cv-item line(s)', (file, min) => {
