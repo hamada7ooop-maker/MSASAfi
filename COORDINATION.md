@@ -15,14 +15,39 @@ The entire Directive 19 program (Batches 0 through 5) plus all three architectur
 - **Release Verification Data (Built, Tested & Signed Locally on Windows with JDK 21)**:
   - **Release Tag**: **v23.3.4**
   - **Signed Release APK**: `Masarifi_V23.3.4_Signed_Release.apk` (16,471,523 bytes / 15.71 MB) — SHA-256: `0B22BA3A4F71BB5AD431E0269642DF277ADBE15242835DA20DC168A0C1AD626B`
-  - **Clean Source ZIP**: `Masarifi_V23.3.4_Source_Clean.zip` (9,369,903 bytes / 8.94 MB) — SHA-256: `42587B11FB0966CEABF9F6C5481171C6F85CEFC8AC95CF05EC0E91AC42B4D31E` (100% credential-free; google-services.json & keystores excluded)
+  - **Clean Source ZIP (Updated with full Gradle build files)**: `Masarifi_V23.3.4_Source_Clean.zip` (9,376,383 bytes / 8.94 MB) — SHA-256: `77C23A09A2C22E51E99DFA5AC59E9700492832454192B38C8D02699312C44F3F`
+  - **Packaging Defect Caught by Independent Review & Fixed**: An external review discovered that `scripts/package-clean-source.mjs` used `rel.includes('.gradle')` which accidentally stripped all `*.gradle` build files. Fixed in commit `a2c7748` via `segments.includes('.gradle')` and guarded by new unit test `tests/unit/packageCleanSource.test.ts`.
   - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean (189/189 tips across 11 languages) · `npm run audit:security` clean (0 vulnerabilities).
-  - **Tests**: **1,376 / 1,376 passing (100%)** across **139 test suites** (+224 new tests since v23.2.0).
-  - **Twelfth Coverage Ratchet**: Locked at **lines 68.1 / functions 62.7 / branches 51.3** (actual measured: 68.56% lines / 62.93% functions / 51.76% branches).
+  - **Automated Tests**: **1,380 / 1,380 passing (100%)** across **140 test suites** (+4 packaging guard tests).
+  - **Twelfth Coverage Ratchet**: Locked at **lines 68.1 / functions 62.7 / branches 51.3** (measured: 68.52% lines / 62.90% functions / 51.63% branches).
   - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0) across all 5 verification stages.
-  - **APK Footprint Optimization**: 15.71 MB (smaller than v23.2.0 despite bundling variable font and 224+ new tests).
   - **Critical Defect #9 Verified**: Cloud restore detached receiver fix verified locally.
   - **Directive 19 Formally Closed**: All UI/UX Renaissance deliverables, performance rules, and architectural debt eliminations are 100% accepted and approved!
+
+---
+
+### 🚀 Directive 20 Authorized: Breaching the 70% Coverage Barrier & Zero-Coverage Cluster Elimination!
+
+**The Owner and Lead Architect officially launch Directive 20!**
+While the Owner tests release v23.3.4 on a real Android device and compiles field notes across UI/UX and functionality, the Auditor is authorized to drive the test coverage ladder past the monumental **70.0% milestone**:
+
+1. **Strategic Targets on the Ladder**:
+   - **`AdvisorPage.tsx` (9.5% lines, 169 statements)**: Characterize and decompose the AI Financial Advisor tabs, financial health score metrics, and recommendation cards.
+   - **`Accounts.tsx` (21.2% lines, 113 statements)**: Characterize and test account creation, multi-currency wallets, balance reconciliation, and inter-account transfers.
+   - **The Zero-Coverage Modals & Components Cluster**:
+     - `RecycleBinModal.tsx` (0%, 43 lines) — soft-deleted item restoration & permanent purge.
+     - `ImportReviewModal.tsx` (0%, 44 lines) — statement reconciliation & duplicate detection.
+     - `CoolingQueueModal.tsx` (0%, 48 lines) — impulsive purchase cooling-off period flow.
+     - `BulkActionsBar.tsx` (0%, 26 lines) — bulk category assignment, tagging, and batch deletion.
+   - **Calculator Components**:
+     - `ProfessionalCalculator.tsx` (0%, 57 lines) & `Calculator.tsx` (0%, 26 lines).
+   - **Reports Summary & Top Expenses Widgets**:
+     - `ReportsExports.tsx`, `ReportsSummary.tsx`, `ReportsTopExpenses.tsx`, `ReportsWeeklyBrief.tsx`.
+2. **Quality & Execution Rules**:
+   - **Target**: Push overall line coverage from **68.52% to > 70.0%**, setting the thirteenth ratchet raise.
+   - **Characterization-first discipline**: Write behavior tests before touching code or extracting sub-components.
+   - **Zero regressions & CI green**: Every commit must maintain clean `tsc --noEmit` and `ci:check` exit 0.
+   - **Fast-Track**: Proceed continuously without waiting for per-batch roundtrips while the Owner compiles on-device feedback.
 
 ---
 
