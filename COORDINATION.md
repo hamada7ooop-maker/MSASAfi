@@ -7,39 +7,30 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ---
 
-## Current Directives: Directive 18 Step 2 Approved, Defect #2 Fix Signed-Off, & Step 3 Authorized
+## Current Directives: Release v23.2.0 Built & Signed — Grand Milestone Complete! 🚀
 
-Outstanding momentum on Directive 18 Step 2! The modular stores reaching 100% statement/function coverage, catching the critical zustand v5 `useShallow` infinite render loop before it hit production, and driving `statementParser` to 98.9% coverage across 1,060 passing tests (113 suites) with full `ci:check` exit 0 is stellar engineering.
+🎉 **Historic Milestone Achieved: Masarifi v23.2.0 Production Release Built & Signed!**
+Directive 18 Step 3 and the owner-approved Defect #2 fix in `statementParser.ts` landed with perfection. The Lead Architect has executed the Windows `@abc` pipeline with JDK 21 to produce the official production release artifacts.
 
-- **Verified Quality Status**:
-  - **Tests**: **1,060 / 1,060 passing (100%)** across **113 test suites**.
-  - **Coverage Ratchet**: Raised to **lines 62.5 / functions 57.8 / branches 46.9** (actual measured: 62.6% / 58.0% / 47.2%).
-  - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0).
-  - **Timezone Fix Integrated**: Commit `0d5613e` pushed to ensure V8 quirk test evaluates dynamically for timezone independence across all developer locales.
-
----
-
-### 1. Formal Sign-Off: statementParser Column-Guessing Fix (Defect #2)
-**Owner Decision: APPROVED.**
-Proceed with the proposed fix for `src/services/statementParser.ts`:
-1. Ensure column guessers skip already-assigned columns.
-2. Reject date-parseable values (such as ISO strings `YYYY-MM-DD`) as valid amount candidates.
-3. Update the two named characterization tests in `tests/unit/statementParser.test.ts` to assert correct, unambiguous column mapping for both date-first and amount-first obscure header rows.
+- **Release Verification Data (Built, Tested & Signed Locally on Windows with JDK 21)**:
+  - **Release Tag**: **v23.2.0**
+  - **Signed Release APK**: `Masarifi_V23.2.0_Signed_Release.apk` (16,643,108 bytes / 15.87 MB) — SHA256: `C4F46CFFBFF71BC71F0698BEEA4316975AF9EC608F01F286297CB26CB9FBB852`
+  - **Clean Source ZIP**: `Masarifi_V23.2.0_Source_Clean.zip` (9,264,696 bytes / 8.84 MB) — SHA256: `7017F51F448E34368395E1C9EBA4628E55EAD39E3A9E53EFE8AACBB3729DBF1A` (100% credential-free; google-services.json & keystores excluded)
+  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean (189/189 tips across 11 languages) · `npm run audit:security` clean (0 vulnerabilities) · `npm run test:security` clean.
+  - **Tests**: **1,112 / 1,112 passing (100%)** across **116 test suites**.
+  - **Coverage Ratchet**: Raised and locked at **lines 63.9 / functions 58.8 / branches 48.0** (actual measured: 64.47% lines / 59.26% functions / 48.42% branches).
+  - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0) across all 5 verification stages.
+  - **Live Crashlytics**: Active native crash reporting with ProGuard mapping uploaded via `uploadCrashlyticsMappingFileRelease`.
+  - **Permanent Documentation Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (§12.25) permanently recorded.
 
 ---
 
-### 2. Authorized: Directive 18 Step 3 (Ladder Step 3)
-Proceed immediately with the remaining ladder targets:
-1. `src/services/marketData.ts` (currently 73%, 264 lines).
-2. `src/features/zakat/components/sabBanner.tsx` (currently 38.46%).
-3. `src/features/reports/services/exportService.ts` (cover core export dispatchers & data formatting).
-4. `src/store/settingsStore.ts` (currently 80.3% — cover remaining actions and edge persistence).
-5. **Ratchet Elevation**: Increment the thresholds in `vitest.config.ts` to lock in each gain.
+### Authorized Next Directives: Post-v23.2.0 Continuation
 
----
-
-### 3. Grand Milestone Horizon: v23.2.0 Historic Release
-Upon completion of Step 3 with a green `ci:check` run, we will execute the `@abc` pipeline on Windows with JDK 21 to produce the official signed **v23.2.0** production release APK and clean source package.
+As proposed by the Auditor, we are ready to continue the quality ladder in the post-v23.2.0 track:
+1. **Component Clusters**: Address uncovered UI clusters (`Calculator.tsx`, `BulkActionsBar.tsx`, `WeeklyBrief.tsx`, export modals).
+2. **Hook Layer**: Characterize and elevate remaining hooks toward 95%+ coverage.
+3. **Continuous Ratchet Elevation**: Lock every new gain into `vitest.config.ts`.
 
 ---
 
