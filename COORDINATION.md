@@ -235,3 +235,30 @@ Executed against your approval `5a90fae` (all four decisions). Everything is sta
 1. **(Owner) Visual gate**: build on your machine (`@abc`, no version bump needed for an intermediate check) and look at dark mode — it should be Obsidian now, cooler and deeper, with hairline borders instead of fading shadows. Light mode should look identical to v23.2.0.
 2. **(Owner) Font decision for Batch 1**: bundle the IBM Plex Sans Arabic variable font file (adds ~100-200KB, changes real rendering) — yes/no.
 3. **(Auditor, on your GO) Batch 1 — the Dashboard**: characterization tests for ClassicDashboard first, then decompose it into ≤120-line pieces (glass balance card + semantic AmbientGlow + NumberFlow counter on top of today's primitives), each covered — the 0%-coverage cluster starts falling as a side effect.
+
+---
+
+## Auditor Report — Directive 19 / Batch 1 (Dashboard Transformation): COMPLETE & GREEN
+
+Executed at maximum velocity per your fast-track authorization (`23eb73e`), with the signature rigor intact: characterization first, zero behavioral regression, ci:check exit 0.
+
+**1. Font bundling (your Decision 2 — approved):** IBM Plex Sans Arabic now ships physically — 5 weights × (arabic + latin) ≈ 316KB of woff2 in the bundle. Two things you should know:
+- **The family has no variable version** (static 100-700 only; weights 800/900 synthesize from 700) — your "~150KB variable file" doesn't exist upstream, so this is the honest equivalent, and it fits the +5% bundle budget easily because...
+- **The old bundle was heavier**: main.tsx already imported FOUR families (Tajawal ×6, Manrope ×3, Inter ×3, Plex ×5). All removed from code AND dependencies. Correction to my Batch 0 report: "no font file ever shipped" was wrong — four families shipped; what never shipped was the *Arabic* rendering of the family. Now it does.
+- **A latent bug died in the process**: `fontOptimizerPlugin` (built for fontsource, never actually used until now) would have silently dropped the ARABIC subset from an Arabic font — fontsource's per-subset comments stick to the previous block's tail when splitting on '@font-face', so the arabic block carried a stray 'cyrillic-ext' comment. Rewritten as a positive whitelist matching the file name inside each block's own url. Verified: the arabic woff2 files now land in dist/assets.
+
+**2. Characterization before rebuild (your explicit order):** 15 tests pinned ClassicDashboard's composition contract — homeOrder order/hiding, edit mode (toolbar, boundary-disabled move buttons, eye toggle → store), simple mode, the financialScore+gamification twin pairing, the banner → action sheet route, honest error state with retry, skeletons, the engine version footer, legacy id aliases. **All 15 stayed green through the entire rebuild** — that is the zero-regression proof, measured not promised.
+
+**3. Decomposition (446 lines → composition root + single-responsibility pieces):** `SmartActionBanner`, `DailyTipCard`, `EditableSection`, `sections.tsx` (routing table), **`HeroBalanceCard`** — strong glass + semantic AmbientGlow (emerald for positive net worth, coral for negative — your approved pair) + NumberFlow, inheriting the classic card's full a11y contract (aria-live polite, incognito toggle with aria-pressed and digits removed from the a11y tree, AA contrast re-measured and pinned over the new gradients) — and **`PulseStrip`**: one ~64px unified glass rail replacing four ~300px stacked market cards, inheriting their data contracts and fallback sets untouched. Classic BalanceCard.tsx and MarketWidgets.tsx deleted; useHomeData types re-pointed.
+
+**4. NumberFlow** — the adaptive counter: rAF driven by the frame's own timestamp, duration adapts to the change's relative size (200ms rebalances → 800ms big jumps), reduced-motion snaps, fixed-width figures so counting never dances horizontally. Fixed a silent runtime drop of `aria-hidden` (React types allow aria-* on any component; the primitive destructured without forwarding).
+
+**5. A real Batch-0 defect, caught and fixed**: `@capacitor/haptics` v8 exports `NotificationType` (key `type`), not `NotificationStyle` (key `style`) — it slipped through because `ci:check` never ran tsc. **`tsc --noEmit` now leads ci:check** (six stages). The release gate is tighter than its maker.
+
+**Final numbers**: **1193/1193 × 125** (+41 tests) · coverage measured 64.45-64.55 across two full runs → **ratchet fifth raise to 64.4/59.6/48.6** (margin under both measurements — 64.5 bit the second run) · ci:check exit 0 end-to-end with tsc first · 0 vulnerabilities · build 10.1s.
+
+### Next Step Proposals
+
+1. **(Owner) Visual gate for Batch 1**: build on your machine and look at the dashboard — the hero glass balance card (with its glow color by net-worth sign and the counting balance), the four market strips, and (importantly) the ACTUAL Arabic typography now rendering in IBM Plex Sans Arabic everywhere, day and night.
+2. **(Auditor, on your GO — already authorized by the fast-track) Batch 2 — Quick Add**: the thumb-first springy bottom sheet with the haptic vocabulary wired into the financial confirm flow (touch.confirm/destruct/error), plus migrating legacy useHaptic to the unified layer.
+3. Remaining ladder candidates after the renaissance batches: lockModal 9.61, detailModal 13.39, drawer 17.39, netWorthTrend 25.53 (now the only old-style market component left is gone; NetWorthTrend itself remains).
