@@ -1,40 +1,31 @@
 import { useCallback } from 'react';
+import { touch } from '../haptics';
 
 /**
- * Hook for triggering standard haptic feedback.
- * Uses the navigator.vibrate API if available.
+ * Directive 19 — Batch 2: the legacy haptic hook now routes through the
+ * unified vocabulary layer (src/core/haptics.ts).
+ *
+ * Nothing else changed for call sites (same event names, same signature),
+ * but every pulse now passes the three gates — the hapticsEnabled setting,
+ * prefers-reduced-motion, and never-throws — and reaches the native
+ * Taptic/vibration engines via @capacitor/haptics on device instead of
+ * navigator.vibrate only. Semantic mapping:
+ *   light → touch.light, medium → touch.select, heavy → touch.destruct,
+ *   success → touch.confirm, error → touch.error, selection → touch.light
  */
-export function useHaptic() {
-  const haptic = useCallback((type: 'light' | 'medium' | 'heavy' | 'success' | 'error' | 'selection' = 'light') => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      try {
-        switch (type) {
-          case 'light':
-            navigator.vibrate(10);
-            break;
-          case 'medium':
-            navigator.vibrate(20);
-            break;
-          case 'heavy':
-            navigator.vibrate([30, 50, 30]);
-            break;
-          case 'success':
-            navigator.vibrate([10, 50, 20]);
-            break;
-          case 'error':
-            navigator.vibrate([50, 50, 50]);
-            break;
-          case 'selection':
-            navigator.vibrate(5);
-            break;
-          default:
-            navigator.vibrate(10);
-        }
-      } catch (e) {
-        // Ignore vibration errors
-      }
-    }
-  }, []);
+const MAP = {
+  light: touch.light,
+  medium: touch.select,
+  heavy: touch.destruct,
+  success: touch.confirm,
+  error: touch.error,
+  selection: touch.light,
+} as const;
 
-  return haptic;
+export type HapticType = keyof typeof MAP;
+
+export function useHaptic() {
+  return useCallback((type: HapticType = 'light') => {
+    MAP[type]();
+  }, []);
 }

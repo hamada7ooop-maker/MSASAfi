@@ -133,3 +133,40 @@ describe('touch — the three gates', () => {
     expect(() => touch.confirm()).not.toThrow();
   });
 });
+
+
+// ─── Directive 19 Batch 2: legacy useHaptic now routes through the vocabulary ───
+describe('useHaptic — legacy redirect to touch', () => {
+  // The redirect is verified through the engine mocks (impact/notification),
+  // exactly like the vocabulary tests above — the legacy names must land on
+  // the same unified pulses the direct vocabulary emits.
+  beforeEach(() => isNative.mockReturnValue(true));
+
+  it('maps every legacy event onto its unified counterpart', async () => {
+    const { renderHook } = await import('@testing-library/react');
+    const { useHaptic } = await import('../../src/core/hooks/useHaptic');
+    const { result } = renderHook(() => useHaptic());
+    const cases = [
+      ['light', () => expect(impact).toHaveBeenLastCalledWith({ style: 'LIGHT' })],
+      ['medium', () => expect(impact).toHaveBeenLastCalledWith({ style: 'MEDIUM' })],
+      ['heavy', () => expect(impact).toHaveBeenLastCalledWith({ style: 'HEAVY' })],
+      ['success', () => expect(notification).toHaveBeenLastCalledWith({ type: 'SUCCESS' })],
+      ['error', () => expect(notification).toHaveBeenLastCalledWith({ type: 'ERROR' })],
+      ['selection', () => expect(impact).toHaveBeenLastCalledWith({ style: 'LIGHT' })],
+    ] as const;
+    for (const [legacy, assertUnified] of cases) {
+      result.current(legacy);
+      assertUnified();
+      impact.mockClear();
+      notification.mockClear();
+    }
+  });
+
+  it('defaults to light when no event is given', async () => {
+    const { renderHook } = await import('@testing-library/react');
+    const { useHaptic } = await import('../../src/core/hooks/useHaptic');
+    const { result } = renderHook(() => useHaptic());
+    result.current();
+    expect(impact).toHaveBeenCalledWith({ style: 'LIGHT' });
+  });
+});
