@@ -174,3 +174,24 @@ Verification item 2 asked for build & signing integrity — the strongest versio
 1. **(Owner) Build & sign v23.2.0** — the historic release: live Crashlytics + the full Directive-18 coverage climb + every guard green.
 2. **(Auditor, on your word) Directive 18 continuation beyond this round** — remaining ladder: the 0%-coverage component cluster (calculator, transactionsBar, weeklyBrief, exportService-adjacent modals), then hooks (88.63%). The ratchet holds every gain permanently.
 3. **(Auditor) Environmental note:** the sandbox reset itself between rounds this time (stale snapshot over an old HEAD) — resolved by verifying every working-tree remnant against the remote before cleaning; zero loss. Standing rule for future rounds: fetch-and-compare BEFORE any destructive action.
+
+---
+
+## Auditor Report — Directive 19 (UI/UX Renaissance): Full Proposal Submitted for Owner Approval
+
+As requested, the vision and engineering roadmap were drafted **after a factual scan of the current visual architecture** — and the scan changed the nature of the proposal: the project already owns a **Tailwind v4 CSS-first token system** (the full "Stitch — Financial Architect" Material-3 semantic palette in `src/index.css`), a working `.dark` variant system with 6 light palettes + a dim dark palette via `ThemeManager`, `@capacitor/haptics` installed, and an `AnimatedNumber` that already respects `prefers-reduced-motion`. So Directive 19 is an **evolution on solid ground**, not a teardown — lower risk, higher speed.
+
+**The full proposal lives in `DIRECTIVE_19_PROPOSAL.md` (root).** Its pillars:
+
+1. **Tokens**: Deep Obsidian `#0B0F17` as a full 6-layer dark palette (elevation via hairline borders + ambient glow instead of shadows-on-black); clean warm light mode; a colorblind-safe emerald/coral income/expense pair (WCAG AA); unified 5-step radii scale and 4-level elevation scale; **`<NumberText/>` primitive enforcing `tabular-nums` on every financial figure**; font consolidation from 4 fragmented families to one variable Arabic family (IBM Plex Sans Arabic).
+2. **Screens (by frequency × impact)**: Dashboard first (glass balance card + semantic AmbientGlow + NumberFlow), then Quick Add (springy bottom sheet + thumb-first keypad + haptic confirm), then Cards/Wallets (decompose the 553-line manager), then charts, then the long tail. **Decomposition doubles as the coverage solution**: every heavy component splits into ≤120-line testable pieces — the 0%-coverage component cluster rises structurally.
+3. **Motion & touch**: 4 standardized spring tokens (no framer-motion — CSS/WAAPI, smaller bundle, transform/opacity-only), generalized `<NumberFlow/>` adaptive counter, and a single **haptic vocabulary layer** (`src/core/haptics.ts`: light/select/confirm/destruct/error/triumph) honoring a settings toggle + reduced-motion, with bottom-sheet drag and rubber-band.
+4. **60 FPS & zero regression**: blur budget (≤3 glass surfaces/screen), content-visibility for long lists, chart.js deferral; **characterization-before-rebuild** for every restyled component; every batch ships with `ci:check` exit 0 (1,112 tests + ratchet are the red line); owner visual QA on-device after each batch; bundle budget +5%.
+
+**Roadmap: 6 shippable batches** (0 enablement → 1 dashboard → 2 quick-add → 3 cards → 4 charts → 5 consistency + v23.3.0), each ≤~10 files, each independently revertible.
+
+### Next Step Proposals
+
+1. **(Owner) Review & approve `DIRECTIVE_19_PROPOSAL.md`** — specifically: Obsidian as the default dark palette, the emerald/coral financial pair, keeping royal navy `#002b59` as brand, and the single-family font decision.
+2. **(Auditor, on approval) Batch 0 (enablement)**: tokens + primitives + haptics layer with full tests — near-zero visual change, everything staged for the visible batches.
+3. **(Owner) v23.2.0 release data** — once you've run your local `@abc` pipeline, share the APK hash and it will be recorded (the release chain is green as of `e8dca6e`).
