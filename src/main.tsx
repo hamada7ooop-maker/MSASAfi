@@ -3,23 +3,15 @@
 // ============================================
 
 // ─── Font Imports (matching legacy main.js) ─────────────────────────────
-import '@fontsource/tajawal/300.css';
-import '@fontsource/tajawal/400.css';
-import '@fontsource/tajawal/500.css';
-import '@fontsource/tajawal/700.css';
-import '@fontsource/tajawal/800.css';
-import '@fontsource/tajawal/900.css';
-import '@fontsource/manrope/400.css';
-import '@fontsource/manrope/700.css';
-import '@fontsource/manrope/800.css';
+/* ═══ Directive 19 — one family, five weights ═══
+   IBM Plex Sans Arabic covers Arabic + Latin in a single family.
+   Tajawal (6 weights), Manrope (3), and Inter (3) were removed:
+   ~12 woff2 files stopped shipping with the bundle. */
 import '@fontsource/ibm-plex-sans-arabic/300.css';
 import '@fontsource/ibm-plex-sans-arabic/400.css';
 import '@fontsource/ibm-plex-sans-arabic/500.css';
 import '@fontsource/ibm-plex-sans-arabic/600.css';
 import '@fontsource/ibm-plex-sans-arabic/700.css';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
 import 'material-symbols/outlined.css';
 
 // ─── Core Styles ────────────────────────────────────────────────────────

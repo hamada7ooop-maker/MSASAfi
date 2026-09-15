@@ -96,4 +96,15 @@ describe('Directive 19 — the single-family font consolidation holds', () => {
   it('keeps the language metadata fonts unified', () => {
     expect(read('src/i18n/engine.ts')).not.toMatch(FRAGMENTED);
   });
+
+  it('bundles exactly one font family via fontsource (Directive 19 Batch 1)', () => {
+    const main = read('src/main.tsx');
+    const imports = main.match(/@fontsource\/[a-z0-9-]+/g) ?? [];
+    // Five weights of the one approved family — nothing else ships.
+    expect(imports.length).toBe(5);
+    for (const imp of imports) {
+      expect(imp).toBe('@fontsource/ibm-plex-sans-arabic');
+    }
+    expect(main).not.toMatch(/@fontsource\/(tajawal|manrope|inter)/);
+  });
 });
