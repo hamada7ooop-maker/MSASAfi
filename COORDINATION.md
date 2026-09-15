@@ -626,3 +626,30 @@ Continue the same composition-root strategy on Advisor's presentation sections, 
 ### Next Step Proposal
 
 Continue with the next stable Advisor presentation boundary only when characterization supports it; otherwise prioritize remaining zero-coverage clusters while preserving the current coverage ratchet and full CI gate.
+
+## Auditor Report — Directive 20 Batch 4: Advisor Score & Insights Decomposition — GREEN
+
+**Status: COMPLETE and GREEN.** Continued the same characterization-first composition-root strategy.
+
+### What shipped
+
+- Extracted the financial score presentation into `src/features/advisor/components/AdvisorScoreCard.tsx`.
+- Extracted the deep-insights presentation into `src/features/advisor/components/AdvisorDeepInsights.tsx`.
+- `AdvisorPage.tsx` remains responsible for data loading, navigation, export, challenge callbacks, and loading/error states; the extracted components are presentation-only and receive explicit props.
+
+### Verification
+
+- Existing Advisor characterization suites: **15/15 tests passing across 2 suites**.
+- `tsc --noEmit`: clean.
+- Changed-file ESLint: clean.
+- Full `npm run ci:check`: **exit 0** across TypeScript, coverage, security, audit, lint, and production build.
+- Coverage remains above the ratchet and increased to **70.11% lines / 66.19% functions / 74.20% branches**.
+- Known jsdom and Vite build warnings remain non-failing and unchanged.
+
+### Defect ledger
+
+- No behavioral defects surfaced; score rendering, insight fallback, and existing Advisor interactions remain characterized.
+
+### Next Step Proposal
+
+Advisor presentation responsibilities are now substantially decomposed. Proceed to the remaining zero-coverage cluster, beginning with `OCRScanner.tsx`, using characterization before any implementation change and preserving the current coverage ratchet.

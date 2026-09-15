@@ -11,6 +11,8 @@ import { RetirementSimulator } from './RetirementSimulator';
 import { NecessityBreakdown } from './NecessityBreakdown';
 import { AdvisorChallenges } from './AdvisorChallenges';
 import { AdvisorRecommendations } from './AdvisorRecommendations';
+import { AdvisorScoreCard } from './AdvisorScoreCard';
+import { AdvisorDeepInsights } from './AdvisorDeepInsights';
 
 import { oklabToRgb, oklchToRgb } from '../utils/pdfColors';
 
@@ -382,49 +384,9 @@ export function AdvisorPage() {
         </div>
       </div>
 
-      {/* Financial Score Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#002b59] to-[#1a4175] rounded-[3rem] p-8 shadow-2xl border border-white/10 group">
-        <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700"></div>
-        <div className="relative z-10 flex flex-col items-center text-center gap-4">
-          <div className="relative w-32 h-32 flex items-center justify-center">
-            <svg className="w-full h-full -rotate-90">
-              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="8" className="text-white/10" />
-              <circle cx="64" cy="64" r="60" fill="none" stroke="currentColor" strokeWidth="8" className="text-blue-400 transition-all duration-1000" strokeDasharray={377} strokeDashoffset={377 - (377 * financialScore / 100)} />
-            </svg>
-            <div className="absolute flex flex-col items-center">
-              <span className="text-4xl font-black text-white">{financialScore}</span>
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">%</span>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-xl font-black text-white">{t('ai.advisor.score')}</h3>
-            <p className="text-white/60 text-xs font-medium max-w-[240px] leading-relaxed">
-              {t('ai.advisor.scoreDesc')}
-            </p>
-          </div>
-        </div>
-      </div>
+      <AdvisorScoreCard score={financialScore} />
 
-      {/* Deep Insights (New Logic) */}
-      <section className="space-y-4">
-        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">
-          {t('ai.advisor.insights')}
-        </h4>
-        <div className="bg-white dark:bg-[#1e2124] rounded-[2.5rem] p-7 shadow-sm border border-black/5 dark:border-white/5 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-125 transition-transform duration-700">
-             <span className="material-symbols-outlined" style={{ fontSize: '80px' }}>psychology</span>
-          </div>
-          <div className="relative z-10 space-y-4">
-            <div className="flex items-center gap-3 text-blue-500">
-               <span className="material-symbols-outlined">analytics</span>
-               <span className="text-xs font-black uppercase tracking-widest">{t('common.lastMonth')}</span>
-            </div>
-            <p className="text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-              {deepInsights || t('chat.ai.noTopData')}
-            </p>
-          </div>
-        </div>
-      </section>
+      <AdvisorDeepInsights insights={deepInsights} />
 
       <NecessityBreakdown necessityStats={necessityStats} />
 
