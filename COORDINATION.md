@@ -458,3 +458,28 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 
 1. **(Owner) Build & sign v23.3.3** via your `@abc` line (all three addenda included). The visual tour is unchanged from the v23.3.2 list — nothing in these splits moves a pixel; that is what the green-before-and-after suites prove.
 2. On your confirmation, the directive closes officially.
+
+## Auditor Report — Cloud Ladder (cloud.ts 3.44%→94.48%): COMPLETE & GREEN — v23.3.4, REAL DEFECT #9 FIXED
+
+**What this is**: the coverage ladder's bottom rung. cloud.ts — the E2E encrypted Supabase sync (auth, PBKDF2 600k, AES-GCM envelope, backup, restore) — sat at 3.44% lines. 23 tests over the REAL crypto and the REAL database, mocking only the platform edges (global fetch, secureStore).
+
+1. **The suite**: envelope round-trip/shape/freshness/wrong-password rejection · session lifecycle (save with s→ms expiry conversion, expiry purge, clear) · sbFetch retry semantics under fake timers (recover after 5xx, give up after 3 with the status surfaced) · backup guards (not_authenticated / no_user_id) and the E2E promise — the test DECRYPTS the uploaded POST body and asserts the rows come back byte-faithfully · restore guards (no_backup_found, wrong_password as a clean message) and the full clear→reimport→settings path.
+2. **REAL DEFECT #9, caught by the first failing assertion**: cloudRestore's clear-phase invoked `delFunc(id)` DETACHED from its receiver — `this` was undefined inside deleteTransaction, the TypeError was swallowed by the very `.catch(silentFail(...))` written to log delete failures, and so **cloud restore never cleared a single stale row in production**; it re-imported over existing data (duplicates, resurrected records), silently. One-line fix (`delFunc.call(dbRecord, id)`), documented in code; the test that caught it is now green.
+3. **Numbers**: cloud.ts **3.44%→94.48%** lines · **1376/1376 × 139** (+23) · overall 68.13/62.8/51.34 → **twelfth ratchet raise to 68.1/62.7/51.3** · ci:check exit 0 · version **23.3.4**.
+
+### Final ledger (amended)
+
+| Batch | Delivered | Tests | Ratchet | Real defects fixed |
+|---|---|---|---|---|
+| 0–5 · Directive 19 | Obsidian + springs + wallet + charts + closing sweep | 1152→1302 ×131 | 64.1→66.7/61.5/50.1 | 8 |
+| 5+ · Addendum | §5.1 perf rules as CI pins, v23.3.1 | 1317 × 134 | held | per-item glass blowout |
+| 5++ · Decomposition | Assets/AssetDetailModal/Investments split, one shared PDF service, v23.3.2 | 1344 × 137 | 67.1/62.0/50.6 | duplicated ~150-line pipeline |
+| 5+++ · Continuation | TravelBudget 584→194 in four modules, v23.3.3 | 1353 × 138 | 67.2/62.1/50.9 | — |
+| 5++++ · Cloud ladder | cloud.ts E2E suite, restore clear-phase fixed, v23.3.4 | **1376 × 139** | **68.1/62.7/51.3** | **#9: detached-receiver delete — restores never cleared stale rows** |
+
+**Nine real defects across the program. Twelve ratchet raises, never lowered.**
+
+### The one remaining gate — yours
+
+1. **(Owner) Build & sign v23.3.4** via your `@abc` line — this one matters beyond pixels: it carries the cloud-restore fix. A quick restore-from-backup on your device is the natural visual tour for it.
+2. On your confirmation, the directive closes officially.

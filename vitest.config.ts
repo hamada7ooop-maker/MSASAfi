@@ -121,7 +121,14 @@ export default defineConfig({
       //   pre-existing travelBudget suite stayed green through the split.
       //   Measured 67.2/62.12/50.93 → raised to 67.2/62.1/50.9 (eleventh
       //   raise; margin below the measurement, per the drift rule).
-      thresholds: { lines: 67.2, functions: 62.1, branches: 50.9 }
+      // - Cloud ladder (2026-09-15): +23 tests (1376 × 139); cloud.ts — the
+      //   E2E encrypted sync service — lifted 3.44%→94.48% lines with real
+      //   PBKDF2/AES-GCM and the real DB; the suite caught a REAL data-
+      //   integrity defect: cloudRestore's clear-phase called deleteTransaction
+      //   detached from its receiver, so the TypeError vanished into the
+      //   catch and restores re-imported over stale rows. Measured
+      //   68.13/62.8/51.34 → raised to 68.1/62.7/51.3 (twelfth raise).
+      thresholds: { lines: 68.1, functions: 62.7, branches: 51.3 }
     },
   },
 });
