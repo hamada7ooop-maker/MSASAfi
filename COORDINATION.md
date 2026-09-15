@@ -201,3 +201,30 @@ As requested, the vision and engineering roadmap were drafted **after a factual 
 1. **(Owner) Review & approve `DIRECTIVE_19_PROPOSAL.md`** — specifically: Obsidian as the default dark palette, the emerald/coral financial pair, keeping royal navy `#002b59` as brand, and the single-family font decision.
 2. **(Auditor, on approval) Batch 0 (enablement)**: tokens + primitives + haptics layer with full tests — near-zero visual change, everything staged for the visible batches.
 3. **(Owner) v23.2.0 release data** — once you've run your local `@abc` pipeline, share the APK hash and it will be recorded (the release chain is green as of `e8dca6e`).
+
+---
+
+## Auditor Report — Directive 19 / Batch 0 (Enablement): COMPLETE, GREEN, awaiting your visual gate
+
+Executed against your approval `5a90fae` (all four decisions). Everything is staged for the visible batches; the only intended visual change in Batch 0 is **the dark mode itself** — it is now Deep Obsidian `#0B0F17` (decision 1). Light mode, layouts, and components are untouched.
+
+**What shipped (17 files + 40 new tests → 1152/1152 × 121, ci:check exit 0):**
+
+1. **Tokens (`src/index.css`)**: full Obsidian ladder (950→500) in `@theme`; `.dark` base AND the user-selectable `dim` palette re-based on it; the approved emerald/coral income/expense pair `#34D399/#FB7185`; `primary-night #7CB0FF`; a 5-step semantic radii scale (`chip 12 / tile 20 / card 28 / sheet 36`) and a 4-level light-mode elevation ladder (`e1..e4`). **Naming note**: the radii intentionally avoid Tailwind's default `rounded-*` names — overriding `--radius-lg` would have silently resized every existing `rounded-lg` surface from 8px to 28px in what was promised as a near-zero-visual batch.
+2. **Font consolidation — one honest discovery**: there was **never a font file in this repo** (no @font-face, no CDN link) — the Tajawal/Inter/Manrope stacks have been rendering system fonts all along. All stacks (index.css ×3, globals.css, index.html, NetWorthTrend chart fonts, pdfExport, LANGUAGE_META) are now the single approved family `IBM Plex Sans Arabic` + system fallbacks. **Bundling the actual variable font file is proposed for Batch 1 behind your visual gate** (it changes real rendering everywhere; it needs your eyes).
+3. **Primitives (all tested)**: `<NumberText/>` — the financial-figure primitive (tabular-nums, one family, NaN/∞ renders as «—» and never as a balance); `<GlassPanel/>` — the one sanctioned glass treatment with the blur budget documented (≤3 glass surfaces/screen); `.ambient-glow` — one semantic halo for hero surfaces.
+4. **Motion tokens** (`src/components/motion/tokens.ts`): the four approved springs + a physics-derived cubic-bezier approximation (damping ratio ζ → bounded overshoot) + the reduced-motion gate. No framer-motion; CSS/WAAPI only.
+5. **Haptic vocabulary** (`src/core/haptics.ts`): `touch.light/select/confirm/destruct/error/triumph` — native routing via @capacitor/haptics, web fallback via navigator.vibrate, three gates (new `hapticsEnabled` setting, `prefers-reduced-motion`, never-throws). Triumph is a distinct double pulse (Medium→Light @90ms, pinned at the 89/90ms boundary).
+6. **Settings**: `hapticsEnabled` (default ON; old persists heal to ON — pinned by test), a visible toggle row in General Settings, search-index registration, and translation keys in **all 11 locales** per repo convention.
+7. **Ratchet — fourth raise**: measured 64.27/59.25/48.48 → thresholds now **64.1/59.2/48.3**. Ladder: 60.0→62.0→62.5→63.9→64.1 lines.
+
+**Disclosed deviations / observations:**
+- (a) Legacy `useHaptic` (direct navigator.vibrate, used only by SwipeableRow) was left untouched — it does not violate the new layer's contract (it never calls @capacitor/haptics). Migration to the unified vocabulary is scheduled for Batch 2/5.
+- (b) `designTokens.test.ts` now guards the whole system: the ladder values, the pair, the radii/elevation scales, the Obsidian re-basing of `.dark` and `dim`, the primitive classes, and font-stack consolidation — a silent regression fails tests before it reaches a user.
+- (c) The `[data-count], .tabular-nums` legacy rule still forces `font-weight: 800 !important` — untouched in Batch 0 to avoid changing existing rendered weights; NumberText deliberately uses its own `.num-fin` class free of that force. Cleanup candidate for Batch 5.
+
+### Next Step Proposals
+
+1. **(Owner) Visual gate**: build on your machine (`@abc`, no version bump needed for an intermediate check) and look at dark mode — it should be Obsidian now, cooler and deeper, with hairline borders instead of fading shadows. Light mode should look identical to v23.2.0.
+2. **(Owner) Font decision for Batch 1**: bundle the IBM Plex Sans Arabic variable font file (adds ~100-200KB, changes real rendering) — yes/no.
+3. **(Auditor, on your GO) Batch 1 — the Dashboard**: characterization tests for ClassicDashboard first, then decompose it into ≤120-line pieces (glass balance card + semantic AmbientGlow + NumberFlow counter on top of today's primitives), each covered — the 0%-coverage cluster starts falling as a side effect.
