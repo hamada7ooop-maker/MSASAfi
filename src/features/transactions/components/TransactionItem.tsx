@@ -35,7 +35,7 @@ export const TransactionItem = React.memo(function TransactionItem({ transaction
   };
 
   return (
-    <div className="flex items-center gap-2 group animate-in slide-in-from-right-4 duration-300">
+    <div className="cv-item flex items-center gap-2 group animate-in slide-in-from-right-4 duration-300">
       {/* Selection Circle */}
       <div 
         onClick={() => toggleSelection(transaction.id)}
@@ -72,7 +72,7 @@ export const TransactionItem = React.memo(function TransactionItem({ transaction
             navigate(`/transactions/add?edit=${transaction.id}`);
           }
         }}
-        className={`flex-1 fin-card p-4 flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer group overflow-hidden ${
+        className={`flex-1 fin-card contain-card p-4 flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer group overflow-hidden ${
           isSelected 
           ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg shadow-blue-500/10' 
           : 'hover:border-blue-500/20 hover:bg-slate-50 dark:hover:bg-slate-700/30'

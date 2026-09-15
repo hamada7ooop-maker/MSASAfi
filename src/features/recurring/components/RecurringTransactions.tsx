@@ -226,7 +226,7 @@ export function RecurringTransactions() {
               recurringTxns.map(tx => (
                 <div 
                   key={tx.id} 
-                  className={`bg-white/60 dark:bg-[#1e2124]/60 backdrop-blur-md rounded-2xl p-4 border border-white/20 dark:border-slate-800/50 shadow-sm flex items-center justify-between transition-all ${
+                  className={`cv-item contain-card bg-white/60 dark:bg-[#1e2124]/60 rounded-2xl p-4 border border-white/20 dark:border-slate-800/50 shadow-sm flex items-center justify-between transition-all ${
                     !tx.isActive ? 'opacity-50 grayscale scale-[0.98]' : 'hover:scale-[1.01]'
                   }`}
                 >
@@ -342,7 +342,7 @@ export function RecurringTransactions() {
                 return (
                   <div 
                     key={tx.id} 
-                    className="bg-white/60 dark:bg-[#1e2124]/60 backdrop-blur-md rounded-2xl p-4 border border-white/20 dark:border-slate-800/50 shadow-sm space-y-4 hover:scale-[1.01] transition-all"
+                    className="cv-item contain-card bg-white/60 dark:bg-[#1e2124]/60 rounded-2xl p-4 border border-white/20 dark:border-slate-800/50 shadow-sm space-y-4 hover:scale-[1.01] transition-all"
                   >
                     
                     {/* Top Info Section */}

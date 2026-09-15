@@ -329,7 +329,7 @@ export function Glossary() {
               <div 
                 key={term.id} 
                 onClick={() => handleCardClick(term.id)}
-                className={`glossary-card-container ${isFlipped ? 'flipped' : ''}`}
+                className={`glossary-card-container cv-item-lg ${isFlipped ? 'flipped' : ''}`}
   role="button" tabIndex={0} onKeyDown={onActivate(() => handleCardClick(term.id))}>
                 <div className="glossary-card-inner">
                   

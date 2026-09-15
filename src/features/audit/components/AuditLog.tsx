@@ -266,7 +266,7 @@ export function AuditLog() {
                   return (
                     <div 
                       key={e.id || index} 
-                      className="bg-white/80 dark:bg-[#1c1f23]/80 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 shadow-sm border border-slate-100/50 dark:border-slate-800/50 transition-all hover:scale-[1.01] hover:shadow-md"
+                      className="cv-item contain-card bg-white/80 dark:bg-[#1c1f23]/80 p-4 rounded-2xl flex items-center gap-4 shadow-sm border border-slate-100/50 dark:border-slate-800/50 transition-all hover:scale-[1.01] hover:shadow-md"
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${bgColor}`}>
                         <span className={`material-symbols-outlined ${iconColor} text-2xl drop-shadow-sm`} style={{ fontVariationSettings: "'FILL' 1" }}>

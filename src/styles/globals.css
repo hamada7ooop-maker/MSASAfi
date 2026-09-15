@@ -648,9 +648,10 @@ input, textarea, [contenteditable="true"], select, input *, textarea * {
 }
 .bottom-nav-item *, .nav-item * { pointer-events: none; }  
 
-/* Dynamic Stability Fixes */
+/* Dynamic Stability Fixes — Directive 19 addendum (§5.1 rule 5): standing
+   will-change removed here too (index.css is the canonical copy; see
+   tests/unit/perfRules.test.ts for the zero-will-change pin). */
 .card-stable {
-  will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;

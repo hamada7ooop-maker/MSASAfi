@@ -167,7 +167,7 @@ export function AutoClassificationCard() {
               </div>
             ) : (
               filteredRules.map(rule => (
-                <div key={rule.id} className="flex items-center gap-4 p-5 bg-white/60 dark:bg-white/[0.02] backdrop-blur-sm rounded-[2rem] border border-white/20 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(31,38,135,0.02)] group hover:bg-black/[0.01] dark:hover:bg-white/[0.01] active:scale-[0.99] transition-all">
+                <div key={rule.id} className="cv-item contain-card flex items-center gap-4 p-5 bg-white/60 dark:bg-white/[0.02] rounded-[2rem] border border-white/20 dark:border-white/[0.05] shadow-[0_8px_32px_0_rgba(31,38,135,0.02)] group hover:bg-black/[0.01] dark:hover:bg-white/[0.01] active:scale-[0.99] transition-all">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${rule.isRegex ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 shadow-sm' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-sm'}`}>
                     <span className="material-symbols-outlined text-2xl">
                       {rule.isRegex ? 'data_object' : 'match_case'}

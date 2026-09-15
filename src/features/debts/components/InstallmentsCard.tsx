@@ -321,7 +321,7 @@ export function InstallmentsCard({ installments, accounts, onPay, onEdit, onDele
               return (
                 <div 
                   key={inst.id}
-                  className="w-full max-w-full min-w-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 border border-white/10 dark:border-slate-800/80 shadow-md relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
+                  className="cv-item-lg contain-card w-full max-w-full min-w-0 bg-white/60 dark:bg-slate-900/60 rounded-2xl p-4 border border-white/10 dark:border-slate-800/80 shadow-md relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
                 >
                   {/* Action buttons on top right (or top left in RTL) */}
                   <div className={`absolute top-4 ${isLTR ? 'right-4' : 'left-4'} flex gap-1.5 z-10 shrink-0`}>

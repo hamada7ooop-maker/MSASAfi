@@ -834,12 +834,37 @@ input, textarea, [contenteditable="true"], select, input *, textarea * {
 }
 .bottom-nav-item *, .nav-item * { pointer-events: none; }  
 
-/* Dynamic Stability Fixes */
+/* Dynamic Stability Fixes — Directive 19 addendum (§5.1 rule 5): the standing
+   `will-change` is gone; translateZ(0) already promotes the card to its own
+   layer for the one-shot modalScale entrance, and a permanent will-change is
+   a layer the GPU never gets back. tests/unit/perfRules.test.ts pins src to
+   ZERO will-change — any future use must be a scoped, justified exception. */
 .card-stable {
-  will-change: transform, opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+}
+
+/* Directive 19 addendum — §5.1 rule 3: long-list virtualization. cv-item lets
+   the browser skip layout+paint+style work for off-screen list entries
+   entirely, which is what holds 60 FPS on the long screens. The `auto` in
+   contain-intrinsic-size makes the browser remember each item's real height
+   after its first paint, so 84px/176px are only pre-first-paint estimates
+   (row cards / tall cards). */
+.cv-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 84px;
+}
+.cv-item-lg {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 176px;
+}
+
+/* §5.1 rule 3 (cards): layout+paint containment for in-flow cards. Paint
+   containment clips descendants to the card bounds — apply only to cards
+   with no intentional out-of-bounds decoration (no outer glows). */
+.contain-card {
+  contain: layout paint;
 }
 
 /* Fix shivering numbers */
