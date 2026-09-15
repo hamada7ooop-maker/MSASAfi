@@ -140,7 +140,7 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
           x: {
             grid: { display: false },
             ticks: {
-              font: { family: 'Tajawal, Inter', size: 10 },
+              font: { family: 'IBM Plex Sans Arabic', size: 10 },
               color: 'rgba(156, 163, 175, 0.8)',
               autoSkip: true,
               maxRotation: 0
@@ -153,7 +153,7 @@ export const NetWorthTrend = React.memo(function NetWorthTrend({ data, period = 
               lineWidth: (context) => context.tick.value === 0 ? 2 : 1
             },
             ticks: {
-              font: { family: 'Tajawal, Inter', size: 10 },
+              font: { family: 'IBM Plex Sans Arabic', size: 10 },
               color: 'rgba(156, 163, 175, 0.8)',
               callback: (value) => fmt(value as number)
             }

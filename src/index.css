@@ -62,23 +62,61 @@
   --color-dark-surface: var(--theme-dark-surface, #1c1f23);
   --color-dark-border: var(--theme-dark-border, rgba(255,255,255,0.05));
   --color-dark-text: var(--theme-dark-text, #f1f5f9);
+
+  /* ═══ Directive 19 — UI/UX Renaissance Tokens (Batch 0: Enablement) ═══ */
+
+  /* Deep Obsidian ladder — the approved default dark surfaces.
+     Elevation in the dark is layering + hairline borders, never shadows-on-black. */
+  --color-obsidian-950: #070A10;
+  --color-obsidian-900: #0B0F17;
+  --color-obsidian-800: #111826;
+  --color-obsidian-700: #161F2E;
+  --color-obsidian-600: #1D2839;
+  --color-obsidian-500: #243146;
+
+  /* Financial semantic pair — colorblind-safe emerald/coral, WCAG AA on Obsidian */
+  --color-income: #34D399;
+  --color-expense: #FB7185;
+
+  /* Brand night variant — royal navy #002b59 cannot live on black */
+  --color-primary-night: #7CB0FF;
+
+  /* Unified radii scale (5 semantic steps; names avoid Tailwind's default
+     rounded-* scale so no existing surface changes size in Batch 0) */
+  --radius-chip: 12px;
+  --radius-tile: 20px;
+  --radius-card: 28px;
+  --radius-sheet: 36px;
+
+  /* Elevation ladder — light-mode shadows (dark mode elevates via borders/glow) */
+  --shadow-e1: 0 1px 2px rgba(9, 14, 26, 0.06);
+  --shadow-e2: 0 2px 8px rgba(9, 14, 26, 0.08);
+  --shadow-e3: 0 8px 24px rgba(9, 14, 26, 0.12);
+  --shadow-e4: 0 16px 40px rgba(9, 14, 26, 0.16);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --color-surface: #1c1f23;
-  --color-surface-container-lowest: #121214;
-  --color-surface-container-low: #1e2124;
-  --color-surface-container: #22262a;
-  --color-surface-container-high: #282d32;
-  --color-surface-container-highest: #2d3135;
-  --color-background: #121214;
-  --color-on-surface: #e2e3e4;
-  --color-on-surface-variant: #c3c6d1;
-  --color-outline: #8d9199;
-  --color-outline-variant: #43474e;
-  --color-text: #e2e3e4;
+  /* Directive 19 — Deep Obsidian (#0B0F17), the approved default dark palette.
+     Ladder mapping: lowest=950, background=900, low/surface=800, container=700,
+     high=600, highest=500. */
+  --color-surface: var(--color-obsidian-800);
+  --color-surface-container-lowest: var(--color-obsidian-950);
+  --color-surface-container-low: var(--color-obsidian-800);
+  --color-surface-container: var(--color-obsidian-700);
+  --color-surface-container-high: var(--color-obsidian-600);
+  --color-surface-container-highest: var(--color-obsidian-500);
+  --color-background: var(--color-obsidian-900);
+  --color-on-surface: #e7eaf2;
+  --color-on-surface-variant: #b9c0cf;
+  --color-outline: #5a6478;
+  --color-outline-variant: #2e3a50;
+  --color-text: #e7eaf2;
+  --theme-dark-bg: var(--color-obsidian-900);
+  --theme-dark-surface: var(--color-obsidian-800);
+  --theme-dark-border: var(--color-obsidian-500);
+  --theme-dark-text: #e7eaf2;
   --theme-light-surface: #ffffff;
   --theme-light-text: #292524;
 }
@@ -244,24 +282,27 @@ html, body, #root {
   }
 
   .text-premium-header {
-    font-family: 'Tajawal', 'Inter', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
     font-weight: 900;
     letter-spacing: -0.02em;
     line-height: 1.1;
   }
 }
 
-/* Global Typography Override */
+/* Global Typography Override — Directive 19: one variable Arabic family.
+   (IBM Plex Sans Arabic covers Arabic + Latin in a single family; the old
+   Tajawal/Inter/Manrope fragmentation never shipped actual font files and
+   rendered system fonts anyway.) */
 * {
-  font-family: 'Tajawal', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, -apple-system, sans-serif;
 }
 
 [dir="rtl"] * {
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
 }
 
 [dir="ltr"] * {
-  font-family: 'Inter', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
 }
 
 html.dark[data-palette="midnight"] {
@@ -326,19 +367,21 @@ html.dark[data-palette="oled"] {
   }
 
 html.dark[data-palette="dim"] {
-  --theme-dark-bg: #121214;
-  --theme-dark-surface: #1c1f23;
-  --theme-dark-border: #3c4043;
-  --theme-dark-text: #e2e3e4;
-  --color-background: #121214;
-  --color-surface: #1c1f23;
-  --color-surface-container-lowest: #121214;
-  --color-surface-container-low: #1e2124;
-  --color-surface-container: #22262a;
-  --color-surface-container-high: #282d32;
-  --color-surface-container-highest: #2d3135;
-  --color-on-surface: #e2e3e4;
-  --color-on-surface-variant: #c3c6d1;
+  /* Directive 19 — 'dim' is now the evolved Deep Obsidian palette (approved).
+     Same ladder as the .dark base so the default experience is one system. */
+  --theme-dark-bg: var(--color-obsidian-900);
+  --theme-dark-surface: var(--color-obsidian-800);
+  --theme-dark-border: var(--color-obsidian-500);
+  --theme-dark-text: #e7eaf2;
+  --color-background: var(--color-obsidian-900);
+  --color-surface: var(--color-obsidian-800);
+  --color-surface-container-lowest: var(--color-obsidian-950);
+  --color-surface-container-low: var(--color-obsidian-800);
+  --color-surface-container: var(--color-obsidian-700);
+  --color-surface-container-high: var(--color-obsidian-600);
+  --color-surface-container-highest: var(--color-obsidian-500);
+  --color-on-surface: #e7eaf2;
+  --color-on-surface-variant: #b9c0cf;
 }
 html.dark[data-palette="royal-gold"] {
   --theme-dark-bg: #080808; 
@@ -1137,7 +1180,7 @@ html[data-preview-active="true"] .floating-actions-container {
 [data-count], .tabular-nums {
   font-variant-numeric: tabular-nums;
   font-weight: 800 !important;
-  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1152,6 +1195,62 @@ html[data-preview-active="true"] .floating-actions-container {
   background: rgba(28,31,35,0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+/* ═══ Directive 19 — UI Primitives (Batch 0) ═══ */
+
+/* NumberText — the financial figure primitive.
+   Fixed-width figures (tabular-nums) so live-updating balances never dance;
+   tight tracking for large amounts. Weight is left to the call site. */
+.num-fin {
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: -0.01em;
+}
+
+/* GlassPanel — the one sanctioned floating-layer glass treatment.
+   Budget: at most 3 glass surfaces visible per screen (blur is the most
+   expensive compositing op in the WebView). */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(9, 14, 26, 0.08);
+  border-radius: var(--radius-card);
+}
+.dark .glass-panel {
+  background: rgba(17, 24, 38, 0.55); /* obsidian-800 @ 55% */
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+.glass-panel-strong {
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.dark .glass-panel-strong {
+  background: rgba(17, 24, 38, 0.72);
+}
+
+/* AmbientGlow — a single soft semantic halo behind a hero surface.
+   Color is driven by --glow-color (income emerald / expense coral). */
+.ambient-glow {
+  position: relative;
+  isolation: isolate;
+}
+.ambient-glow::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, var(--glow-color, var(--color-income)), transparent 70%);
+  opacity: 0.12;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-glow::before { transition: none; }
 }
 
 /* ── Gradient Text ── */
@@ -1172,7 +1271,7 @@ html[data-preview-active="true"] .floating-actions-container {
 
 /* ── Financial Amount ── */
 .fin-amount {
-  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }

@@ -12,14 +12,14 @@ export interface LanguageMetaItem {
 }
 
 export const LANGUAGE_META: Record<LanguageCode, LanguageMetaItem> = {
-  ar: { name: 'العربية', flag: '🇸🇦', dir: 'rtl', font: "'Tajawal', 'IBM Plex Sans Arabic', sans-serif" },
+  ar: { name: 'العربية', flag: '🇸🇦', dir: 'rtl', font: "'IBM Plex Sans Arabic', sans-serif" },
   en: { name: 'English', flag: '🇺🇸', dir: 'ltr', font: 'sans-serif' },
   fr: { name: 'Français', flag: '🇫🇷', dir: 'ltr', font: 'sans-serif' },
   tr: { name: 'Türkçe', flag: '🇹🇷', dir: 'ltr', font: 'sans-serif' },
-  ur: { name: 'اردو', flag: '🇵🇰', dir: 'rtl', font: "'Tajawal', 'IBM Plex Sans Arabic', sans-serif" },
+  ur: { name: 'اردو', flag: '🇵🇰', dir: 'rtl', font: "'IBM Plex Sans Arabic', sans-serif" },
   ms: { name: 'Bahasa Melayu', flag: '🇲🇾', dir: 'ltr', font: 'sans-serif' },
   id: { name: 'Bahasa Indonesia', flag: '🇮🇩', dir: 'ltr', font: 'sans-serif' },
-  fa: { name: 'فارسی', flag: '🇮🇷', dir: 'rtl', font: "'Tajawal', 'IBM Plex Sans Arabic', sans-serif" },
+  fa: { name: 'فارسی', flag: '🇮🇷', dir: 'rtl', font: "'IBM Plex Sans Arabic', sans-serif" },
   es: { name: 'Español', flag: '🇪🇸', dir: 'ltr', font: 'sans-serif' },
   de: { name: 'Deutsch', flag: '🇩🇪', dir: 'ltr', font: 'sans-serif' },
   it: { name: 'Italiano', flag: '🇮🇹', dir: 'ltr', font: 'sans-serif' },

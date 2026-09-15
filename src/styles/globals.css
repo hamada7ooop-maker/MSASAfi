@@ -1005,7 +1005,7 @@ html[data-preview-active="true"] .floating-actions-container {
 [data-count], .tabular-nums {
   font-variant-numeric: tabular-nums;
   font-weight: 800 !important;
-  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1040,7 +1040,7 @@ html[data-preview-active="true"] .floating-actions-container {
 
 /* ── Financial Amount ── */
 .fin-amount {
-  font-family: 'Manrope', 'IBM Plex Sans Arabic', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }

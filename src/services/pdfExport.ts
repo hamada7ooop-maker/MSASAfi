@@ -46,7 +46,7 @@ export async function exportProfessionalPDF(
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5);
 
-  if (document.fonts) await document.fonts.load('16px "Tajawal"');
+  if (document.fonts) await document.fonts.load('16px "IBM Plex Sans Arabic"');
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const container = document.createElement('div');
@@ -60,7 +60,7 @@ export async function exportProfessionalPDF(
   while (currentTxnIndex < totalTxns) {
     const pageDiv = document.createElement('div');
     pageDiv.dir = isRtl ? 'rtl' : 'ltr';
-    pageDiv.style.cssText = `width:210mm;padding:20mm;background:white;min-height:297mm;box-sizing:border-box;font-family:'Tajawal', sans-serif;position:relative;overflow:hidden;`;
+    pageDiv.style.cssText = `width:210mm;padding:20mm;background:white;min-height:297mm;box-sizing:border-box;font-family:'IBM Plex Sans Arabic', sans-serif;position:relative;overflow:hidden;`;
 
     // Watermark
     const watermark = document.createElement('div');
@@ -343,7 +343,7 @@ export async function exportTaxPDF(
   const netIncome = totalIncome - totalExpense;
   const estimatedTax = netIncome > 0 ? netIncome * 0.15 : 0;
 
-  if (document.fonts) await document.fonts.load('16px "Tajawal"');
+  if (document.fonts) await document.fonts.load('16px "IBM Plex Sans Arabic"');
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const container = document.createElement('div');
@@ -352,7 +352,7 @@ export async function exportTaxPDF(
 
   const pageDiv = document.createElement('div');
   pageDiv.dir = isRtl ? 'rtl' : 'ltr';
-  pageDiv.style.cssText = `width:210mm;padding:20mm;background:white;min-height:297mm;box-sizing:border-box;font-family:'Tajawal', sans-serif;`;
+  pageDiv.style.cssText = `width:210mm;padding:20mm;background:white;min-height:297mm;box-sizing:border-box;font-family:'IBM Plex Sans Arabic', sans-serif;`;
 
   safeInnerHTML(
     pageDiv,
