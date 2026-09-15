@@ -66,8 +66,16 @@ export const StatementParser = {
     });
 
     // 2. Content-Based Fallback (If headers are missing or obscure)
-    if (dateIdx === -1) dateIdx = this.guessColumnByContent(dataRows, 'date');
-    if (amountIdx === -1 && debitIdx === -1) amountIdx = this.guessColumnByContent(dataRows, 'amount');
+    //    Guessers exclude columns already assigned to another role, and the
+    //    date/amount discrimination uses a strict date SHAPE check — because
+    //    V8 considers new Date('-44.5') a valid date (May 1, 2044), which
+    //    used to let each guesser hijack the other's column.
+    if (dateIdx === -1) {
+      dateIdx = this.guessColumnByContent(dataRows, 'date', amountIdx !== -1 ? [amountIdx] : []);
+    }
+    if (amountIdx === -1 && debitIdx === -1) {
+      amountIdx = this.guessColumnByContent(dataRows, 'amount', dateIdx !== -1 ? [dateIdx] : []);
+    }
     if (descIdx === -1) descIdx = dateIdx === 0 ? 1 : 0; // Default guess
 
     const results: ImportedTransaction[] = [];
@@ -186,15 +194,28 @@ export const StatementParser = {
   },
 
   /**
-   * Guesses column index by scanning data samples
+   * Strict date-shape check: three digit groups chained by date separators
+   * (e.g. 2026-09-01, 14/09/2026, 09.14.26) or an explicit clock time.
+   * Unlike `!isNaN(new Date(v))`, this does NOT classify plain numbers like
+   * '-44.5' as dates (V8 parses them as e.g. May 1, 2044).
    */
-  guessColumnByContent(rows: string[][], type: 'date' | 'amount'): number {
+  looksLikeDate(value: string): boolean {
+    return /\d+\s*[-/.]\s*\d+\s*[-/.]\s*\d+/.test(value) || /:\d{2}/.test(value);
+  },
+
+  /**
+   * Guesses column index by scanning data samples.
+   * `exclude` holds column indices already assigned to another role, so the
+   * date and amount guessers cannot hijack each other's columns.
+   */
+  guessColumnByContent(rows: string[][], type: 'date' | 'amount', exclude: number[] = []): number {
     if (rows.length === 0) return -1;
     const sample = rows[0];
     for (let i = 0; i < sample.length; i++) {
+      if (exclude.includes(i)) continue;
       const val = sample[i];
-      if (type === 'date' && !isNaN(new Date(val).getTime()) && val.includesAny(['-', '/', ':'])) return i;
-      if (type === 'amount' && !isNaN(parseFloat(val.replace(/[^\d.-]/g, ''))) && /[\d]/.test(val)) return i;
+      if (type === 'date' && !isNaN(new Date(val).getTime()) && this.looksLikeDate(val)) return i;
+      if (type === 'amount' && !this.looksLikeDate(val) && !isNaN(parseFloat(val.replace(/[^\d.-]/g, ''))) && /[\d]/.test(val)) return i;
     }
     return -1;
   },

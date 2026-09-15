@@ -69,12 +69,28 @@ describe('StatementParser Unit Tests (statementParser.ts)', () => {
       expect(StatementParser.guessColumnByContent(rows, 'amount')).toBe(2);
     });
 
-    it('documents a heuristic weakness: a preceding date column satisfies the amount guess first', () => {
-      // '2026-09-01' parses as the number 2026, so the amount scan latches
-      // onto the date column when it comes first. Pinned as-is (audited
-      // behavior, flagged in the audit report); a fix needs owner sign-off.
+    it('FIXED (owner-approved): the amount guess rejects date-shaped values', () => {
+      // Previously '2026-09-01' parsed as the number 2026 and the amount scan
+      // latched onto the date column. Strict date-shape discrimination now
+      // rejects it, so the real amount column wins even without exclusion.
       const rows = [['note', '2026-09-01', '42.5']];
-      expect(StatementParser.guessColumnByContent(rows, 'amount')).toBe(1);
+      expect(StatementParser.guessColumnByContent(rows, 'amount')).toBe(2);
+    });
+
+    it('excludes already-assigned columns from the guess (mutual exclusion)', () => {
+      const rows = [['note', '2026-09-01', '42.5']];
+      expect(StatementParser.guessColumnByContent(rows, 'amount', [2])).toBe(-1);
+      expect(StatementParser.guessColumnByContent(rows, 'date', [1])).toBe(-1);
+    });
+
+    it('looksLikeDate accepts real date shapes and rejects plain numbers (V8 quirk guard)', () => {
+      expect(StatementParser.looksLikeDate('2026-09-01')).toBe(true);
+      expect(StatementParser.looksLikeDate('14/09/2026 08:30')).toBe(true);
+      expect(StatementParser.looksLikeDate('09.14.26')).toBe(true);
+      // V8 parses these as "May 1, 2044" — they must NOT count as dates.
+      expect(StatementParser.looksLikeDate('-44.5')).toBe(false);
+      expect(StatementParser.looksLikeDate('44.5')).toBe(false);
+      expect(StatementParser.looksLikeDate('2026')).toBe(false);
     });
 
     it('returns -1 when nothing matches or there is no data', () => {
@@ -242,34 +258,31 @@ describe('StatementParser Unit Tests (statementParser.ts)', () => {
       expect(txns[0].accountName).toBe('الرئيسية');
     });
 
-    it('documents the reverse weakness: a plain amount preceding the date hijacks the date guess (V8 quirk)', async () => {
-      // new Date('-44.5') is VALID in V8 (it parses as May 1, 2044!), so the
-      // content-based DATE guess latches onto the amount column when it comes
-      // first. Both the date and the amount end up reading column 1: the date
-      // becomes 2044-05-01 while the real date column is ignored entirely.
-      // Pinned as audited behavior; flagged for a future fix decision.
+    it('FIXED (owner-approved): amount-first rows no longer hijack the date guess (V8 quirk)', async () => {
+      // new Date('-44.5') is VALID in V8 (May 1, 2044), which previously let
+      // the DATE guess latch onto the amount column. looksLikeDate now rejects
+      // plain numbers, so the real date column is found.
       const csv = ['col_a,col_b,col_c', 'coffee,-44.5,2026-09-01'].join('\n');
       const txns = await StatementParser.parseCSV(csvFile(csv));
       expect(txns[0]).toMatchObject({
-        date: new Date('-44.5').toISOString(),
+        date: '2026-09-01T00:00:00.000Z',
         description: 'coffee',
         amount: 44.5,
         type: 'expense',
       });
     });
 
-    it('documents the end-to-end effect of the amount-guess weakness (date-first rows)', async () => {
-      // With obscure headers and the date in the FIRST column, the content
-      // fallback mistakes the date for the amount (2026-09-01 → 2026), so the
-      // transaction imports as an income of 2026 instead of an expense of 44.5.
-      // Pinned as audited behavior; flagged for a future fix decision.
+    it('FIXED (owner-approved): date-first rows now parse correctly with obscure headers', async () => {
+      // Previously the date column was hijacked as the amount (an "income of
+      // 2026"). With strict date-shape discrimination plus mutual exclusion,
+      // the date, description and amount all map to the right columns.
       const csv = ['col_a,col_b,col_c', '2026-09-01,Some shop,-44.5'].join('\n');
       const txns = await StatementParser.parseCSV(csvFile(csv));
       expect(txns[0]).toMatchObject({
         date: '2026-09-01T00:00:00.000Z',
         description: 'Some shop',
-        amount: 2026,
-        type: 'income',
+        amount: 44.5,
+        type: 'expense',
       });
     });
 
