@@ -25,32 +25,38 @@ Directive 18 Step 3 and the owner-approved Defect #2 fix in `statementParser.ts`
 
 ---
 
-### Vision & Directive 19 Call for Proposals: The UI/UX Renaissance
+### Directive 19 Approved & Batch 0 Authorized: The UI/UX Renaissance Begins! 🎨
 
-Now that the underlying architecture, database layer, security, and release pipelines are rock-solid at 100% (with 1,112 green tests and production Crashlytics live in v23.2.0), the Owner and Lead Architect want to embark on the **next monumental phase: The UI/UX Renaissance**.
+**The Owner and Lead Architect have reviewed the comprehensive proposal in `DIRECTIVE_19_PROPOSAL.md` and officially APPROVED it in full!**
+This is a masterclass in architectural elegance: balancing artistic luxury with ruthless engineering discipline (60 FPS, characterization-before-rebuild, zero regressions).
 
-We want Masarifi to transcend traditional, generic, and classic fintech design patterns and evolve into a world-class, ultra-modern, elegant design masterpiece (drawing inspiration from design leaders like Linear, Apple Design Award winners, and Revolut).
+- **Formal Owner Decisions**:
+  1. **Theme & Palette**: **APPROVED.** Deep Obsidian `#0B0F17` is adopted as the default dark mode palette (elevation via 1px hairline borders + ambient glow). The Radiant Emerald (`#34D399`) and Coral (`#FB7185`) semantic pair is adopted for income/expense (colorblind-safe, WCAG-AA compliant).
+  2. **Brand Identity**: **APPROVED.** Royal Navy `#002b59` remains our core brand identity, with its luminous night variant (`--color-primary-night: #7CB0FF`) lighting up the obsidian backdrop.
+  3. **Typography**: **APPROVED.** **IBM Plex Sans Arabic Variable** is approved as our sole unified font family for Arabic and Latin text (supporting weights 100–900 in one variable file). The fragmented Tajawal, Inter, and Manrope references are approved for removal.
+  4. **Visual QA Gate**: The Owner and Lead Architect commit to running the local Windows `@abc` pipeline to build the signed APK and visually verify each batch on a real device.
 
-**We want to hear YOUR vision and technical/architectural proposal first.**
+---
 
-Please provide a detailed proposal covering:
-1. **Design System & Visual Language**:
-   - Modern design tokens (deep obsidian dark mode `#0B0F17`, crisp ceramic light mode, subtle glassmorphism `backdrop-blur`, refined 1px borders, ambient lighting).
-   - Typographic hierarchy & tabular numerics (`tabular-nums`) for currency and metrics.
-   - Spacing scales, depth elevation, and visual density balance.
-2. **Key Screen Reinvention & Prioritization**:
-   - Which screens/flows should be revolutionized first (e.g., Home Dashboard & Hero Cards, Cards & Accounts Manager, Quick Transaction Add & Action Drawers, Interactive Analytics & Charts)?
-   - Architectural strategy for breaking down and redesigning heavy UI components.
-3. **Motion, Micro-Interactions & Ergonomics**:
-   - Smooth spring physics transitions for card interactions and sheet presentations.
-   - Fluid number ticker counters when balances update.
-   - Tactile haptic feedback mapping (`@capacitor/haptics`) across key financial interactions.
-   - Thumb-friendly bottom-oriented ergonomics.
-4. **Performance & Zero-Regression Protocol**:
-   - Guaranteeing buttery 60 FPS fluidity with zero unnecessary re-renders.
-   - Maintaining our 100% passing test suite (1,112+ tests) and ratchet thresholds throughout the UI overhaul.
+### Authorized Execution: Batch 0 (Enablement / التمكين)
 
-Please append your recommendations, architectural plan, and suggested roadmap under `## 📝 Auditor Report & Next Step Proposals` so we can review, synthesize, and launch Directive 19!
+Proceed immediately with **Batch 0**:
+1. **Design Tokens & Theme System**:
+   - Implement the Obsidian 6-level palette and ceramic warm light mode in `@theme` within `src/index.css`.
+   - Standardize the 5-step radius scale (`--radius-sm: 12px` to `--radius-full`) and 4-tier elevation scale.
+2. **Motion System**:
+   - Create `src/components/motion/tokens.ts` with the 4 standard spring curves (`spring.snappy`, `spring.smooth`, `spring.gentle`, `spring.playful`) using CSS/WAAPI (`transform` and `opacity` only).
+3. **Core Primitives**:
+   - Build `<NumberText/>` primitive enforcing `font-variant-numeric: tabular-nums` to eliminate horizontal number dancing.
+   - Build `<GlassPanel/>` with strict blur budgeting (`backdrop-blur(16px)`).
+   - Generalize `AnimatedNumber` into `<NumberFlow/>` with adaptive duration and delta-flash.
+4. **Haptic Vocabulary Layer**:
+   - Create `src/core/haptics.ts` (`touch.light`, `touch.select`, `touch.confirm`, `touch.destruct`, `touch.error`, `touch.triumph`) honoring user settings toggle and `prefers-reduced-motion`.
+5. **Font Consolidation**:
+   - Consolidate typography into IBM Plex Sans Arabic Variable.
+6. **Testing & Quality Gates**:
+   - Write comprehensive unit tests for all new primitives (`NumberText`, `GlassPanel`, `NumberFlow`, `haptics.ts`, motion tokens).
+   - Ensure `npm run ci:check` exits with code 0 (1,112+ tests passing, zero regression, ratchet preserved).
 
 ---
 
