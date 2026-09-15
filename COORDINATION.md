@@ -7,37 +7,39 @@ To eliminate manual copy-pasting, we use this `COORDINATION.md` file as our dire
 
 ---
 
-## Current Directives: Release v23.1.19 Approved (Crashlytics LIVE) & Directive 18 In Progress
+## Current Directives: Directive 18 Step 2 Approved, Defect #2 Fix Signed-Off, & Step 3 Authorized
 
-🎉 **Milestone Achieved: Native Crashlytics is LIVE in Production Release v23.1.19!**
-The owner has placed `android/app/google-services.json`. The readiness gate passed 10/10 checks instantly, and the full `@abc` release pipeline built and signed the APK with active Firebase Crashlytics plugins (`uploadCrashlyticsMappingFileRelease` completed successfully).
+Outstanding momentum on Directive 18 Step 2! The modular stores reaching 100% statement/function coverage, catching the critical zustand v5 `useShallow` infinite render loop before it hit production, and driving `statementParser` to 98.9% coverage across 1,060 passing tests (113 suites) with full `ci:check` exit 0 is stellar engineering.
 
-- **Release Verification Data (Built, Tested & Signed Locally on Windows with JDK 21)**:
-  - **Release Tag**: **v23.1.19**
-  - **Signed Release APK**: `Masarifi_V23.1.19_Signed_Release.apk` (16,643,084 bytes / 15.87 MB) — SHA256: `943C13B0D5F038DD7E5C159AC2C734AEA3038C9011CD29F0516C9F9D41A6D2DE`
-  - **Clean Source ZIP**: `Masarifi_V23.1.19_Source_Clean.zip` (9,236,131 bytes / 8.81 MB) — SHA256: `89B59AB9A9CB7F84616D9E67ACE39AC87D853C7D8BAF9F2132C16AAC2D0A2BE5` (google-services.json excluded from clean package)
-  - **Quality Gates**: `tsc --noEmit` 0 errors · `npm run lint` 0 warnings · `guardian.mjs validate` clean (189/189 tips verified across 11 languages) · `npm run audit:security` clean (0 vulnerabilities).
-  - **Tests**: **924 / 924 passing (100%)** across **108 test suites**.
-  - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0) across all 5 verification stages.
-  - **Crashlytics Status**: ACTIVATED natively. `VITE_CRASH_REPORTING=true` enabled in build; Gradle Google Services & Crashlytics plugins applied; ProGuard mapping uploaded.
-  - **Permanent Memory Updated**: `GEMINI.md` and `AUDIT_REPORT.md` (Sections 12.18–12.22) permanently recorded.
+- **Verified Quality Status**:
+  - **Tests**: **1,060 / 1,060 passing (100%)** across **113 test suites**.
+  - **Coverage Ratchet**: Raised to **lines 62.5 / functions 57.8 / branches 46.9** (actual measured: 62.6% / 58.0% / 47.2%).
+  - **CI Chain**: `npm run ci:check` fully GREEN (exit code 0).
+  - **Timezone Fix Integrated**: Commit `0d5613e` pushed to ensure V8 quirk test evaluates dynamically for timezone independence across all developer locales.
 
 ---
 
-### Authorized Directive 18: Systematic Coverage Escalation & Ratchet Elevation
+### 1. Formal Sign-Off: statementParser Column-Guessing Fix (Defect #2)
+**Owner Decision: APPROVED.**
+Proceed with the proposed fix for `src/services/statementParser.ts`:
+1. Ensure column guessers skip already-assigned columns.
+2. Reject date-parseable values (such as ISO strings `YYYY-MM-DD`) as valid amount candidates.
+3. Update the two named characterization tests in `tests/unit/statementParser.test.ts` to assert correct, unambiguous column mapping for both date-first and amount-first obscure header rows.
 
-As proposed, proceed with **Directive 18** to systematically lift test coverage from our honest baseline, raising the ratchet thresholds with each gain:
+---
 
-1. **Top Priority Targets**:
-   - `src/core/voiceAssistant.ts`: Lift from 12.6% (193 uncovered lines) by characterizing intent recognition, command parsing, and voice feedback states.
-   - Core Modular Stores: `familyStore.ts`, `preferencesStore.ts`, `envelopeStore.ts` (currently ~40% each) — cover state transitions, persistence, and edge mutations.
-   - Financial Parsers & Feeds: `src/core/paymentParser.ts` (71.5%) and `src/core/marketData.ts` (73%).
-2. **Ratchet Protocol**:
-   - For every module lifted, increment the corresponding coverage ratchet thresholds in `vitest.config.ts` so the gains are permanently locked into CI.
-   - Ensure all new tests follow unit/integration characterization standards with meaningful assertions.
-3. **Quality Gates Preservation**:
-   - Maintain 100% passing tests with zero regressions.
-   - Keep `npm run ci:check` completely green at exit code 0.
+### 2. Authorized: Directive 18 Step 3 (Ladder Step 3)
+Proceed immediately with the remaining ladder targets:
+1. `src/services/marketData.ts` (currently 73%, 264 lines).
+2. `src/features/zakat/components/sabBanner.tsx` (currently 38.46%).
+3. `src/features/reports/services/exportService.ts` (cover core export dispatchers & data formatting).
+4. `src/store/settingsStore.ts` (currently 80.3% — cover remaining actions and edge persistence).
+5. **Ratchet Elevation**: Increment the thresholds in `vitest.config.ts` to lock in each gain.
+
+---
+
+### 3. Grand Milestone Horizon: v23.2.0 Historic Release
+Upon completion of Step 3 with a green `ci:check` run, we will execute the `@abc` pipeline on Windows with JDK 21 to produce the official signed **v23.2.0** production release APK and clean source package.
 
 ---
 
