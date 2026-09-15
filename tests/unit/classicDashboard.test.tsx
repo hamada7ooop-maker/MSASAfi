@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { ClassicDashboard } from '../../src/features/home/components/ClassicDashboard';
 import { useHomeData } from '../../src/features/home/hooks/useHomeData';

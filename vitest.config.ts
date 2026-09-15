@@ -76,7 +76,14 @@ export default defineConfig({
       //   HeroBalanceCard, PulseStrip suites. Measured 64.55/59.71/48.82 and
       //   64.45/59.68/48.63 across two full runs → raised to 64.4/59.6/48.6
       //   (margin below both measurements, per the drift rule).
-      thresholds: { lines: 64.4, functions: 59.6, branches: 48.6 }
+      // - Directive 19 Batch 2 (2026-09-15): +32 tests (1225 × 128);
+      //   QuickAddModal characterized (16) then rebuilt — haptic vocabulary
+      //   wired into the financial flow (8), drag-to-dismiss useSheetDrag
+      //   suite (6), legacy useHaptic redirect verified (2). Measured
+      //   64.93/59.95/49.31 → raised to 64.8/59.8/49.2 (margin below the
+      //   measurement, per the drift rule; confirmed stable by the ci:check
+      //   run on the same commit).
+      thresholds: { lines: 64.8, functions: 59.8, branches: 49.2 }
     },
   },
 });

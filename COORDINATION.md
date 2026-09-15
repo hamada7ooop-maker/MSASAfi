@@ -262,3 +262,28 @@ Executed at maximum velocity per your fast-track authorization (`23eb73e`), with
 1. **(Owner) Visual gate for Batch 1**: build on your machine and look at the dashboard — the hero glass balance card (with its glow color by net-worth sign and the counting balance), the four market strips, and (importantly) the ACTUAL Arabic typography now rendering in IBM Plex Sans Arabic everywhere, day and night.
 2. **(Auditor, on your GO — already authorized by the fast-track) Batch 2 — Quick Add**: the thumb-first springy bottom sheet with the haptic vocabulary wired into the financial confirm flow (touch.confirm/destruct/error), plus migrating legacy useHaptic to the unified layer.
 3. Remaining ladder candidates after the renaissance batches: lockModal 9.61, detailModal 13.39, drawer 17.39, netWorthTrend 25.53 (now the only old-style market component left is gone; NetWorthTrend itself remains).
+
+
+---
+
+## Auditor Report — Directive 19 / Batch 2 (Quick Add → thumb-first sheet): COMPLETE & GREEN
+
+Executed under the standing fast-track authorization, methodology unchanged: **characterization before rebuild, zero behavioral regression, ci:check exit 0.**
+
+**1. Characterization first (16 tests):** QuickAddModal's full contract pinned before a single line moved — dialog aria contract, expense/income aria-pressed toggle, amount sanitization, the validation order (amount → category → accounts → locked year), default-category-for-type ('طعام'), FIRST_TRANSACTION on first save, edit mode (load + update, not add), confirmed delete, the turbo gate both ways (locked → toast + /shop redirect; unlocked → inline scanner), SMS parse success AND failure, backdrop close. **All 16 stayed green through the entire rebuild.**
+
+**2. The thumb-first sheet:** new `useSheetDrag` hook — grab the handle, pull down. Dismissal physics: past **96px** you are gone; a flick above **0.6 px/ms** dismisses from any distance; past **120px** the sheet rubber-bands at half rate; anything else springs back on a 320ms `springCss('smooth')`. Reduced motion kills the live finger-tracking but preserves dismissal. Sheet radius joined the design scale (`var(--radius-sheet)`). The physics has its own 6-test suite.
+
+**3. The haptic vocabulary enters the financial flow** — impulse strength matches the gravity of the act: `touch.error` on every validation rejection and the locked fiscal year, `touch.confirm` on save/update, `touch.destruct` on a confirmed delete, `touch.select` on the expense/income toggle, `touch.light` on category pick and SMS-parse success. 8 tests pin the wiring.
+
+**4. Legacy useHaptic migrated:** now a 6-line redirect onto the unified vocabulary (same interface, same event names, semantic mapping documented). Its sole consumer — SwipeableRow — inherited all three gates (hapticsEnabled setting, reduced motion, never-throws) and the native Taptic engine **without touching a single line in it**.
+
+**5. A fourth real defect, caught by the new suite:** the close-animation timer (300ms) wiped `editingTransactionId`/amount even when the sheet had been **re-opened meanwhile** — a real-user race: close, then immediately edit-open within a third of a second, and the fresh session was nulled from under you. Fixed with a re-open guard. (Also: the hook's first draft gated reduced-motion on the drag state but not on the transform itself — live tracking is now gated at the source.)
+
+**Final numbers:** **1225/1225 × 128** (+32 tests) · coverage 64.93/59.95/49.31 and 64.91/59.92/49.27 across two consecutive full runs → **ratchet sixth raise to 64.8/59.8/49.2** · ci:check exit 0 end-to-end, tsc first · 2 legacy lint warnings from Batch 1 test files cleaned (unused imports).
+
+### Next Step Proposals
+
+1. **(Owner) Visual + touch gate for Batch 2**: build on your machine and feel the sheet — pull the handle down slowly (rubber-band past 120px, springs back), pull past 96px (dismisses), flick it (dismisses), and confirm the haptics fire on save/delete/validation on device.
+2. **(Auditor, on your GO — already authorized by the fast-track) Batch 3 candidates** from the remaining low-coverage cluster: lockModal 9.61, detailModal 13.39, drawer 17.39, netWorthTrend 25.53.
+3. If you approve, the same rhythm: characterization → rebuild onto the motion/haptic primitives → ratchet raise.
