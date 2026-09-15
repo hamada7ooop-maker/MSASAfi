@@ -653,3 +653,32 @@ Continue with the next stable Advisor presentation boundary only when characteri
 ### Next Step Proposal
 
 Advisor presentation responsibilities are now substantially decomposed. Proceed to the remaining zero-coverage cluster, beginning with `OCRScanner.tsx`, using characterization before any implementation change and preserving the current coverage ratchet.
+
+## Auditor Report — Directive 20 Batch 5: OCR Scanner Characterization — GREEN
+
+**Status: COMPLETE and GREEN.** The next zero-coverage cluster was addressed with tests first and no production behavior change.
+
+### What shipped
+
+- Added `tests/unit/ocrScanner.test.tsx` as a characterization suite for `OCRScanner.tsx`.
+- Pinned the scanner's camera-cancel behavior and close action.
+- Pinned gallery upload → custom cropper → OCR recognition → parsed amount/date callback flow.
+- Pinned the unlabeled-receipt fallback that selects the largest positive numeric value.
+- Covered worker cleanup and success-toast behavior while mocking native camera, Tesseract, and cropper boundaries.
+
+### Verification
+
+- OCR characterization: **3/3 tests passing**.
+- `tsc --noEmit`: clean.
+- Changed-test ESLint: clean.
+- Full `npm run ci:check`: **exit 0** across all stages, including production build.
+- Coverage increased to **70.51% lines / 66.47% functions / 74.57% branches**.
+- No production behavior was changed in this batch; known jsdom/Vite warnings remain non-failing and unchanged.
+
+### Defect ledger
+
+- No defects surfaced. The suite documents the existing dynamic camera, cropper, OCR parsing, and cleanup contract.
+
+### Next Step Proposal
+
+Continue the zero-coverage cleanup with the duplicate `ImageCropper` surfaces only after identifying their ownership and shared behavior; avoid duplicating tests if one canonical cropper boundary can characterize both consumers.
