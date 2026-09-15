@@ -135,3 +135,31 @@ Verification item 2 asked for build & signing integrity — the strongest versio
 1. **Directive 18 continues — ladder step 3:** `marketData.ts` (73%, 264 lines), then `sabBanner.tsx` (38.46%), `exportService.ts` (0.81% — nominal test only), and `settingsStore.ts` (now 80.3%, the shared backbone of the modular stores).
 2. **(Owner decision) statementParser column-guessing fix** as described above — small, test-backed, unblocks correct imports from banks with unrecognized headers.
 3. **(Owner) v23.2 historic release** once the ladder lands — everything is staged: live Crashlytics, green ci:check, and the version-alignment guard now watching every bump.
+
+---
+
+## Auditor Report — Defect #2 Fixed (Owner-Approved); Directive 18 Step 3 Complete; v23.2.0 READY TO BUILD
+
+**Defect #2 — fixed exactly as approved:** the content-based column guessers now (1) skip columns already assigned to another role (mutual exclusion), and (2) use a strict date-SHAPE check (`looksLikeDate`: three digit groups chained by date separators, or an explicit clock time) instead of trusting V8's `new Date()` — which considers `'-44.5'` a valid date (May 1, 2044). Both formerly-documented weaknesses are now pinned as "FIXED (owner-approved)" tests: obscure-header statements parse correctly in BOTH column orderings.
+
+**Step 3 shipped (+52 tests → 1112/1112 across 116 suites):**
+
+1. **`marketData.ts` 73% → 95% statements**: missing-key early-outs, gold per-gram vs per-ounce (÷31.1035), USD fallback converted via internal rates, exchange rates, news (encoded key), FRED's 13 series (relative change, missing-value '.' fallback, zero/failed series filtered), crypto mapping (unknown ids upper-cased).
+2. **`settingsStore.ts` 80.3% → 95.5% statements** — including the persist **migration pipeline** exercised via real `rehydrate()`: monolith splits (market→4 pulses, pulse→aiPulse+habitStreak, savings→tree+whatIf, bills→upcoming) with visibility inheritance, next-gen widget auto-heal (forced visible), partial qaOrder completion, null-persist passthrough.
+3. **`exportService.ts` 0.81% → 94.6% statements** — the old test file reimplemented the running-balance logic LOCALLY and never touched the service (nominal coverage). Replaced with a real suite: live-only filtering (deleted/draft), all four filters, running balance incl. **shared-expense splitBy division**, CSV quoting/labels, JSON payload, xlsx (web download vs native base64), PDF delegation, native save Documents→Cache fallback + share sheet, web data-URI download.
+4. **`ZakatNisabBanner.tsx` 38.5% → 85.7% statements**: estimate flag, hawl wording (status × {days}), below-nisab notice, save action gating, silver Pro-lock (toast, no call), sanitized price inputs, sync button states, hawl date forwarding.
+
+**Flakiness root-caused and fixed (not retried blindly):** one failure under full parallel load — `postRestorePinGate` read the legacy-`pin` cleanup immediately after `pinHash` appeared; they are two separate non-atomic writes, so the immediate read raced the cleanup under CPU load. Both conditions now polled inside a single `waitFor`. (Same class as last round's one-off bankCardsManager flake — these get fixed when identified, not ignored.)
+
+**Ratchet raised (third documented raise):** 62.5/57.8/46.9 → **63.9/58.8/48.0** (measured 64.0/59.02/48.11–48.14). Full ladder history in `vitest.config.ts`.
+
+**v23.2.0 readiness (your step, everything staged):**
+- `package.json` AND `APP_VERSION` were bumped **together** to 23.2.0 per your announcement — the alignment guard is green, and the signed APK will display the right number from the first build (no third round of the version gap).
+- Full `ci:check` exit 0 on the final state: 1112/1112 × 116, coverage 64.0 above the raised ratchet, security scan clean, 0 vulnerabilities, lint clean, build clean, guardian clean, readiness gate GREEN (inert in-repo; LIVE on your machine).
+- Run your local `@abc` pipeline and sign **v23.2.0** whenever ready.
+
+### Next Step Proposals
+
+1. **(Owner) Build & sign v23.2.0** — the historic release: live Crashlytics + the full Directive-18 coverage climb + every guard green.
+2. **(Auditor, on your word) Directive 18 continuation beyond this round** — remaining ladder: the 0%-coverage component cluster (calculator, transactionsBar, weeklyBrief, exportService-adjacent modals), then hooks (88.63%). The ratchet holds every gain permanently.
+3. **(Auditor) Environmental note:** the sandbox reset itself between rounds this time (stale snapshot over an old HEAD) — resolved by verifying every working-tree remnant against the remote before cleaning; zero loss. Standing rule for future rounds: fetch-and-compare BEFORE any destructive action.
