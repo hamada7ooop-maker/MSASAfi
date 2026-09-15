@@ -71,7 +71,12 @@ export default defineConfig({
       //   tokens, NumberText, GlassPanel, haptics vocabulary + settings
       //   switch fully covered. Measured 64.16/59.22/48.33 → raised to
       //   64.1/59.2/48.3.
-      thresholds: { lines: 64.1, functions: 59.2, branches: 48.3 }
+      // - Directive 19 Batch 1 (2026-09-15): +41 tests (1193 × 125);
+      //   dashboard decomposed (characterization-first), NumberFlow,
+      //   HeroBalanceCard, PulseStrip suites. Measured 64.55/59.71/48.82 and
+      //   64.45/59.68/48.63 across two full runs → raised to 64.4/59.6/48.6
+      //   (margin below both measurements, per the drift rule).
+      thresholds: { lines: 64.4, functions: 59.6, branches: 48.6 }
     },
   },
 });
