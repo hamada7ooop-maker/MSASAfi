@@ -66,6 +66,13 @@ describe('Directive 20 zero-coverage transaction components', () => {
     expect(refresh).toHaveBeenCalled();
   });
 
+  it('renders the empty recycle-bin state when no deleted transactions exist', () => {
+    mocks.liveQuery.mockReturnValue([]);
+    render(<RecycleBinModal onClose={vi.fn()} onRefreshList={vi.fn()} />);
+    expect(screen.getByText('trash.empty')).toBeInTheDocument();
+    expect(screen.getByText('trash.emptyHint')).toBeInTheDocument();
+  });
+
   it('protects locked-year restores and supports the empty state', async () => {
     mocks.settings.lockedYears = [2025];
     mocks.liveQuery.mockReturnValue([tx('t1')]);
@@ -91,6 +98,24 @@ describe('Directive 20 zero-coverage transaction components', () => {
     expect(close).toHaveBeenCalled();
   });
 
+  it('rejects an import when no destination account is available', async () => {
+    mocks.accountRepo.getAll.mockResolvedValue([]);
+    const items = [{ id: 'i3', amount: 5, type: 'expense', category: 'food', description: 'Snack', date: '2026-01-03' }] as never[];
+    render(<ImportReviewModal transactions={items as never} onConfirm={vi.fn()} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText('Snack')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /txn.confirmImport/ }));
+    expect(mocks.toast).toHaveBeenCalledWith('account.selectAccount', 'error');
+  });
+
+  it('surfaces import persistence failures', async () => {
+    const onConfirm = vi.fn().mockRejectedValue(new Error('disk'));
+    const items = [{ id: 'i4', amount: 5, type: 'expense', category: 'food', description: 'Failure', date: '2026-01-04' }] as never[];
+    render(<ImportReviewModal transactions={items as never} onConfirm={onConfirm} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText('Failure')).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /txn.confirmImport/ }));
+    await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith('common.error', 'error'));
+  });
+
   it('renders cooling queue and routes skip, confirm, and cancel actions', async () => {
     const item = { ...tx('c1'), isDraft: true, coolingExpireDate: new Date(Date.now() - 1000).toISOString(), mood: 'neutral' };
     mocks.liveQuery.mockReturnValue([item]);
@@ -100,6 +125,40 @@ describe('Directive 20 zero-coverage transaction components', () => {
     await waitFor(() => expect(mocks.txRepo.update).toHaveBeenCalledWith('c1', expect.objectContaining({ isDraft: false })));
     fireEvent.click(screen.getByText('cooling.cancelPurchaseBtn'));
     await waitFor(() => expect(mocks.txRepo.hardDelete).toHaveBeenCalledWith('c1'));
+  });
+
+  it('covers an active cooling timer and the skip-cooling confirmation path', async () => {
+    const item = { ...tx('c2'), isDraft: true, coolingExpireDate: new Date(Date.now() + 90 * 60 * 1000).toISOString(), mood: 'neutral' };
+    mocks.liveQuery.mockReturnValue([item]);
+    render(<CoolingQueueModal onClose={vi.fn()} onRefreshList={mocks.refresh} />);
+    expect(screen.getByText('cooling.waitingTime')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('cooling.skipPurchaseBtn'));
+    await waitFor(() => expect(mocks.txRepo.update).toHaveBeenCalledWith('c2', expect.objectContaining({ isDraft: false })));
+  });
+
+  it('surfaces repository failures from recycle-bin permanent deletion', async () => {
+    mocks.liveQuery.mockReturnValue([tx('err')]);
+    mocks.txRepo.hardDelete.mockRejectedValueOnce(new Error('disk'));
+    render(<RecycleBinModal onClose={vi.fn()} onRefreshList={vi.fn()} />);
+    fireEvent.click(screen.getByTitle(/trash.deletePermanently/));
+    fireEvent.click(screen.getByTitle(/trash.confirmHardDelete/));
+    await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith('common.error', 'error'));
+  });
+
+  it('renders an empty cooling queue without actions', () => {
+    mocks.liveQuery.mockReturnValue([]);
+    render(<CoolingQueueModal onClose={vi.fn()} />);
+    expect(screen.getByText('cooling.emptyTitle')).toBeInTheDocument();
+    expect(screen.getByText('cooling.emptyDesc')).toBeInTheDocument();
+  });
+
+  it('surfaces cooling confirmation failures', async () => {
+    const item = { ...tx('err-c'), isDraft: true, coolingExpireDate: new Date(Date.now() - 1000).toISOString(), mood: 'neutral' };
+    mocks.liveQuery.mockReturnValue([item]);
+    mocks.txRepo.update.mockRejectedValueOnce(new Error('disk'));
+    render(<CoolingQueueModal onClose={vi.fn()} />);
+    fireEvent.click(screen.getByText('cooling.confirmPurchaseBtn'));
+    await waitFor(() => expect(mocks.toast).toHaveBeenCalledWith('common.error', 'error'));
   });
 
   it('bulk-deletes only unlocked selected transactions', async () => {

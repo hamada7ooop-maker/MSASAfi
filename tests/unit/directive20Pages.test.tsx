@@ -25,7 +25,7 @@ vi.mock('../../src/features/advisor/components/NecessityBreakdown', () => ({ Nec
 vi.mock('../../src/features/reports/services/exportService', () => ({ ExportService: { saveFileNative: vi.fn() } }));
 
 import { Accounts } from '../../src/features/accounts/components/Accounts';
-import { AdvisorPage } from '../../src/features/advisor/components/AdvisorPage';
+import { AdvisorPage, oklabToRgb, oklchToRgb } from '../../src/features/advisor/components/AdvisorPage';
 
 const account = (id: string, archived = false) => ({ id, name: `Account ${id}`, type: 'bank', balance: 100, initialBalance: 100, archived });
 
@@ -36,6 +36,13 @@ beforeEach(() => {
 });
 
 describe('Directive 20 high-value page characterization', () => {
+  it('converts Tailwind OKLCH and OKLAB colors for the PDF fallback and preserves other CSS', () => {
+    expect(oklchToRgb('color oklch(62% 0.2 30 / 50%)')).toMatch(/^color rgba\(/);
+    expect(oklabToRgb('color oklab(0.62 0.1 -0.05)')).toMatch(/^color rgb\(/);
+    expect(oklchToRgb('none')).toBe('none');
+    expect(oklabToRgb('rgb(1, 2, 3)')).toBe('rgb(1, 2, 3)');
+  });
+
   it('renders accounts, opens the add modal, saves an account, archives and deletes', async () => {
     render(<Accounts />);
     expect(screen.getByText('nav.accounts')).toBeInTheDocument();
@@ -72,7 +79,7 @@ describe('Directive 20 high-value page characterization', () => {
     expect(mocks.accounts.retry).toHaveBeenCalled();
   });
 
-  it('renders advisor score, insights, challenge acceptance, and recommendation navigation', () => {
+  it('renders advisor score, insights, challenge acceptance, and recommendation navigation', async () => {
     mocks.advisor.challenges = [{ id: 'c1', icon: '🎯', title: 'Challenge', body: 'Do it', reward: 5 }];
     mocks.advisor.recommendations = [{ id: 'r1', icon: '💡', title: 'Recommendation', body: 'Go', priority: 'high', action: 'accounts' }];
     render(<AdvisorPage />);
@@ -81,6 +88,12 @@ describe('Directive 20 high-value page characterization', () => {
     fireEvent.click(screen.getByText('ai.challenge.accept'));
     fireEvent.click(screen.getByText('action.show'));
     expect(mocks.navigate).toHaveBeenCalledWith('/accounts');
+    const print = vi.spyOn(window, 'print').mockImplementation(() => undefined);
+    fireEvent.click(screen.getByTitle('common.print'));
+    await waitFor(() => expect(print).toHaveBeenCalled());
+    fireEvent.click(screen.getByTitle('report.exportPdf'));
+    await waitFor(() => expect(screen.getByTitle('report.exportPdf')).not.toBeDisabled(), { timeout: 2000 });
+    print.mockRestore();
   });
 
   it('renders advisor loading and failure states', () => {

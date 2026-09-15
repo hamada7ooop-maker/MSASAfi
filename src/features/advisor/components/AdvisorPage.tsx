@@ -11,7 +11,7 @@ import { RetirementSimulator } from './RetirementSimulator';
 import { NecessityBreakdown } from './NecessityBreakdown';
 
 // دالة مساعدة متطورة لتحويل ألوان oklch المترجمة من Tailwind CSS v4 إلى صيغة RGB مدعومة في html2canvas لتجنب خطأ التصدير.
-function oklchToRgb(oklchStr: string): string {
+export function oklchToRgb(oklchStr: string): string {
   const regex = /oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)/g;
   
   return oklchStr.replace(regex, (match, p1, p2, p3, p4) => {
@@ -49,7 +49,7 @@ function oklchToRgb(oklchStr: string): string {
 }
 
 // دالة مساعدة متطورة لتحويل ألوان oklab المترجمة من Tailwind CSS v4 إلى صيغة RGB مدعومة في html2canvas
-function oklabToRgb(oklabStr: string): string {
+export function oklabToRgb(oklabStr: string): string {
   const regex = /oklab\(\s*([\d.]+%?)\s+([-+]?[\d.]+)\s+([-+]?[\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)/g;
   
   return oklabStr.replace(regex, (match, p1, p2, p3, p4) => {

@@ -531,3 +531,46 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 ### Next Step Proposal
 
 Proceed with Directive 20 Batch 1: decompose the Advisor page's export/analysis and presentation responsibilities behind these characterization tests, then lift `AdvisorPage.tsx` substantially; follow with the Accounts modal/card extraction and the remaining calculator/report widget cluster. Preserve the ratchet and run `ci:check` after each batch.
+
+## Auditor Report — Directive 20 Batch 1: Zero-Coverage Cluster & 70% Barrier — COMPLETE & GREEN
+
+**Status: COMPLETE, GREEN, and above the 70% line.** This batch followed the mandated characterization-first approach and covered the remaining first-wave cluster rather than weakening thresholds.
+
+### Delivered
+
+- Expanded `tests/unit/directive20Coverage.test.tsx` to **12 tests** covering:
+  - Recycle-bin empty state, restore, locked-year protection, permanent-delete confirmation, empty-trash flow, and repository-failure surfacing.
+  - Import review selection, account assignment, no-account validation, persistence failure, and success confirmation.
+  - Cooling queue empty/active/expired states, skip-cooling, confirm purchase, cancellation, timer behavior, and repository failures.
+  - Bulk deletion with both locked and unlocked transactions.
+- Expanded `tests/unit/directive20Pages.test.tsx` to **6 tests**, including Advisor PDF/print fallback paths and direct characterization of the OKLCH/OKLAB conversion used by PDF export.
+- Added `tests/unit/directive20CalculatorsReports.test.tsx` with **6 tests** for both calculators and all four report widgets: arithmetic/error paths, backspace, decimal/parenthesis/sign/percent/copy behavior, report-builder routing, tax/XLSX exports, savings verdicts, comparison deltas, empty top-expenses state, and weekly totals.
+- Fixed a real calculator defect discovered during characterization: `ProfessionalCalculator` implemented percent handling but exposed no `%` key, making the branch unreachable. The `%` action is now present and covered.
+- Exported the Advisor PDF color conversion helpers so their existing behavior is directly pinned without duplicating the conversion algorithm in tests. No behavioral change was made to the conversion itself.
+
+### Exact verification
+
+- **1,404 / 1,404 tests passing across 143 suites**.
+- `npm run ci:check`: **exit 0** — all stages green: TypeScript, coverage, security scan, npm audit, lint, and production build.
+- `tsc --noEmit`: clean.
+- New/changed-file ESLint: clean.
+- Coverage: **70.07% lines / 66.14% functions / 74.20% branches**.
+- Target files:
+  - `AdvisorPage.tsx`: **76.33% lines**
+  - `Accounts.tsx`: **71.68% lines**
+  - `RecycleBinModal.tsx`: **86.05% lines**
+  - `ImportReviewModal.tsx`: **81.82% lines**
+  - `CoolingQueueModal.tsx`: **81.25% lines**
+  - `BulkActionsBar.tsx`: **96.15% lines**
+  - `Calculator.tsx`: **92.31% lines**
+  - `ProfessionalCalculator.tsx`: **coverage lifted with the newly reachable percent path**
+  - `ReportsExports.tsx`, `ReportsSummary.tsx`, `ReportsTopExpenses.tsx`, `ReportsWeeklyBrief.tsx`: **100% lines each**
+
+### Defect ledger
+
+1. **FIXED — Professional calculator percent control missing.** The handler already had a `%` branch, but the button grid did not expose it. Added the control and characterization test; this is both a functional repair and a coverage unlock.
+2. No other production defects surfaced in this batch. Repository failure paths are now explicitly pinned as user-facing error toasts.
+
+### Next Step Proposal
+
+Continue Directive 20 with the next leverage cluster: deepen `AdvisorPage` decomposition around the PDF/export and analysis presentation responsibilities, then extract `Accounts` modal/card responsibilities behind the now-green characterization suite. Maintain the new **70.07 / 66.14 / 74.20** ratchet without lowering it.

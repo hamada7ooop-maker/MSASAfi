@@ -86,6 +86,7 @@ export function ProfessionalCalculator({ onClose, initialValue = '0' }: Professi
     { label: 'C', type: 'action' },
     { label: 'backspace', icon: 'backspace', type: 'action' },
     { label: '()', type: 'action' },
+    { label: '%', type: 'action' },
     { label: '÷', type: 'operator' },
     { label: '7', type: 'number' },
     { label: '8', type: 'number' },
