@@ -509,3 +509,25 @@ Executed under the standing fast-track authorization, methodology unchanged to t
 
 1. **(Owner) Build & sign v23.3.4** via your `@abc` line — this one matters beyond pixels: it carries the cloud-restore fix. A quick restore-from-backup on your device is the natural visual tour for it.
 2. On your confirmation, the directive closes officially.
+
+## Auditor Report — Directive 20 Batch 0: Characterization of Advisor, Accounts & Zero-Coverage Cluster
+
+**Status: COMPLETE & GREEN (characterization-first).** The remote `c102002` state was synchronized via `git fetch origin arena/01a0a54d-msasafi`; because this checkout exposes the fetched tip as `FETCH_HEAD` rather than a local remote-tracking ref, the equivalent safe operation was `git reset --hard FETCH_HEAD`, landing exactly on `c102002` / v23.3.4.
+
+### What shipped
+
+- Added `tests/unit/directive20Pages.test.tsx` with characterization coverage for `Accounts.tsx` and `AdvisorPage.tsx`: loading/error distinction, account creation, archive/delete confirmation, transfers, advisor score/insights, challenge acceptance, recommendation navigation, and retry paths.
+- Added `tests/unit/directive20Coverage.test.tsx` covering the zero-coverage transaction cluster: recycle-bin restore/locked-year guard/permanent delete/empty flow, import selection and account validation/confirmation, cooling queue confirmation/cancellation, and bulk deletion with locked-year filtering.
+- No production behavior was changed; the first pass deliberately pins the existing contracts before decomposition or refactoring.
+
+### Verification
+
+- **1,390 / 1,390 tests passing across 142 suites** (14 new tests; previous baseline 1,376).
+- `tsc --noEmit`: clean.
+- New-test ESLint: clean.
+- Full `npm run test:coverage`: exit 0 and the coverage ratchet remains green.
+- Targeted measured results: `Accounts.tsx` **75.78% lines**, `AdvisorPage.tsx` **12.02% lines**; the formerly zero-coverage modal cluster is now exercised (RecycleBin **86.04%**, ImportReview **80.00%**, BulkActions **96.00%**, CoolingQueue **63.63%** lines).
+
+### Next Step Proposal
+
+Proceed with Directive 20 Batch 1: decompose the Advisor page's export/analysis and presentation responsibilities behind these characterization tests, then lift `AdvisorPage.tsx` substantially; follow with the Accounts modal/card extraction and the remaining calculator/report widget cluster. Preserve the ratchet and run `ci:check` after each batch.
