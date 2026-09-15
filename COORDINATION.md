@@ -720,3 +720,32 @@ The source release package is ready for the Owner's local `@abc` build and signi
 ### Coverage metric reconciliation
 
 The requested branch value `74.0` was not compatible with the repository's actual Vitest/V8 branch metric: the full run reports **54.18% branches** (5,981 covered out of 11,040 branch arms), while the earlier `74.57%` figure came from counting branch locations rather than individual branch arms. Setting `74.0` literally makes `ci:check` fail immediately. To preserve the non-negotiable green CI gate and avoid a false ratchet, the executable branch floor is therefore set honestly to **54.0**, while the requested lines/functions floors are applied exactly.
+
+## Auditor Report — Directive 21 Batch 1: Challenges & Family Composition — GREEN
+
+**Status: COMPLETE and GREEN.** Directive 21 began with the two highest-value presentation roots that already had characterization coverage; no behavior was changed.
+
+### What shipped
+
+- Extracted the 52-week confirmation surface from `Challenges.tsx` into:
+  - `src/features/challenges/components/Week52ConfirmationModal.tsx`
+- Extracted the duplicated add/edit family-member modal surface from `FamilyExpenses.tsx` into:
+  - `src/features/family/components/FamilyMemberModal.tsx`
+- Preserved parent ownership of all data lifecycle and callbacks: challenge saving, family member validation, persistence, cancellation, and tab state remain in their original roots.
+- Existing target characterization remains green: **70/70 tests** across Challenges, FamilyExpenses, ZakatCalculator, and AddTransactionPage.
+
+### Verification
+
+- `tsc --noEmit`: clean.
+- Changed-file ESLint: clean.
+- Target characterization: **4/4 suites passing**.
+- Full coverage before this batch measured **70.60% statements / 72.06% lines / 66.63% functions / 54.12% branches**.
+- The release ratchet remains protected at **70.2 / 66.1 / 54.0**.
+
+### Defect ledger
+
+- No production defects surfaced. The extraction only consolidated duplicate presentation markup behind explicit props and callbacks.
+
+### Next Step Proposal
+
+Continue Directive 21 with characterization-led coverage deepening in `ZakatCalculator.tsx` and `AddTransactionPage.tsx`, then extract only stable orchestration boundaries. Preserve the v23.4.0 ratchet and require full `ci:check` before each release-oriented commit.
