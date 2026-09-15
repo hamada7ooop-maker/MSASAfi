@@ -92,7 +92,14 @@ export default defineConfig({
       //   raised to 65.0/60.0/49.3 (margin below the measurement, per the
       //   drift rule; confirmed stable by the ci:check run on the same
       //   commit).
-      thresholds: { lines: 65.0, functions: 60.0, branches: 49.3 }
+      // - Directive 19 Batch 4 (2026-09-15): +32 tests (1281 × 130); the
+      //   unified chart theme (chartTheme.ts at 100%) + characterization and
+      //   theme-wiring suites for all four chart surfaces. NetWorthTrend
+      //   25.5%→90.4% lines, DashboardCharts →89.2%, PortfolioBreakdown
+      //   →95.5%, ReportsTrend →85.7%. Measured 65.92/61.23/50.05 → raised
+      //   to 65.7/61.0/49.9 (margin below the measurement, per the drift
+      //   rule; confirmed stable by the ci:check run on the same commit).
+      thresholds: { lines: 65.7, functions: 61.0, branches: 49.9 }
     },
   },
 });

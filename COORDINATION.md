@@ -314,3 +314,27 @@ Executed under the standing fast-track authorization, methodology unchanged: **c
 1. **(Owner) Touch gate for Batch 3**: build on your machine and feel the wallet — swipe the active card rightward (Arabic UI) to walk the deck, feel the edge refusal on the last card, watch the entrance spring on each switch, and confirm the haptics on pick/reveal/delete/save.
 2. **(Auditor, on your GO — already authorized by the fast-track) Batch 4 — Charts & Reports**: unified semantic color grid for the chart.js surfaces, soft gradients, glass tooltips, faint gridlines (the proposal's هـ batch).
 3. Same rhythm: characterization first where contracts are unpinned, rebuild onto the motion/haptic primitives, ratchet raise, ci:check exit 0.
+
+
+---
+
+## Auditor Report — Directive 19 / Batch 4 (Charts & Reports): COMPLETE & GREEN
+
+Executed under the standing fast-track authorization, methodology unchanged: **characterization before rebuild, zero behavioral regression, ci:check exit 0.**
+
+**1. The unified theme (`src/core/chartTheme.ts`, 100% covered):** SEMANTIC — the financial pair (emerald income / rose expense, kin of the --color-income/--color-expense tokens the HeroBalanceCard glow speaks); glassTooltip — one dark-glass card (translucent slate, hairline border, corner 14, the app font); faintGrid — x hidden, y whispers, the zero line alone speaks (2px, 0.4 alpha); axisTicks — one voice, IBM Plex Sans Arabic; softFill — vertical gradient fills fading to the baseline; chartAnimation — 400ms gentle, FALSE under prefers-reduced-motion.
+
+**2. Characterization with a new trick:** chart.js cannot render in jsdom (no 2d context). The lazy loader is mocked with a fake Chart class that CAPTURES every config handed to it — so the data contracts of all four surfaces were pinned without drawing a pixel: dataset order and values, cutouts (72%/70%), hoverOffsets, the by-type SUM aggregation of investments, empty-state behaviors, unmount destruction. 12 tests, all green against the old code first, all still green after the unification. NetWorthTrend additionally got a stubbed 2d context so its zero-aware gradient is asserted stop by stop.
+
+**3. What got unified:** three different tooltip blacks → one glass card; two different income greens → the semantic pair; flat fills → soft gradients (ReportsTrend); ad-hoc 750ms animation → the 400ms motion gate everywhere; the dead 'Inter' legend font → the app font.
+
+**4. Two more real defects (sixth and seventh):**
+- NetWorthTrend statically imported chart.js and registered controllers at module scope — defeating the shared lazy loader and taxing the dashboard chunk whether or not the chart rendered. Now lazy like its three siblings. Its characterization test had pinned the eager truth; the sanctioned fix flips that one truth, and the test was replaced by the new contract (lazy + sign coloring + zero gradient + glass/grid) — the difference between characterization that prevents regression and characterization that prevents progress.
+- PortfolioBreakdown's legend asked for 'Inter' — a family REMOVED from the bundle in Batch 1 — silently falling back for months. Dead code doesn't shout.
+
+**Final numbers:** **1281/1281 × 130** (+32 tests: theme 14, surfaces 18) · NetWorthTrend 25.5%→90.4% lines, DashboardCharts 89.2%, PortfolioBreakdown 95.5%, ReportsTrend 85.7% · coverage 65.92/61.23/50.05 and 65.97/61.26/50.08 across two consecutive full runs → **ratchet eighth raise to 65.7/61.0/49.9** · ci:check exit 0 end-to-end (tsc first) · build 9.5s.
+
+### Next Step Proposals
+
+1. **(Owner) Visual gate for Batch 4**: build on your machine and look at the four surfaces — one glass tooltip everywhere (dashboard doughnut, reports trend, portfolio allocation, net-worth line), the soft gradient fills, the zero-aware emerald/rose gradient on the net-worth chart, and the unified 400ms entrances.
+2. **(Auditor, on your GO — already authorized by the fast-track) Batch 5 — the closing sweep**: the secondary screens wholesale (lockModal 9.61, detailModal 13.39, drawer 17.39 remaining from the low-coverage ladder), the last stray radius/bezier sweeps, and the closing report that seals the directive as **v23.3.0**.
